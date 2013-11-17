@@ -26,7 +26,7 @@ class JSONEncodedDict(TypeDecorator):
 class Image(Base):
     __tablename__ = 'images'
     id = Column(Integer, primary_key=True)
-    name = Column(String(50))
+    name = Column(String(255))
     width = Column(Integer)
     height = Column(Integer)
     credit = Column(String(120))
