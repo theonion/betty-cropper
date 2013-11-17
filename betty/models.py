@@ -9,6 +9,7 @@ from wand.image import Image as WandImage
 from betty.database import Base
 from betty import app
 
+
 class JSONEncodedDict(TypeDecorator):
     impl = VARCHAR
 
@@ -22,6 +23,17 @@ class JSONEncodedDict(TypeDecorator):
             value = json.loads(value)
         return value
 
+class Ratio(object):
+    def __init__(self, ratio):
+        self.string = ratio
+        self.height = 0
+        self.width = 0
+
+        if ratio != "original":
+            if len(ratio.split("x")) != 2:
+                raise ValueError("Improper ratio!")
+            self.width = int(ratio.split("x")[0])
+            self.height = int(ratio.split("x")[1])
 
 class Image(Base):
     __tablename__ = 'images'
@@ -58,6 +70,20 @@ class Image(Base):
                 id_string += "/"
             id_string += char
         return os.path.join(app.config['BETTY']['IMAGE_ROOT'], id_string[1:], "src")
+
+    def to_dict(self):
+        data = {
+            'id': self.id,
+            'name': self.name,
+            'width': self.get_width(),
+            'height': self.get_height(),
+            'credit': self.credit,
+            'selections': {}
+        }
+        for ratio in app.config['BETTY']['RATIOS']:
+            data['selections'][ratio] = self.get_selection(Ratio(ratio))
+        return data
+
 
     def get_selection(self, ratio):
         selection = None
