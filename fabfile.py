@@ -17,10 +17,6 @@ def push():
     except Exception, e:
         print "*** Exception during sync:", e
 
-
-def install_requirements():
-    run("pip install --upgrade -r requirements.txt")
-
 def restart():
     pass
     #run('/etc/init.d/avclub-uwsgi restart')
@@ -32,6 +28,5 @@ def clean():
 def deploy():
     archive()
     push()
-    install_requirements()
     restart()
     clean()
