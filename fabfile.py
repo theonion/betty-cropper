@@ -28,6 +28,5 @@ def clean():
 def deploy():
     archive()
     push()
-    install_requirements()
     restart()
     clean()
