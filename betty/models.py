@@ -89,6 +89,13 @@ class Image(Base):
         selection = None
         if self.selections is not None:
             selection = self.selections.get(ratio.string)
+
+        if selection is not None:
+            if selection['y1'] > self.get_height() or selection['x1'] > self.get_width():
+                selection = None
+            if selection['x0'] < 0 or selection['y0'] < 0:
+                selection = None
+
         if selection is None:
             source_aspect = self.get_width() / self.get_height()
             selection_aspect = ratio.width / float(ratio.height)
