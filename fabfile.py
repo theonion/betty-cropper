@@ -13,7 +13,7 @@ def archive():
 
 def push():
     try:
-        rsync_project(env.webroot, local_dir=LOCAL_DIR, delete=True, extra_opts='-q -l')
+        rsync_project(env.webroot, local_dir=LOCAL_DIR, delete=True, extra_opts='-q -l', exclude=["bin", "lib", "include"])
     except Exception, e:
         print "*** Exception during sync:", e
 
@@ -28,5 +28,6 @@ def clean():
 def deploy():
     archive()
     push()
+    install_requirements()
     restart()
     clean()
