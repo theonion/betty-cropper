@@ -52,15 +52,15 @@ class Image(Base):
     def get_height(self):
         if self.height in (None, 0):
             with WandImage(filename=self.path()) as img:
-                self.height = img.size[0]
-                self.width = img.size[1]
+                self.height = img.size[1]
+                self.width = img.size[0]
         return self.height
 
     def get_width(self):
         if self.width in (None, 0):
             with WandImage(filename=self.path()) as img:
-                self.height = img.size[0]
-                self.width = img.size[1]
+                self.height = img.size[1]
+                self.width = img.size[0]
         return self.width
 
     def path(self):
@@ -88,16 +88,16 @@ class Image(Base):
     def get_selection(self, ratio):
         selection = None
         if self.selections is not None:
-            selection = self.selections.get(ratio.string)
+            if ratio.string in self.selections:
+                selection = self.selections.get(ratio.string)
 
-        if selection is not None:
-            if selection['y1'] > self.get_height() or selection['x1'] > self.get_width():
-                selection = None
-            if selection['x0'] < 0 or selection['y0'] < 0:
-                selection = None
+                if selection['y1'] > self.get_height() or selection['x1'] > self.get_width():
+                    selection = None
+                elif selection['x0'] < 0 or selection['y0'] < 0:
+                    selection = None
 
         if selection is None:
-            source_aspect = self.get_width() / self.get_height()
+            source_aspect = self.get_width() / float(self.get_height())
             selection_aspect = ratio.width / float(ratio.height)
 
             min_x = 0
