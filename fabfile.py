@@ -18,8 +18,7 @@ def push():
         print "*** Exception during sync:", e
 
 def restart():
-    pass
-    #run('/etc/init.d/avclub-uwsgi restart')
+    run('/etc/init.d/betty-cropper restart')
 
 def clean():
     local("rm -r %s" % LOCAL_DIR)
