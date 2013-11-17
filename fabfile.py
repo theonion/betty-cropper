@@ -18,7 +18,7 @@ def push():
         print "*** Exception during sync:", e
 
 def restart():
-    run('/etc/init.d/betty-cropper restart')
+    run('sudo /etc/init.d/betty-cropper restart')
 
 def clean():
     local("rm -r %s" % LOCAL_DIR)
