@@ -88,10 +88,22 @@ def crop(id, ratio_slug, width, extension):
 
         if extension == 'jpg':
             img.format = 'jpeg'
+            img.compression_quality = 80
         if extension == 'png':
             img.format = 'png'
 
         img_blob = img.make_blob()
+
+        ratio_dir = os.path.join(os.path.dirname(image.path()), ratio.string)
+        try:
+            os.makedirs(ratio_dir)
+        except OSError as e:
+            if e.errno != 17:
+                abort(500)
+
+        with open(os.path.join(ratio_dir, "%d.%s" % (width, extension)), 'w+') as out:
+            out.write(img_blob)
+
         resp = make_response(img_blob, 200)
         if extension == 'jpg':
            resp.headers["Content-Type"] = "image/jpeg"
