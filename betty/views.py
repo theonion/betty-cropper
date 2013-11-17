@@ -4,7 +4,7 @@ from betty import app
 from betty.database import db_session
 from betty.models import Image as ImageObj
 
-from flask import abort, make_response, redirect, url_for
+from flask import abort, make_response, redirect
 from wand.image import Image
 from wand.color import Color
 from wand.drawing import Drawing
