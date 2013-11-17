@@ -3,3 +3,4 @@ lib
 bin
 include
 .Python
+settings.py

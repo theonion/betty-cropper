@@ -1,0 +1,12 @@
+Flask==0.10.1
+Jinja2==2.7.1
+MarkupSafe==0.18
+SQLAlchemy==0.8.3
+Wand==0.3.5
+Werkzeug==0.9.4
+git-remote-helpers==0.1.0
+itsdangerous==0.23
+mercurial==2.7.2
+psycopg2==2.5.1
+uWSGI==1.9.19
+wsgiref==0.1.2
