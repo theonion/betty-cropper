@@ -4,7 +4,7 @@ from betty import app
 from betty.database import db_session
 from betty.models import Image as ImageObj
 
-from flask import abort, make_response
+from flask import abort, make_response, redirect, url_for
 from wand.image import Image
 from wand.color import Color
 from wand.drawing import Drawing
@@ -44,6 +44,15 @@ def crop(id, ratio_slug, width, extension):
 
     if extension not in ('jpg', 'png'):
         abort(404)
+
+    if len(id) > 4 and id == id.replace("/", ""):
+        image_id = id.replace("/", "")
+        id_string = ""
+        for index,char in enumerate(image_id):
+            if index % 4 == 0:
+                id_string += "/"
+            id_string += char
+        return redirect("%s/%s/%s.%s" % (id_string, ratio_slug, width, extension))
 
     try:
         image_id = int(id.replace("/", ""))

@@ -1,4 +1,5 @@
 BETTY = {
+    "DATABASE": "sqlite:////tmp/test.db",
     "IMAGE_ROOT": "/Users/csinchok/Development/betty-cropper-flask/root",
     "RATIOS": (
         "1x1",

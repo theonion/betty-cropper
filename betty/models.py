@@ -54,13 +54,15 @@ class Image(Base):
     def path(self):
         id_string = ""
         for index,char in enumerate(str(self.id)):
-            id_string += char
             if index % 4 == 0:
                 id_string += "/"
-        return os.path.join(app.config['BETTY']['IMAGE_ROOT'], id_string, "src")
+            id_string += char
+        return os.path.join(app.config['BETTY']['IMAGE_ROOT'], id_string[1:], "src")
 
     def get_selection(self, ratio):
-        selection = self.selections.get(ratio)
+        selection = None
+        if self.selections is not None:
+            selection = self.selections.get(ratio)
         if selection is None:
             source_aspect = self.get_width() / self.get_height()
             selection_aspect = ratio.width / float(ratio.height)
