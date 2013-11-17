@@ -13,7 +13,7 @@ def archive():
 
 def push():
     try:
-        rsync_project(env.webroot, local_dir=LOCAL_DIR, delete=True, extra_opts='-q -l', exclude=["bin", "lib", "include"])
+        rsync_project(env.webroot, local_dir=LOCAL_DIR, delete=True, extra_opts='-q -l', exclude=["bin", "lib", "include", "settings.py"])
     except Exception, e:
         print "*** Exception during sync:", e
 
