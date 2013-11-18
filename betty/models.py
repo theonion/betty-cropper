@@ -120,6 +120,19 @@ class Image(Base):
                 'x1': int(max_x),
                 'y1': int(max_y)        
             }
+
+        if selection['y1'] > self.get_height():
+            selection['y1'] = int(self.get_height())
+
+        if selection['x1'] > self.get_width():
+            selection['x1'] = int(self.get_width())
+
+        if selection['x0'] < 0:
+            selection['x0'] = 0
+
+        if selection['y0'] < 0:
+            selection['y0'] = 0
+
         return selection
 
 
