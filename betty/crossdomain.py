@@ -41,7 +41,7 @@ def crossdomain(origin=None, methods=None, headers=None,
             if headers is not None:
                 h['Access-Control-Allow-Headers'] = headers
             else:
-                h['Access-Control-Allow-Headers'] = "X-Betty-Api-Key"
+                h['Access-Control-Allow-Headers'] = "X-Betty-Api-Key, Content-Type"
             return resp
 
         f.provide_automatic_options = False
