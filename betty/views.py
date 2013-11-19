@@ -46,7 +46,8 @@ def crop(id, ratio_slug, width, extension):
             if index % 4 == 0:
                 id_string += "/"
             id_string += char
-        return redirect("%s/%s/%s.%s" % (id_string, ratio_slug, width, extension))
+        # TODO: make this dynamic
+        return redirect("/avclub/%s/%s/%s.%s" % (id_string, ratio_slug, width, extension))
 
     try:
         image_id = int(id.replace("/", ""))
@@ -102,8 +103,8 @@ def crop(id, ratio_slug, width, extension):
         if extension == 'png':
             resp.headers["Content-Type"] = "image/png"
         return resp
-
     abort(500)
+
 
 def placeholder(ratio, width, extension):
     height = (width * ratio.height / float(ratio.width))
