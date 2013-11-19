@@ -226,7 +226,7 @@ def search():
     if query:
         q = db_session.query(ImageObj).filter(ImageObj.name.ilike('%' + query + '%')).order_by('-id').limit(25)
     else:
-        q = db_session.query(ImageObj).query.order_by('-id').limit(25)
+        q = db_session.query(ImageObj).order_by('-id').limit(25)
     results = []
 
     for instance in q:
