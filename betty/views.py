@@ -135,7 +135,7 @@ def placeholder(ratio, width, extension):
 @app.route('/api/new', methods=['POST', 'OPTIONS'])
 @crossdomain('*')
 def new():
-    if request.headers.get('X-Betty-Api-Key') != app.config['BETTY']['API_KEY']:
+    if not app.config['DEBUG'] and request.headers.get('X-Betty-Api-Key') != app.config['BETTY']['API_KEY']:
         abort(403)
     
     if 'image' not in request.files:
@@ -162,7 +162,8 @@ def new():
 @app.route('/api/<int:id>/<string:ratio>', methods=['POST', 'OPTIONS'])
 @crossdomain('*')
 def update_selection(id, ratio):
-    if request.headers.get('X-Betty-Api-Key') != app.config['BETTY']['API_KEY']:
+    # TODO: move this to a decorator or similar
+    if not app.config['DEBUG'] and request.headers.get('X-Betty-Api-Key') != app.config['BETTY']['API_KEY']:
         abort(403)
 
     image = ImageObj.query.get(id)
@@ -213,7 +214,7 @@ def update_selection(id, ratio):
 @app.route('/api/search', methods=['GET', 'OPTIONS'])
 @crossdomain('*')
 def search():
-    if request.headers.get('X-Betty-Api-Key') != app.config['BETTY']['API_KEY']:
+    if not app.config['DEBUG'] and request.headers.get('X-Betty-Api-Key') != app.config['BETTY']['API_KEY']:
         abort(403)
 
     query = request.args.get('q')
@@ -232,7 +233,7 @@ def search():
 @app.route('/api/<int:id>', methods=['GET', 'OPTIONS', 'PATCH'])
 @crossdomain('*')
 def image_detail(id):
-    if request.headers.get('X-Betty-Api-Key') != app.config['BETTY']['API_KEY']:
+    if not app.config['DEBUG'] and request.headers.get('X-Betty-Api-Key') != app.config['BETTY']['API_KEY']:
         abort(403)
 
     image = ImageObj.query.get(id)
