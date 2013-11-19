@@ -131,12 +131,14 @@ def placeholder(ratio, width, extension):
                     resp.headers["Content-Type"] = "image/png"
                 return resp
 
-@crossdomain('*')
 @app.route('/api/new', methods=['POST', 'OPTIONS'])
+@crossdomain(origin='*')
 def new():
     if not app.config['DEBUG'] and request.headers.get('X-Betty-Api-Key') != app.config['BETTY']['API_KEY']:
-        abort(403)
-    
+        response = jsonify({'message': 'Not authorized'})
+        response.status_code = 403
+        return response
+
     if 'image' not in request.files:
         abort(400)
     
@@ -157,12 +159,14 @@ def new():
 
     return jsonify(image.to_dict())
 
-@crossdomain('*')
 @app.route('/api/<int:id>/<string:ratio>', methods=['POST', 'OPTIONS'])
+@crossdomain(origin='*')
 def update_selection(id, ratio):
     # TODO: move this to a decorator or similar
     if not app.config['DEBUG'] and request.headers.get('X-Betty-Api-Key') != app.config['BETTY']['API_KEY']:
-        abort(403)
+        response = jsonify({'message': 'Not authorized'})
+        response.status_code = 403
+        return response
 
     image = ImageObj.query.get(id)
     if image is None:
@@ -209,11 +213,13 @@ def update_selection(id, ratio):
 
     return jsonify({'message': 'OK', 'error': False})
     
-@crossdomain('*')
 @app.route('/api/search', methods=['GET', 'OPTIONS'])
+@crossdomain(origin='*')
 def search():
     if not app.config['DEBUG'] and request.headers.get('X-Betty-Api-Key') != app.config['BETTY']['API_KEY']:
-        abort(403)
+        response = jsonify({'message': 'Not authorized'})
+        response.status_code = 403
+        return response
 
     query = request.args.get('q')
 
@@ -227,11 +233,13 @@ def search():
         results.append(instance.to_dict())
     return jsonify({'results': results})
 
-@crossdomain('*')
 @app.route('/api/<int:id>', methods=['GET', 'OPTIONS', 'PATCH'])
+@crossdomain(origin='*')
 def image_detail(id):
     if not app.config['DEBUG'] and request.headers.get('X-Betty-Api-Key') != app.config['BETTY']['API_KEY']:
-        abort(403)
+        response = jsonify({'message': 'Not authorized'})
+        response.status_code = 403
+        return response
 
     image = ImageObj.query.get(id)
     if image is None:
