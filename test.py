@@ -28,7 +28,8 @@ class BettyTestCase(unittest.TestCase):
                 "3x4",
                 "4x3",
                 "16x9"
-            )
+            ),
+            'API_KEY': 'noop'
         }
         self.client = app.test_client()
         init_db()
@@ -36,7 +37,8 @@ class BettyTestCase(unittest.TestCase):
     def test_image_upload(self):
         lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
         with open(lenna_path, 'r') as lenna:
-            res = self.client.post('/api/new', data=dict(
+            headers = [('X-Betty-Api-Key', 'noop')]
+            res = self.client.post('/api/new', headers=headers, data=dict(
                 image=(lenna, 'Lenna.png'),
             ))
 
@@ -61,7 +63,7 @@ class BettyTestCase(unittest.TestCase):
             'x1': 510,
             'y1': 510
         }
-        headers = [('Content-Type', 'application/json')]
+        headers = [('Content-Type', 'application/json'), ('X-Betty-Api-Key', 'noop')]
 
         res = self.client.post('/api/%s/1x1' % image.id, headers=headers, data=json.dumps(new_selection))
         assert res.status_code == 200
@@ -87,10 +89,11 @@ class BettyTestCase(unittest.TestCase):
         db_session.add(image)
         db_session.commit()
 
-        res = self.client.get('/api/%s' % image.id)
+        headers = [('X-Betty-Api-Key', 'noop')]
+        res = self.client.get('/api/%s' % image.id, headers=headers)
         assert res.status_code == 200
 
-        headers = [('Content-Type', 'application/json')]
+        headers = [('Content-Type', 'application/json'), ('X-Betty-Api-Key', 'noop')]
         res = self.client.patch('/api/%s' % image.id, headers=headers, data=json.dumps({'name': 'Updated'}))
         assert res.status_code == 200
         db_session.refresh(image)
@@ -101,7 +104,8 @@ class BettyTestCase(unittest.TestCase):
         db_session.add(image)
         db_session.commit()
 
-        res = self.client.get('/api/search?q=blergh')
+        headers = [('X-Betty-Api-Key', 'noop')]
+        res = self.client.get('/api/search?q=blergh', headers=headers)
         assert res.status_code == 200
 
     def tearDown(self):
