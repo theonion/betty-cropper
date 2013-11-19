@@ -131,9 +131,8 @@ def placeholder(ratio, width, extension):
                     resp.headers["Content-Type"] = "image/png"
                 return resp
 
-
-@app.route('/api/new', methods=['POST', 'OPTIONS'])
 @crossdomain('*')
+@app.route('/api/new', methods=['POST', 'OPTIONS'])
 def new():
     if not app.config['DEBUG'] and request.headers.get('X-Betty-Api-Key') != app.config['BETTY']['API_KEY']:
         abort(403)
@@ -158,9 +157,8 @@ def new():
 
     return jsonify(image.to_dict())
 
-
-@app.route('/api/<int:id>/<string:ratio>', methods=['POST', 'OPTIONS'])
 @crossdomain('*')
+@app.route('/api/<int:id>/<string:ratio>', methods=['POST', 'OPTIONS'])
 def update_selection(id, ratio):
     # TODO: move this to a decorator or similar
     if not app.config['DEBUG'] and request.headers.get('X-Betty-Api-Key') != app.config['BETTY']['API_KEY']:
@@ -211,8 +209,8 @@ def update_selection(id, ratio):
 
     return jsonify({'message': 'OK', 'error': False})
     
-@app.route('/api/search', methods=['GET', 'OPTIONS'])
 @crossdomain('*')
+@app.route('/api/search', methods=['GET', 'OPTIONS'])
 def search():
     if not app.config['DEBUG'] and request.headers.get('X-Betty-Api-Key') != app.config['BETTY']['API_KEY']:
         abort(403)
@@ -229,9 +227,8 @@ def search():
         results.append(instance.to_dict())
     return jsonify({'results': results})
 
-
-@app.route('/api/<int:id>', methods=['GET', 'OPTIONS', 'PATCH'])
 @crossdomain('*')
+@app.route('/api/<int:id>', methods=['GET', 'OPTIONS', 'PATCH'])
 def image_detail(id):
     if not app.config['DEBUG'] and request.headers.get('X-Betty-Api-Key') != app.config['BETTY']['API_KEY']:
         abort(403)
