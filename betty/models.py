@@ -44,21 +44,23 @@ class Image(Base):
     credit = Column(String(120))
     selections = Column(JSONEncodedDict(1024))
 
-    def __init__(self, name, credit=None, selections=None):
+    def __init__(self, name, width, height, credit=None, selections=None):
         self.name = name
+        self.width = width
+        self.height = height
         self.credit = credit
         self.selections = selections
 
     def get_height(self):
         if self.height in (None, 0):
-            with WandImage(filename=self.path()) as img:
+            with WandImage(filename=self.src_path()) as img:
                 self.height = img.size[1]
                 self.width = img.size[0]
         return self.height
 
     def get_width(self):
         if self.width in (None, 0):
-            with WandImage(filename=self.path()) as img:
+            with WandImage(filename=self.src_path()) as img:
                 self.height = img.size[1]
                 self.width = img.size[0]
         return self.width
@@ -69,7 +71,10 @@ class Image(Base):
             if index % 4 == 0:
                 id_string += "/"
             id_string += char
-        return os.path.join(app.config['BETTY']['IMAGE_ROOT'], id_string[1:], "src")
+        return os.path.join(app.config['BETTY']['IMAGE_ROOT'], id_string[1:])
+
+    def src_path(self):
+        return os.path.join(self.path(), 'src')
 
     def to_dict(self):
         data = {
