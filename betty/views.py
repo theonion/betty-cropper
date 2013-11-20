@@ -62,14 +62,14 @@ def crop(id, ratio_slug, width, extension):
             abort(404)
 
     try:
-        source_file = open(os.path.join(image.path(), 'src'), 'r')
+        source_file = open(image.src_path(), 'r')
     except IOError:
         if current_app.config['BETTY'].get('PLACEHOLDER', False):
             return placeholder(ratio, width, extension)
         else:
             abort(404)
 
-    with Image(file=source_file) as img:
+    with Image(file=source_file, format=extension) as img:
         if ratio_slug == 'original':
             ratio.width = img.size[0]
             ratio.height = img.size[1]
@@ -146,17 +146,17 @@ def new():
     image_file = request.files['image']
     with Image(file=image_file) as img:
         width = img.size[0]
-        height = img.size[0]
+        height = img.size[1]
 
-    filename = secure_filename(image_file.filename)
-    
-    image = ImageObj(name=filename, width=width, height=height, selections={})
-    db_session.add(image)
-    db_session.commit()
+        filename = secure_filename(image_file.filename)
+        
+        image = ImageObj(name=filename, width=width, height=height, selections={})
+        db_session.add(image)
+        db_session.commit()
 
-    os.makedirs(image.path())
-    image_file.save(os.path.join(image.path(), filename))
-    os.symlink(filename, os.path.join(image.path(), 'src'))
+        os.makedirs(image.path())
+        img.save(filename=os.path.join(image.path(), filename))
+        os.symlink(filename, image.src_path())
 
     return jsonify(image.to_dict())
 
