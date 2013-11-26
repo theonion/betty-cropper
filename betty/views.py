@@ -39,6 +39,9 @@ def crop(id, ratio_slug, width, extension):
     if extension not in ('jpg', 'png'):
         abort(404)
 
+    if width > 2000:
+        abort(500)
+
     if len(id) > 4 and id == id.replace("/", ""):
         image_id = id.replace("/", "")
         id_string = ""
