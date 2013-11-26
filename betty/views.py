@@ -50,7 +50,7 @@ def crop(id, ratio_slug, width, extension):
                 id_string += "/"
             id_string += char
         # TODO: make this dynamic
-        return redirect("/avclub/%s/%s/%s.%s" % (id_string, ratio_slug, width, extension))
+        return redirect("/avclub%s/%s/%s.%s" % (id_string, ratio_slug, width, extension))
 
     try:
         image_id = int(id.replace("/", ""))
