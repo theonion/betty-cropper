@@ -28,6 +28,9 @@ BACKGROUND_COLORS = (
     "rgb(153,51,153)",
 )
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return 'Not found', 404, {"Cache-Control": "max-age=60"}
 
 @app.route('/<path:id>/<string:ratio_slug>/<int:width>.<string:extension>', methods=['GET'])
 def crop(id, ratio_slug, width, extension):
