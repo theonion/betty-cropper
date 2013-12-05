@@ -129,6 +129,9 @@ def placeholder(ratio, width, extension):
                 img_blob = img.make_blob()
 
                 resp = make_response(img_blob, 200)
+                resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+                resp.headers["Pragma"] = "no-cache"
+                resp.headers["Expires"] = "0"
                 if extension == 'jpg':
                    resp.headers["Content-Type"] = "image/jpeg"
                 if extension == 'png':
