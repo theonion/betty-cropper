@@ -78,8 +78,19 @@ def crop(id, ratio_slug, width, extension):
             ratio.height = img.size[1]
 
         selection = image.get_selection(ratio)
+        try:
+            img.crop(selection['x0'], selection['y0'], selection['x1'], selection['y1'])
+        except ValueError:
+            # Uhoh, looks like we have bad height and width data. Let's reload that and try again.
+            image.width = img.size[0]
+            image.height = img.size[1]
+            db_session.add(image)
+            db_session.commit()
 
-        img.crop(selection['x0'], selection['y0'], selection['x1'], selection['y1'])
+            selection = image.get_selection(ratio)
+            img.crop(selection['x0'], selection['y0'], selection['x1'], selection['y1'])
+
+
         img.transform(resize='%dx' % width)
 
         if extension == 'jpg':

@@ -99,6 +99,35 @@ class BettyTestCase(unittest.TestCase):
         db_session.refresh(image)
         assert image.name == 'Updated'
 
+    def test_bad_image_data(self):
+        lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
+        with open(lenna_path, 'r') as lenna:
+            headers = [('X-Betty-Api-Key', 'noop')]
+            res = self.client.post('/api/new', headers=headers, data=dict(
+                image=(lenna, 'Lenna.png'),
+            ))
+
+        assert res.status_code == 200
+        response_json = json.loads(res.data)
+        assert response_json.get('name') == 'Lenna.png'
+        assert response_json.get('width') == 512
+        assert response_json.get('height') == 512
+
+        # Now that the image is uploaded, let's fuck up the data.
+        image = Image.query.get(response_json['id'])
+        image.width = 1024
+        image.height = 1024
+        db_session.add(image)
+        db_session.commit()
+
+        id_string = ""
+        for index,char in enumerate(str(image.id)):
+            if index % 4 == 0:
+                id_string += "/"
+            id_string += char
+        res = self.client.get('%s/1x1/500.jpg' % id_string)
+        assert res.status_code == 200
+
     def test_image_search(self):
         image = Image(name="BLERGH", width=512, height=512)
         db_session.add(image)
