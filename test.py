@@ -18,7 +18,7 @@ class BettyTestCase(unittest.TestCase):
         self.db_fd, db_path = tempfile.mkstemp()
         app.config['TESTING'] = True
         image_root = tempfile.mkdtemp()
-        app.config['BETTY'] = {
+        app.config.update({
             'DATABASE': 'sqlite://',
             'IMAGE_ROOT': image_root,
             'RATIOS': (
@@ -30,7 +30,7 @@ class BettyTestCase(unittest.TestCase):
                 "16x9"
             ),
             'API_KEY': 'noop'
-        }
+        })
         self.client = app.test_client()
         init_db()
 
@@ -140,7 +140,7 @@ class BettyTestCase(unittest.TestCase):
     def tearDown(self):
         os.close(self.db_fd)
         # os.unlink(app.config['BETTY']['DATABASE'])
-        shutil.rmtree(app.config['BETTY']['IMAGE_ROOT'])
+        shutil.rmtree(app.config['IMAGE_ROOT'])
 
 
 if __name__ == '__main__':

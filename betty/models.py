@@ -71,7 +71,7 @@ class Image(Base):
             if index % 4 == 0:
                 id_string += "/"
             id_string += char
-        return os.path.join(app.config['BETTY']['IMAGE_ROOT'], id_string[1:])
+        return os.path.join(app.config['IMAGE_ROOT'], id_string[1:])
 
     def src_path(self):
         return os.path.join(self.path(), 'src')
@@ -85,7 +85,7 @@ class Image(Base):
             'credit': self.credit,
             'selections': {}
         }
-        for ratio in app.config['BETTY']['RATIOS']:
+        for ratio in app.config['RATIOS']:
             data['selections'][ratio] = self.get_selection(Ratio(ratio))
         return data
 

@@ -4,7 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from betty import app
 
-engine = create_engine(app.config['BETTY']['DATABASE'], convert_unicode=True)
+engine = create_engine(app.config['DATABASE'], convert_unicode=True)
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))

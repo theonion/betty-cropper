@@ -9,7 +9,7 @@ from betty.models import Image as ImageObj
 from betty.models import Ratio
 from betty.crossdomain import crossdomain
 
-from flask import abort, make_response, redirect, jsonify, request, current_app
+from flask import abort, make_response, redirect, jsonify, request, current_app, render_template, make_response
 from werkzeug import secure_filename
 from wand.image import Image
 from wand.color import Color
@@ -32,6 +32,14 @@ BACKGROUND_COLORS = (
 def page_not_found(e):
     return 'Not found', 404, {"Cache-Control": "max-age=60"}
 
+
+@app.route('/image.js')
+def image_js():
+    response = make_response(render_template('image.js.j2', **current_app.config))
+    response.headers['Content-Type'] = "text/javascript"
+    return response
+
+@crossdomain(origin='*')
 @app.route('/<path:id>/<string:ratio_slug>/<int:width>.<string:extension>', methods=['GET'])
 def crop(id, ratio_slug, width, extension):
     try:
@@ -52,8 +60,7 @@ def crop(id, ratio_slug, width, extension):
             if index % 4 == 0:
                 id_string += "/"
             id_string += char
-        # TODO: make this dynamic
-        return redirect("/avclub%s/%s/%s.%s" % (id_string, ratio_slug, width, extension))
+        return redirect("%s%s/%s/%s.%s" % (current_app.config['PUBLIC_URL'], id_string, ratio_slug, width, extension))
 
     try:
         image_id = int(id.replace("/", ""))
@@ -62,7 +69,7 @@ def crop(id, ratio_slug, width, extension):
 
     image = ImageObj.query.get(image_id)
     if image is None:
-        if current_app.config['BETTY'].get('PLACEHOLDER', False):
+        if current_app.config.get('PLACEHOLDER', False):
             return placeholder(ratio, width, extension)
         else:
             abort(404)
@@ -70,7 +77,7 @@ def crop(id, ratio_slug, width, extension):
     try:
         source_file = open(image.src_path(), 'r')
     except IOError:
-        if current_app.config['BETTY'].get('PLACEHOLDER', False):
+        if current_app.config.get('PLACEHOLDER', False):
             return placeholder(ratio, width, extension)
         else:
             abort(404)
@@ -126,7 +133,7 @@ def crop(id, ratio_slug, width, extension):
 def placeholder(ratio, width, extension):
     height = (width * ratio.height / float(ratio.width))
     with Drawing() as draw:
-        draw.font = app.config['BETTY']['PLACEHOLDER_FONT']
+        draw.font = app.config.get('PLACEHOLDER_FONT')
         draw.font_size = 52
         draw.gravity = "center"
         draw.fill_color = Color("white")
@@ -155,7 +162,7 @@ def placeholder(ratio, width, extension):
 @app.route('/api/new', methods=['POST', 'OPTIONS'])
 @crossdomain(origin='*')
 def new():
-    if not app.config['DEBUG'] and request.headers.get('X-Betty-Api-Key') != app.config['BETTY']['API_KEY']:
+    if not app.config['DEBUG'] and request.headers.get('X-Betty-Api-Key') != app.config['API_KEY']:
         response = jsonify({'message': 'Not authorized'})
         response.status_code = 403
         return response
@@ -184,7 +191,7 @@ def new():
 @crossdomain(origin='*')
 def update_selection(id, ratio):
     # TODO: move this to a decorator or similar
-    if not app.config['DEBUG'] and request.headers.get('X-Betty-Api-Key') != app.config['BETTY']['API_KEY']:
+    if not app.config['DEBUG'] and request.headers.get('X-Betty-Api-Key') != app.config['API_KEY']:
         response = jsonify({'message': 'Not authorized'})
         response.status_code = 403
         return response
@@ -216,7 +223,7 @@ def update_selection(id, ratio):
     if selections is None:
         selections = {}
 
-    if ratio not in current_app.config['BETTY']['RATIOS']:
+    if ratio not in current_app.config['RATIOS']:
         response = jsonify({'message': 'No such ratio', 'error': True})
         response.status_code = 400
         return response
@@ -237,7 +244,7 @@ def update_selection(id, ratio):
 @app.route('/api/search', methods=['GET', 'OPTIONS'])
 @crossdomain(origin='*')
 def search():
-    if not app.config['DEBUG'] and request.headers.get('X-Betty-Api-Key') != app.config['BETTY']['API_KEY']:
+    if not app.config['DEBUG'] and request.headers.get('X-Betty-Api-Key') != app.config['API_KEY']:
         response = jsonify({'message': 'Not authorized'})
         response.status_code = 403
         return response
@@ -257,7 +264,7 @@ def search():
 @app.route('/api/<int:id>', methods=['GET', 'OPTIONS', 'PATCH'])
 @crossdomain(origin='*')
 def image_detail(id):
-    if not app.config['DEBUG'] and request.headers.get('X-Betty-Api-Key') != app.config['BETTY']['API_KEY']:
+    if not app.config['DEBUG'] and request.headers.get('X-Betty-Api-Key') != app.config['API_KEY']:
         response = jsonify({'message': 'Not authorized'})
         response.status_code = 403
         return response
