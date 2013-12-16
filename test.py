@@ -1,25 +1,23 @@
+#!/usr/bin/env python
+
 import os
 import unittest
 import tempfile
 import shutil
 import json
 
-from sqlalchemy.orm import scoped_session, sessionmaker
-
 from betty import app
 from betty.models import Image
-from betty.database import init_db, db_session
+from betty.database import db_session, init_db
 
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'test_data')
 
 class BettyTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.db_fd, db_path = tempfile.mkstemp()
         app.config['TESTING'] = True
         image_root = tempfile.mkdtemp()
         app.config.update({
-            'DATABASE': 'sqlite://',
             'IMAGE_ROOT': image_root,
             'RATIOS': (
                 "1x1",
@@ -31,8 +29,8 @@ class BettyTestCase(unittest.TestCase):
             ),
             'API_KEY': 'noop'
         })
-        self.client = app.test_client()
-        init_db()
+        self.client = app.test_client()  
+        init_db()      
 
     def test_image_upload(self):
         lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
@@ -138,8 +136,7 @@ class BettyTestCase(unittest.TestCase):
         assert res.status_code == 200
 
     def tearDown(self):
-        os.close(self.db_fd)
-        # os.unlink(app.config['BETTY']['DATABASE'])
+        # os.unlink(app.config['DATABASE'].replace('sqlite:///', ''))
         shutil.rmtree(app.config['IMAGE_ROOT'])
 
 
