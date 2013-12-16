@@ -2,7 +2,7 @@
     /* We can request an image at every possible width, but let's limit it to a reasonable number
        We can set these so they correspond to our more common sizes.
     */
-
+    
     var IMAGE_URL = "{{ PUBLIC_URL }}/{id}/{crop}/{width}.jpg";
     var breakpoints = [0, {% for width in WIDTHS %}{{width}},{% endfor %}];
     function tmpl(text, dict) {
@@ -27,7 +27,7 @@
                 var _w = div.offsetWidth,
                     _h = div.offsetHeight;
                 
-                if (!crop || crop === "" || crop ==="auto") {
+                if (!crop || crop === "" || crop === "auto") {
                     crop = computeAspectRatio(_w, _h);
                 }
                 if (el.getAttribute("data-format")) {
@@ -131,6 +131,78 @@
             return "16x9"
         }
     }
+
+    // NOTE: this is used elsewhere so I'm putting it back in for now.
+    w.pictureFillElement = function(el) {
+        var div = el.getElementsByTagName( "div" )[0];
+
+        if( el.getAttribute( "data-image-id" ) !== null ){
+            var id = el.getAttribute( "data-image-id" ),
+                crop = el.getAttribute( "data-crop" );
+            var _w = div.offsetWidth,
+                _h = div.offsetHeight;
+
+
+            if (!crop || crop === "" || crop === "auto") {
+                crop = computeAspectRatio(_w, _h);
+            }
+            if (el.getAttribute("data-format")) {
+                format = el.getAttribute("data-format");
+            }
+            else {
+                format = "jpg";
+            }
+
+
+            var width = 50;
+            for (var j = 0; j < breakpoints.length; j++) {
+                if (_w <= breakpoints[j]) {
+                    width = breakpoints[j];
+                    break;
+                }
+            }
+            // TODO: do something for retina
+            if (w.devicePixelRatio) {
+                if (w.devicePixelRatio > 1) {
+                    width *= w.devicePixelRatio;
+                }
+            }
+
+            // Find any existing img element in the picture element
+            var picImg = div.getElementsByTagName( "img" )[ 0 ];
+
+
+            if(!picImg){
+                picImg = w.document.createElement( "img" );
+                picImg.alt = el.getAttribute( "data-alt" );
+
+                div.appendChild( picImg );
+            }
+
+            //picImg.className = "loading";
+            picImg.onload = function() {
+                //this.className = "";
+            };
+            // if the existing image is larger (or the same) than the one we're about to load, do not update.
+            //however if the crop changes, we need to reload.
+            if (width > 0) {
+
+                //ie8 doesn't support natuarl width, always load.
+                if (typeof picImg.naturalWidth === "undefined" || picImg.naturalWidth < width ||
+                    crop !== computeAspectRatio(picImg.naturalWidth, picImg.naturalHeight)) {
+                    var id_str = "";
+                    for(var i=0;i < id.length;i++) {
+                        if ((i % 4) === 0) {
+                            id_str += "/";
+                        }
+                        id_str += id.charAt(i);
+                    }
+                    var url = tmpl(w.IMAGE_URL, {id: id_str, crop: crop, width: width, format:format});
+                    picImg.src = url;
+                }
+            }
+        }
+    };
 
     // Run on resize and domready (w.load as a fallback)
     if (!w.IMAGE_LISTENERS_DISABLED) {

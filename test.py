@@ -125,7 +125,7 @@ class BettyTestCase(unittest.TestCase):
             if index % 4 == 0:
                 id_string += "/"
             id_string += char
-        res = self.client.get('%s/1x1/500.jpg' % id_string)
+        res = self.client.get('%s/1x1/400.jpg' % id_string)
         assert res.status_code == 200
 
     def test_image_search(self):

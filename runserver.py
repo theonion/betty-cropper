@@ -8,4 +8,4 @@ if 'SENTRY_DSN' in app.config:
     sentry = Sentry(app)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
