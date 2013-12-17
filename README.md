@@ -1,6 +1,7 @@
 ## Betty Cropper (Flask Edition)
 
 [![Build Status](https://travis-ci.org/theonion/betty-cropper.png?branch=master)](https://travis-ci.org/theonion/betty-cropper)
+[![Coverage Status](https://coveralls.io/repos/theonion/betty-cropper/badge.png)](https://coveralls.io/r/theonion/betty-cropper)
 
 ### Get started:
 
@@ -38,3 +39,5 @@ __GET__ /api/search, with an option "q" parameter in order to get a list of file
 
 - ES integration?
 - Put credit on the image itself?
+- Add nginx/uwsgi instructions
+- Build embedded uwsgi binary, package with fpm?
