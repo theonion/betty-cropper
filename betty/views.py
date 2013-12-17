@@ -37,7 +37,7 @@ def page_not_found(e):
 @app.route('/image.js')
 def image_js():
     response = make_response(minify(render_template('image.js.j2', **current_app.config), mangle=True, mangle_toplevel=True))
-    response.headers['Content-Type'] = "text/javascript"
+    response.headers['Content-Type'] = "application/javascript"
     response.headers['Cache-Control'] = "max-age=60"
     return response
 
@@ -81,6 +81,10 @@ def crop(id, ratio_slug, width, extension):
         source_file = open(image.src_path(), 'r')
     except IOError:
         if current_app.config.get('PLACEHOLDER', False):
+            # We don't really know how to render an "original" placeholder, so we'll make it a 4x3
+            if ratio_slug == 'original':
+                ratio.width = 4
+                ratio.height = 3
             return placeholder(ratio, width, extension)
         else:
             abort(404)

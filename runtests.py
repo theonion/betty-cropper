@@ -56,6 +56,10 @@ class BettyTestCase(unittest.TestCase):
         assert res.status_code == 200
         assert os.path.exists(os.path.join(image.path(), '1x1', '256.png'))
 
+    def test_bad_image_id(self):
+        res = self.client.get('/abc/13x4/256.jpg')
+        assert res.status_code == 404
+
     def test_bad_ratio(self):
         res = self.client.get('/666/13x4/256.jpg')
         assert res.status_code == 404
@@ -79,9 +83,31 @@ class BettyTestCase(unittest.TestCase):
         assert res.headers['Content-Type'] == 'image/jpeg'
         assert res.status_code == 200
 
+        res = self.client.get('/666/1x1/256.png')
+        assert res.headers['Content-Type'] == 'image/png'
+        assert res.status_code == 200
+
         app.config['PLACEHOLDER'] = False
         res = self.client.get('/666/1x1/256.jpg')
         assert res.status_code == 404
+
+    def test_image_js(self):
+        res = self.client.get('/image.js')
+        assert res.headers['Content-Type'] == 'application/javascript'
+        assert res.status_code == 200
+
+    def test_no_api_key(self):
+        res = self.client.post('/api/new')
+        assert res.status_code == 403
+
+        res = self.client.get('/api/1')
+        assert res.status_code == 403        
+
+        res = self.client.post('/api/1/1x1')
+        assert res.status_code == 403
+
+        res = self.client.patch('/api/1')
+        assert res.status_code == 403
 
     def test_image_selection_update_api(self):
         image = Image(name="Testing", width=512, height=512)
@@ -169,7 +195,6 @@ class BettyTestCase(unittest.TestCase):
         assert res.status_code == 200
 
     def tearDown(self):
-        # os.unlink(app.config['DATABASE'].replace('sqlite:///', ''))
         shutil.rmtree(app.config['IMAGE_ROOT'])
 
 
