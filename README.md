@@ -16,7 +16,7 @@ __POST__ an image (using the key "image") to /api/new, for example:
 
 This should return an image id ("1", if this is the first image).
 
-You can get a cropped version of this image using a URL like: (http://localhost:5000/1/1x1/300.jpg)[http://localhost:5000/1/1x1/300.jpg].
+You can get a cropped version of this image using a URL like: [http://localhost:5000/1/1x1/300.jpg](http://localhost:5000/1/1x1/300.jpg).
 
 To get the data form an image, send a GET request to /api/id, for example:
 
