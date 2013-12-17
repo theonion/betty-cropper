@@ -104,7 +104,7 @@ def crop(id, ratio_slug, width, extension):
 
         img_blob = img.make_blob()
 
-        ratio_dir = os.path.join(os.path.dirname(image.path()), ratio.string)
+        ratio_dir = os.path.join(image.path(), ratio.string)
         try:
             os.makedirs(ratio_dir)
         except OSError as e:
