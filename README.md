@@ -1,12 +1,12 @@
 ## Betty Cropper (Flask Edition)
 
-[![Build Status](https://travis-ci.org/csinchok/betty-cropper.png?branch=master)](https://travis-ci.org/csinchok/betty-cropper)
+[![Build Status](https://travis-ci.org/theonion/betty-cropper.png?branch=master)](https://travis-ci.org/theonion/betty-cropper)
 
 ### Get started:
 
     > pip install -r requirements.txt
     > cp settings.py.example settings.py  # Edit values as necessary.
-    > python runserver.py 
+    > python runserver.py
 
 ### API
 
