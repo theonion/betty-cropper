@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
 import os
+if 'SETTINGS_MODULE' not in os.environ:
+    os.environ['SETTINGS_MODULE'] = "testsettings"
+
 import unittest
 import tempfile
 import shutil
@@ -49,6 +52,12 @@ class BettyTestCase(unittest.TestCase):
         image = Image.query.get(response_json['id'])
         assert os.path.exists(image.path())
         assert os.path.exists(image.src_path())
+
+        # Now let's test that a crop will return properly.
+        res = self.client.get('/%s/1x1/256.jpg' % image.id)
+        assert res.headers['Content-Type'] == 'image/jpeg'
+        assert res.status_code == 200
+        assert os.path.exists(os.path.join(image.path(), '1x1', '256.jpg'))
 
     def test_image_selection_update_api(self):
         image = Image(name="Testing", width=512, height=512)

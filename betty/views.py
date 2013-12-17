@@ -9,7 +9,7 @@ from betty.models import Image as ImageObj
 from betty.models import Ratio
 from betty.crossdomain import crossdomain
 
-from flask import abort, make_response, redirect, jsonify, request, current_app, render_template, make_response
+from flask import abort, redirect, jsonify, request, current_app, render_template, make_response
 from werkzeug import secure_filename
 from wand.image import Image
 from wand.color import Color
@@ -54,9 +54,6 @@ def crop(id, ratio_slug, width, extension):
         abort(404)
 
     if width > 2000:
-        abort(500)
-
-    if width not in current_app.config['WIDTHS']:
         abort(500)
 
     if len(id) > 4 and id == id.replace("/", ""):
@@ -159,7 +156,7 @@ def crop(id, ratio_slug, width, extension):
 def placeholder(ratio, width, extension):
     height = (width * ratio.height / float(ratio.width))
     with Drawing() as draw:
-        draw.font = app.config.get('PLACEHOLDER_FONT')
+        draw.font = os.path.join(os.path.dirname(__file__), "font/OpenSans-Semibold.ttf")
         draw.font_size = 52
         draw.gravity = "center"
         draw.fill_color = Color("white")
