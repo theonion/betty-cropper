@@ -22,18 +22,9 @@ class BettyTestCase(unittest.TestCase):
         image_root = tempfile.mkdtemp()
         app.config.update({
             'IMAGE_ROOT': image_root,
-            'RATIOS': (
-                "1x1",
-                "2x1",
-                "3x1",
-                "3x4",
-                "4x3",
-                "16x9"
-            ),
-            'API_KEY': 'noop'
         })
         self.client = app.test_client()  
-        init_db()      
+        init_db()
 
     def test_image_upload(self):
         lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
