@@ -44,11 +44,44 @@ class BettyTestCase(unittest.TestCase):
         assert os.path.exists(image.path())
         assert os.path.exists(image.src_path())
 
-        # Now let's test that a crop will return properly.
+        # Now let's test that a JPEG crop will return properly.
         res = self.client.get('/%s/1x1/256.jpg' % image.id)
         assert res.headers['Content-Type'] == 'image/jpeg'
         assert res.status_code == 200
         assert os.path.exists(os.path.join(image.path(), '1x1', '256.jpg'))
+
+        # Now let's test that a PNG crop will return properly.
+        res = self.client.get('/%s/1x1/256.png' % image.id)
+        assert res.headers['Content-Type'] == 'image/png'
+        assert res.status_code == 200
+        assert os.path.exists(os.path.join(image.path(), '1x1', '256.png'))
+
+    def test_bad_ratio(self):
+        res = self.client.get('/666/13x4/256.jpg')
+        assert res.status_code == 404
+
+    def test_bad_extension(self):
+        res = self.client.get('/666/1x1/500.gif')
+        assert res.status_code == 404
+
+    def test_too_large(self):
+        res = self.client.get('/666/1x1/2001.jpg')
+        assert res.status_code == 500
+
+    def test_image_redirect(self):
+        res = self.client.get('/66666/1x1/100.jpg')
+        assert res.status_code == 302
+        assert res.headers['Location'] == "http://127.0.0.1:5000/6666/6/1x1/100.jpg"
+
+    def test_placeholder(self):
+        app.config['PLACEHOLDER'] = True
+        res = self.client.get('/666/1x1/256.jpg')
+        assert res.headers['Content-Type'] == 'image/jpeg'
+        assert res.status_code == 200
+
+        app.config['PLACEHOLDER'] = False
+        res = self.client.get('/666/1x1/256.jpg')
+        assert res.status_code == 404
 
     def test_image_selection_update_api(self):
         image = Image(name="Testing", width=512, height=512)
