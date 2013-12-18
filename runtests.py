@@ -92,6 +92,25 @@ class BettyTestCase(unittest.TestCase):
         db_session.commit()
         assert image.get_selection(Ratio('1x1')) == {'x0': 0, 'y0': 0, 'x1': 512, 'y1': 512}
 
+    def test_missing_file(self):
+        image = Image(name="Lenna.gif", width=512, height=512)
+        db_session.add(image)
+        db_session.commit()
+
+        app.config['PLACEHOLDER'] = True
+        res = self.client.get('/%s/1x1/256.jpg' % image.id )
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.headers['Content-Type'], 'image/jpeg')
+
+        res = self.client.get('/%s/original/256.jpg' % image.id )
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.headers['Content-Type'], 'image/jpeg')
+
+        app.config['PLACEHOLDER'] = False
+        res = self.client.get('/%s/1x1/256.jpg' % image.id )
+        self.assertEqual(res.status_code, 404)
+
+
     def test_image_upload(self):
         lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
         with open(lenna_path, 'r') as lenna:
@@ -121,6 +140,12 @@ class BettyTestCase(unittest.TestCase):
         assert res.headers['Content-Type'] == 'image/png'
         assert res.status_code == 200
         assert os.path.exists(os.path.join(image.path(), '1x1', '256.png'))
+
+        # Finally, let's test an "original" crop
+        res = self.client.get('/%s/original/256.jpg' % image.id)
+        assert res.headers['Content-Type'] == 'image/jpeg'
+        assert res.status_code == 200
+        assert os.path.exists(os.path.join(image.path(), 'original', '256.jpg'))
 
     def test_bad_image_id(self):
         res = self.client.get('/abc/13x4/256.jpg')
