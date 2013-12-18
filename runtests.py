@@ -27,10 +27,8 @@ class BettyTestCase(unittest.TestCase):
         init_db()
 
     def test_ratio_object(self):
-        with self.assertRaises(ValueError):
-            Ratio('1x1x2')
-        with self.assertRaises(ValueError):
-            Ratio('3x')
+        self.assertRaises(ValueError, lambda: Ratio('1x1x2'))
+        self.assertRaises(ValueError, lambda: Ratio('3x'))
 
     def test_image_selections(self):
         image = Image(name="Lenna.gif", width=512, height=512)
