@@ -96,10 +96,16 @@ class Image(Base):
             if ratio.string in self.selections:
                 selection = self.selections.get(ratio.string)
 
+                # Here I need to check for all kinds of bad data. Because we have some *awful* data right now.
                 if selection['y1'] > self.get_height() or selection['x1'] > self.get_width():
                     selection = None
-                elif selection['x0'] < 0 or selection['y0'] < 0:
+                elif selection['y1'] < selection['y0'] or selection['x1'] < selection['x0']:
                     selection = None
+                else:
+                    for key in ('x0', 'x1', 'y0', 'y1'):
+                        if selection[key] < 0:
+                            selection = None
+                            break
 
         if selection is None:
             source_aspect = self.get_width() / float(self.get_height())

@@ -10,7 +10,7 @@ import shutil
 import json
 
 from betty import app
-from betty.models import Image
+from betty.models import Image, Ratio
 from betty.database import db_session, init_db
 
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'test_data')
@@ -25,6 +25,74 @@ class BettyTestCase(unittest.TestCase):
         })
         self.client = app.test_client()  
         init_db()
+
+    def test_ratio_object(self):
+        with self.assertRaises(ValueError):
+            Ratio('1x1x2')
+        with self.assertRaises(ValueError):
+            Ratio('3x')
+
+    def test_image_selections(self):
+        image = Image(name="Lenna.gif", width=512, height=512)
+        db_session.add(image)
+        db_session.commit()
+
+        # Test to make sure the default selections work
+        assert image.get_selection(Ratio('1x1')) == {'x0': 0, 'y0': 0, 'x1': 512, 'y1': 512}
+        
+        # Now let's add some bad data
+        image.selections = {
+            '1x1': {
+                'x0': 0,
+                'y0': 0,
+                'x1': 513,
+                'y1': 512
+            }
+        }
+        db_session.add(image)
+        db_session.commit()
+
+        # Now, that was a bad selection, so we should be getting an auto generated one.
+        assert image.get_selection(Ratio('1x1')) == {'x0': 0, 'y0': 0, 'x1': 512, 'y1': 512}
+
+        # Try with a negative value
+        image.selections = {
+            '1x1': {
+                'x0': -1,
+                'y0': 0,
+                'x1': 512,
+                'y1': 512
+            }
+        }
+        db_session.add(image)
+        db_session.commit()
+        assert image.get_selection(Ratio('1x1')) == {'x0': 0, 'y0': 0, 'x1': 512, 'y1': 512}
+
+        # Try with another negative value
+        image.selections = {
+            '1x1': {
+                'x0': 0,
+                'y0': 0,
+                'x1': -1,
+                'y1': 512
+            }
+        }
+        db_session.add(image)
+        db_session.commit()
+        assert image.get_selection(Ratio('1x1')) == {'x0': 0, 'y0': 0, 'x1': 512, 'y1': 512}
+        
+        # Try with bad x values
+        image.selections = {
+            '1x1': {
+                'x0': 10,
+                'y0': 0,
+                'x1': 9,
+                'y1': 512
+            }
+        }
+        db_session.add(image)
+        db_session.commit()
+        assert image.get_selection(Ratio('1x1')) == {'x0': 0, 'y0': 0, 'x1': 512, 'y1': 512}
 
     def test_image_upload(self):
         lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
@@ -107,6 +175,9 @@ class BettyTestCase(unittest.TestCase):
         assert res.status_code == 403
 
         res = self.client.patch('/api/1')
+        assert res.status_code == 403
+
+        res = self.client.patch('/api/search')
         assert res.status_code == 403
 
     def test_image_selection_update_api(self):
