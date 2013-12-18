@@ -177,7 +177,7 @@ class BettyTestCase(unittest.TestCase):
         res = self.client.patch('/api/1')
         assert res.status_code == 403
 
-        res = self.client.patch('/api/search')
+        res = self.client.get('/api/search')
         assert res.status_code == 403
 
     def test_image_selection_update_api(self):
