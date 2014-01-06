@@ -19,7 +19,6 @@ requires = [
     "SQLAlchemy==0.8.3",
     "psycopg2==2.5.1",
     "slimit==0.8.1",
-    "uWSGI==1.9.19",
     "wand==0.3.5",
 ]
 
