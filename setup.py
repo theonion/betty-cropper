@@ -75,6 +75,9 @@ setup(
     author=author,
     author_email=author_email,
     packages=get_packages(package),
-    package_data=get_package_data(package),
+    package_data={
+        "betty/font": ["betty/font/Lato-Hai.ttf", "OpenSans-Semibold.ttf"],
+        "betty/templates": ["betty/templates/image.js.j2"]
+    },
     install_requires=requires
 )
