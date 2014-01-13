@@ -41,6 +41,9 @@ def image_js():
     response.headers['Cache-Control'] = "max-age=60"
     return response
 
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db_session.remove()
 
 @crossdomain(origin='*')
 @app.route('/<path:id>/<string:ratio_slug>/<int:width>.<string:extension>', methods=['GET'])

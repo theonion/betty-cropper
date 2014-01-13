@@ -219,7 +219,7 @@ class BettyTestCase(unittest.TestCase):
         res = self.client.post('/api/%s/1x1' % image.id, headers=headers, data=json.dumps(new_selection))
         assert res.status_code == 200
 
-        db_session.refresh(image, ['selections'])
+        image = Image.query.get(image.id)
         assert new_selection == image.selections['1x1']
 
         bad_selection = {
@@ -247,7 +247,8 @@ class BettyTestCase(unittest.TestCase):
         headers = [('Content-Type', 'application/json'), ('X-Betty-Api-Key', 'noop')]
         res = self.client.patch('/api/%s' % image.id, headers=headers, data=json.dumps({'name': 'Updated'}))
         assert res.status_code == 200
-        db_session.refresh(image)
+
+        image = Image.query.get(image.id)
         assert image.name == 'Updated'
 
     def test_bad_image_data(self):
