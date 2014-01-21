@@ -20,6 +20,7 @@ requires = [
     "psycopg2==2.5.1",
     "slimit==0.8.1",
     "wand==0.3.5",
+    "blinker==1.3"
 ]
 
 
