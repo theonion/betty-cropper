@@ -40,14 +40,6 @@ class Image(Base, BettyImageMixin):
         self.credit = credit
         self.selections = selections
 
-    def path(self):
-        id_string = ""
-        for index,char in enumerate(str(self.id)):
-            if index % 4 == 0:
-                id_string += "/"
-            id_string += char
-        return os.path.join(app.config['IMAGE_ROOT'], id_string[1:])
-
     def src_path(self):
         return os.path.join(self.path(), 'src')
 

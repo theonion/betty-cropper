@@ -5,6 +5,7 @@ import os
 import urlparse
 
 from django.conf import settings as _settings
+from django.core.files.storage import FileSystemStorage
 
 DEFAULTS = {
     "REMOTE_CROPPER": False,
@@ -12,7 +13,8 @@ DEFAULTS = {
     "IMAGE_URL": urlparse.urljoin(_settings.MEDIA_URL, "images"),
     "RATIOS": ("1x1", "2x1", "3x1", "3x4", "4x3", "16x9"),
     "WIDTHS": ( 80, 150, 240, 300, 320, 400, 480, 620, 640, 820, 960, 1200, 1600),
-    "PLACEHOLDER": _settings.DEBUG
+    "PLACEHOLDER": _settings.DEBUG,
+    "STORAGE": FileSystemStorage
 }
 
 

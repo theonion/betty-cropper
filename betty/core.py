@@ -1,6 +1,8 @@
 """Core cropping code, sharable between the Flask and Django versions.
 """
 
+import os
+
 from wand.image import Image as WandImage
 
 class Ratio(object):
@@ -47,6 +49,14 @@ class BettyImageMixin(object):
                 self.height = img.size[1]
                 self.width = img.size[0]
         return self.width
+
+    def path(self):
+        id_string = ""
+        for index,char in enumerate(str(self.id)):
+            if index % 4 == 0:
+                id_string += "/"
+            id_string += char
+        return os.path.join(self.get_settings()['IMAGE_ROOT'], id_string[1:])
 
     def src_path(self):
         """Returns the path to the image source"""
