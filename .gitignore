@@ -4,3 +4,4 @@ bin
 include
 .Python
 settings.py
+.DS_Store
