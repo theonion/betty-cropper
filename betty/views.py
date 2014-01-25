@@ -6,7 +6,7 @@ import shutil
 from betty import app
 from betty.database import db_session
 from betty.models import Image as ImageObj
-from betty.models import Ratio
+from betty.core import Ratio
 from betty.crossdomain import crossdomain
 
 from flask import abort, redirect, jsonify, request, current_app, render_template, make_response
@@ -215,7 +215,7 @@ def new():
         img.save(filename=os.path.join(image.path(), filename))
         os.symlink(filename, image.src_path())
 
-    return jsonify(image.to_dict())
+    return jsonify(image.to_native())
 
 @app.route('/api/<int:id>/<string:ratio>', methods=['POST', 'OPTIONS'])
 @crossdomain(origin='*')
@@ -288,7 +288,7 @@ def search():
     results = []
 
     for instance in q:
-        results.append(instance.to_dict())
+        results.append(instance.to_native())
     return jsonify({'results': results})
 
 @app.route('/api/<int:id>', methods=['GET', 'OPTIONS', 'PATCH'])
@@ -316,4 +316,4 @@ def image_detail(id):
             response.status_code = 400
             return response
 
-    return jsonify(image.to_dict())
+    return jsonify(image.to_native())

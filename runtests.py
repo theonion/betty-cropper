@@ -10,7 +10,8 @@ import shutil
 import json
 
 from betty import app
-from betty.models import Image, Ratio
+from betty.models import Image
+from betty.core import Ratio
 from betty.database import db_session, init_db
 
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'test_data')
