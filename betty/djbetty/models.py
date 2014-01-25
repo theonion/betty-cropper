@@ -3,7 +3,8 @@ import os
 from django.db import models
 
 from betty.core import BettyImageMixin
-from betty.djbetty.conf import settings
+from .conf import settings
+from .fields import JSONField
 
 def upload_to(instance, filename):
     return os.path.join(instance.path(), filename)
@@ -11,10 +12,11 @@ def upload_to(instance, filename):
 class Image(models.Model, BettyImageMixin):
 
     source = models.FileField(upload_to=upload_to)
+    name = models.CharField(max_length=255)
     height = models.IntegerField()
     width = models.IntegerField()
     credit = models.CharField(max_length=120)
-    selections = models.TextField()
+    selections = JSONField(null=True, blank=True)
 
     @classmethod
     def get_settings(cls):
