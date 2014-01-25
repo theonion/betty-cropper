@@ -9,7 +9,7 @@ install:
   - pip install -r requirements.txt --download-cache $HOME/.pip-cache
   - pip install coveralls
 script:
-  - coverage run --source=betty runtests.py
+  - coverage run --source=betty tests/runtests.py
 after_success:
   - coveralls
 notifications:

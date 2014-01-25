@@ -1,20 +1,24 @@
-#!/usr/bin/env python
-
 import os
-if 'SETTINGS_MODULE' not in os.environ:
-    os.environ['SETTINGS_MODULE'] = "testsettings"
-
 import unittest
 import tempfile
 import shutil
 import json
 
 from betty.flask import app
+app.config.update(
+    DATABASE = "sqlite://",
+    PUBLIC_URL = "http://127.0.0.1:5000",
+    RATIOS = ("1x1", "2x1", "3x1", "3x4", "4x3", "16x9"),
+    WIDTHS = (80, 150, 240, 300, 320, 400, 480, 620, 640, 820, 960, 1200, 1600),
+    API_KEY = 'noop'
+)
+
+
 from betty.flask.models import Image
 from betty.core import Ratio
 from betty.flask.database import db_session, init_db
 
-TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'test_data')
+TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), '../../tests/images')
 
 class BettyTestCase(unittest.TestCase):
 
@@ -292,7 +296,3 @@ class BettyTestCase(unittest.TestCase):
 
     def tearDown(self):
         shutil.rmtree(app.config['IMAGE_ROOT'])
-
-
-if __name__ == '__main__':
-    unittest.main()

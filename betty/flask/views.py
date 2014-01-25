@@ -94,6 +94,9 @@ def shutdown_session(exception=None):
 @crossdomain(origin='*')
 @app.route('/<path:id>/<string:ratio_slug>/<int:width>.<string:extension>', methods=['GET'])
 def crop(id, ratio_slug, width, extension):
+    if ratio_slug != "original" and ratio_slug not in current_app.config["RATIOS"]:
+        abort(404)
+
     try:
         ratio = Ratio(ratio_slug)
     except ValueError:
