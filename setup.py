@@ -13,7 +13,7 @@ description = "A flask-powered image server"
 url = "https://github.com/theonion/betty-cropper"
 author = "Chris Sinchok"
 author_email = 'csinchok@theonion.com'
-license = 'BSD'
+license = 'MIT'
 requires = [
     "Flask==0.10.1",
     "SQLAlchemy==0.8.3",
@@ -75,7 +75,6 @@ setup(
     author_email=author_email,
     packages=get_packages(package),
     package_data={
-        "betty/font": ["betty/font/Lato-Hai.ttf", "OpenSans-Semibold.ttf"],
         "betty/templates": ["betty/templates/image.js.j2"]
     },
     install_requires=requires
