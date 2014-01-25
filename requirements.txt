@@ -1,7 +1,5 @@
 Flask==0.10.1
-Jinja2==2.7.1
-MarkupSafe==0.18
-slimit==0.8.1
 SQLAlchemy==0.8.3
-Wand==0.3.5
-Werkzeug==0.9.4
+slimit==0.8.1
+wand==0.3.5
+blinker==1.3

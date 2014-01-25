@@ -5,9 +5,9 @@ from sqlalchemy import Column, Integer, String
 from sqlalchemy.types import TypeDecorator, VARCHAR
 
 
-from betty import app
+from betty.flask import app
 from betty.core import BettyImageMixin
-from betty.database import Base
+from betty.flask.database import Base
 
 
 class JSONEncodedDict(TypeDecorator):

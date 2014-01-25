@@ -7,6 +7,7 @@ import urlparse
 from django.conf import settings as _settings
 
 DEFAULTS = {
+    "REMOTE_CROPPER": False,
     "IMAGE_ROOT": os.path.join(_settings.MEDIA_ROOT, "images"),
     "IMAGE_URL": urlparse.urljoin(_settings.MEDIA_URL, "images"),
     "RATIOS": ("1x1", "2x1", "3x1", "3x4", "4x3", "16x9"),

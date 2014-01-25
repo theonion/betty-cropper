@@ -17,7 +17,6 @@ license = 'BSD'
 requires = [
     "Flask==0.10.1",
     "SQLAlchemy==0.8.3",
-    "psycopg2==2.5.1",
     "slimit==0.8.1",
     "wand==0.3.5",
     "blinker==1.3"

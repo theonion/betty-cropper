@@ -9,10 +9,10 @@ import tempfile
 import shutil
 import json
 
-from betty import app
-from betty.models import Image
+from betty.flask import app
+from betty.flask.models import Image
 from betty.core import Ratio
-from betty.database import db_session, init_db
+from betty.flask.database import db_session, init_db
 
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'test_data')
 
