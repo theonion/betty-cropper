@@ -5,11 +5,12 @@ python:
 cache:
   directories:
     - $HOME/.pip-cache/
+env: SETTINGS_MODULE=testsettings
 install:
   - pip install -r requirements.txt --download-cache $HOME/.pip-cache
   - pip install coveralls
 script:
-  - coverage run --source=betty runtests.py
+  - SETTINGS_MODULE=testsettings coverage run --source=betty runtests.py
 after_success:
   - coveralls
 notifications:
