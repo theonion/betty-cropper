@@ -163,10 +163,13 @@ BACKGROUND_COLORS = (
     "rgb(153,51,153)",
 )
 
+RATIOS = ("1x1", "2x1", "3x1", "3x4", "4x3", "16x9")
+
 def placeholder(ratio, width, extension):
+    if ratio.string == "original":
+        ratio = Ratio(random.choice((RATIOS)))
     height = (width * ratio.height / float(ratio.width))
     with Drawing() as draw:
-        draw.font = os.path.join(os.path.dirname(__file__), "font/OpenSans-Semibold.ttf")
         draw.font_size = 52
         draw.gravity = "center"
         draw.fill_color = Color("white")

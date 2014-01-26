@@ -164,6 +164,11 @@ class BettyTestCase(unittest.TestCase):
 
     def test_placeholder(self):
         app.config['PLACEHOLDER'] = True
+
+        res = self.client.get('/666/original/256.jpg')
+        assert res.headers['Content-Type'] == 'image/jpeg'
+        assert res.status_code == 200
+
         res = self.client.get('/666/1x1/256.jpg')
         assert res.headers['Content-Type'] == 'image/jpeg'
         assert res.status_code == 200

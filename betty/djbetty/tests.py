@@ -91,6 +91,11 @@ class ImageSavingTestCase(TestCase):
 
     def test_placeholder(self):
         settings.BETTY_CROPPER['PLACEHOLDER'] = True
+
+        res = self.client.get('/images/666/original/256.jpg')
+        assert res['Content-Type'] == 'image/jpeg'
+        assert res.status_code == 200
+
         res = self.client.get('/images/666/1x1/256.jpg')
         assert res.status_code == 200
         assert res['Content-Type'] == 'image/jpeg'

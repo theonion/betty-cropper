@@ -146,27 +146,6 @@ def crop(id, ratio_slug, width, extension):
 
         img.transform(resize='%dx' % width)
 
-        # TODO: do we even want to do image credit this way?
-        # if image.credit and width >= app.config.get('CREDIT_SIZE_LIMIT'):
-        #     with Drawing() as draw:
-
-        #         draw.font = app.config.get('CREDIT_FONT')
-        #         draw.gravity = "south_east"
-        #         draw.font_size = 10
-        #         metrics = draw.get_font_metrics(img, image.credit, multiline=False)
-
-        #         draw.fill_color = Color("rgba(0, 0, 0, 0.0)")
-        #         draw.stroke_color = Color("rgba(0, 0, 0, 0.2)")
-        #         draw.stroke_width = metrics.text_height + 10
-        #         draw_y = img.size[1] - (metrics.text_height - 5)
-        #         draw.line((img.size[0] - metrics.text_width - 10, draw_y), (img.size[0], draw_y))
-
-        #         draw.fill_color = Color("white")
-        #         draw.stroke_color = Color("white")
-        #         draw.stroke_width = 1.0
-        #         draw.text(5, 5, image.credit)
-        #         draw(img)
-
         if extension == 'jpg':
             img.format = 'jpeg'
             img.compression_quality = 80
