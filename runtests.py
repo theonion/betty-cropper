@@ -7,7 +7,7 @@ import os.path
 import sys
 import os
 
-from betty.flask.tests import BettyTestCase
+from betty.flask.tests import CroppingTestCase, APITestCase
 
 # Detect location and available modules
 module_root = os.path.dirname(os.path.realpath(__file__))
@@ -15,7 +15,9 @@ module_root = os.path.dirname(os.path.realpath(__file__))
 if __name__ == '__main__':
 
     # Run the Flask suite
-    flask_suite = unittest.TestLoader().loadTestsFromTestCase(BettyTestCase)
+    cropping_suite = unittest.TestLoader().loadTestsFromTestCase(CroppingTestCase)
+    api_suite = unittest.TestLoader().loadTestsFromTestCase(APITestCase)
+    flask_suite = unittest.TestSuite([cropping_suite, api_suite])
     unittest.TextTestRunner(verbosity=2).run(flask_suite)
 
     settings.configure(

@@ -53,8 +53,10 @@ def crop(request, id, ratio_slug, width, extension):
             raise Http404
 
     try:
-        source_file = open(image.src_path(), 'r')
-    except (IOError, ValueError):
+        image_blob = image.crop(ratio, width, extension)
+    except Exception:
         return HttpResponseServerError()
 
-    return HttpResponse("Whatevs")
+    resp = HttpResponse(image_blob)
+    resp["Content-Type"] = EXTENSION_MAP[extension]["mime_type"]
+    return resp

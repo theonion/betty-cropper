@@ -122,55 +122,13 @@ def crop(id, ratio_slug, width, extension):
             abort(404)
 
     try:
-        source_file = open(image.src_path(), 'r')
-    except IOError:
+        image_blob = image.crop(ratio, width, extension)
+    except Exception:
         abort(500)
 
-    with Image(file=source_file, format=extension) as img:
-        if ratio_slug == 'original':
-            ratio.width = img.size[0]
-            ratio.height = img.size[1]
-
-        selection = image.get_selection(ratio)
-        try:
-            img.crop(selection['x0'], selection['y0'], selection['x1'], selection['y1'])
-        except ValueError:
-            # Uhoh, looks like we have bad height and width data. Let's reload that and try again.
-            image.width = img.size[0]
-            image.height = img.size[1]
-            db_session.add(image)
-            db_session.commit()
-
-            selection = image.get_selection(ratio)
-            img.crop(selection['x0'], selection['y0'], selection['x1'], selection['y1'])
-
-        img.transform(resize='%dx' % width)
-
-        if extension == 'jpg':
-            img.format = 'jpeg'
-            img.compression_quality = 80
-        if extension == 'png':
-            img.format = 'png'
-
-        img_blob = img.make_blob()
-
-        ratio_dir = os.path.join(image.path(), ratio.string)
-        try:
-            os.makedirs(ratio_dir)
-        except OSError as e:
-            if e.errno != 17:
-                abort(500)
-
-        with open(os.path.join(ratio_dir, "%d.%s" % (width, extension)), 'w+') as out:
-            out.write(img_blob)
-
-        resp = make_response(img_blob, 200)
-        if extension == 'jpg':
-           resp.headers["Content-Type"] = "image/jpeg"
-        if extension == 'png':
-            resp.headers["Content-Type"] = "image/png"
-        return resp
-    abort(500)
+    resp = make_response(image_blob, 200)
+    resp.headers["Content-Type"] = EXTENSION_MAP[extension]["mime_type"]
+    return resp
 
 
 @app.route('/api/new', methods=['POST', 'OPTIONS'])

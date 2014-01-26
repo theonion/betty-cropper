@@ -20,7 +20,7 @@ from betty.flask.database import db_session, init_db
 
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), '../../tests/images')
 
-class BettyTestCase(unittest.TestCase):
+class CroppingTestCase(unittest.TestCase):
 
     def setUp(self):
         app.config['TESTING'] = True
@@ -105,42 +105,6 @@ class BettyTestCase(unittest.TestCase):
         res = self.client.get('/%s/1x1/256.jpg' % image.id )
         self.assertEqual(res.status_code, 500)
 
-    def test_image_upload(self):
-        lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
-        with open(lenna_path, 'r') as lenna:
-            headers = [('X-Betty-Api-Key', 'noop')]
-            res = self.client.post('/api/new', headers=headers, data=dict(
-                image=(lenna, 'Lenna.png'),
-            ))
-
-        assert res.status_code == 200
-        response_json = json.loads(res.data)
-        assert response_json.get('name') == 'Lenna.png'
-        assert response_json.get('width') == 512
-        assert response_json.get('height') == 512
-
-        image = Image.query.get(response_json['id'])
-        assert os.path.exists(image.path())
-        assert os.path.exists(image.src_path())
-
-        # Now let's test that a JPEG crop will return properly.
-        res = self.client.get('/%s/1x1/256.jpg' % image.id)
-        assert res.headers['Content-Type'] == 'image/jpeg'
-        assert res.status_code == 200
-        assert os.path.exists(os.path.join(image.path(), '1x1', '256.jpg'))
-
-        # Now let's test that a PNG crop will return properly.
-        res = self.client.get('/%s/1x1/256.png' % image.id)
-        assert res.headers['Content-Type'] == 'image/png'
-        assert res.status_code == 200
-        assert os.path.exists(os.path.join(image.path(), '1x1', '256.png'))
-
-        # Finally, let's test an "original" crop
-        res = self.client.get('/%s/original/256.jpg' % image.id)
-        assert res.headers['Content-Type'] == 'image/jpeg'
-        assert res.status_code == 200
-        assert os.path.exists(os.path.join(image.path(), 'original', '256.jpg'))
-
     def test_bad_image_id(self):
         res = self.client.get('/abc/13x4/256.jpg')
         assert res.status_code == 404
@@ -185,6 +149,57 @@ class BettyTestCase(unittest.TestCase):
         res = self.client.get('/image.js')
         assert res.headers['Content-Type'] == 'application/javascript'
         assert res.status_code == 200
+
+    def tearDown(self):
+        shutil.rmtree(app.config['IMAGE_ROOT'])
+
+
+class APITestCase(unittest.TestCase):
+
+    def setUp(self):
+        app.config['TESTING'] = True
+        image_root = tempfile.mkdtemp()
+        app.config.update({
+            'IMAGE_ROOT': image_root,
+        })
+        self.client = app.test_client()  
+        init_db()
+
+    def test_image_upload(self):
+        lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
+        with open(lenna_path, 'r') as lenna:
+            headers = [('X-Betty-Api-Key', 'noop')]
+            res = self.client.post('/api/new', headers=headers, data=dict(
+                image=(lenna, 'Lenna.png'),
+            ))
+
+        assert res.status_code == 200
+        response_json = json.loads(res.data)
+        assert response_json.get('name') == 'Lenna.png'
+        assert response_json.get('width') == 512
+        assert response_json.get('height') == 512
+
+        image = Image.query.get(response_json['id'])
+        assert os.path.exists(image.path())
+        assert os.path.exists(image.src_path())
+
+        # Now let's test that a JPEG crop will return properly.
+        res = self.client.get('/%s/1x1/256.jpg' % image.id)
+        assert res.headers['Content-Type'] == 'image/jpeg'
+        assert res.status_code == 200
+        assert os.path.exists(os.path.join(image.path(), '1x1', '256.jpg'))
+
+        # Now let's test that a PNG crop will return properly.
+        res = self.client.get('/%s/1x1/256.png' % image.id)
+        assert res.headers['Content-Type'] == 'image/png'
+        assert res.status_code == 200
+        assert os.path.exists(os.path.join(image.path(), '1x1', '256.png'))
+
+        # Finally, let's test an "original" crop
+        res = self.client.get('/%s/original/256.jpg' % image.id)
+        assert res.headers['Content-Type'] == 'image/jpeg'
+        assert res.status_code == 200
+        assert os.path.exists(os.path.join(image.path(), 'original', '256.jpg'))
 
     def test_no_api_key(self):
         res = self.client.post('/api/new')

@@ -1,3 +1,5 @@
+import os
+
 from django.test import TestCase, Client
 
 from betty.core import Ratio
@@ -14,7 +16,8 @@ class ImageSavingTestCase(TestCase):
         image = Image.objects.create(
             name="Lenna.gif",
             width=512,
-            height=512)
+            height=512
+        )
 
         # Test to make sure the default selections work
         assert image.get_selection(Ratio('1x1')) == {'x0': 0, 'y0': 0, 'x1': 512, 'y1': 512}
@@ -114,3 +117,28 @@ class ImageSavingTestCase(TestCase):
         res = self.client.get('/images/%s/1x1/256.jpg' % image.id )
         self.assertEqual(res.status_code, 500)
 
+    def test_image_save(self):
+
+        image = Image.objects.create(
+            name="Lenna.gif",
+            width=512,
+            height=512
+        )
+
+        # Now let's test that a JPEG crop will return properly.
+        res = self.client.get('/%s/1x1/256.jpg' % image.id)
+        assert res.headers['Content-Type'] == 'image/jpeg'
+        assert res.status_code == 200
+        assert os.path.exists(os.path.join(image.path(), '1x1', '256.jpg'))
+
+        # Now let's test that a PNG crop will return properly.
+        res = self.client.get('/%s/1x1/256.png' % image.id)
+        assert res.headers['Content-Type'] == 'image/png'
+        assert res.status_code == 200
+        assert os.path.exists(os.path.join(image.path(), '1x1', '256.png'))
+
+        # Finally, let's test an "original" crop
+        res = self.client.get('/%s/original/256.jpg' % image.id)
+        assert res.headers['Content-Type'] == 'image/jpeg'
+        assert res.status_code == 200
+        assert os.path.exists(os.path.join(image.path(), 'original', '256.jpg'))

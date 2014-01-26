@@ -150,6 +150,49 @@ class BettyImageMixin(object):
 
         return selection
 
+    def crop(self, ratio, width, extension):
+        source_file = open(self.src_path(), 'r')
+
+        with Image(file=source_file) as img:
+            if ratio.string == 'original':
+                ratio.width = img.size[0]
+                ratio.height = img.size[1]
+
+            selection = self.get_selection(ratio)
+            try:
+                img.crop(selection['x0'], selection['y0'], selection['x1'], selection['y1'])
+            except ValueError:
+                # Uhoh, looks like we have bad height and width data. Let's reload that and try again.
+                self.width = img.size[0]
+                self.height = img.size[1]
+
+                # TODO: Cross-framework save
+
+                selection = self.get_selection(ratio)
+                img.crop(selection['x0'], selection['y0'], selection['x1'], selection['y1'])
+
+            img.transform(resize='%dx' % width)
+
+            if extension == 'jpg':
+                img.format = 'jpeg'
+                img.compression_quality = 80
+            if extension == 'png':
+                img.format = 'png'
+
+            img_blob = img.make_blob()
+
+            ratio_dir = os.path.join(self.path(), ratio.string)
+            try:
+                os.makedirs(ratio_dir)
+            except OSError as e:
+                if e.errno != 17:
+                    raise e
+
+            with open(os.path.join(ratio_dir, "%d.%s" % (width, extension)), 'w+') as out:
+                out.write(img_blob)
+            return img_blob
+
+
 BACKGROUND_COLORS = (
     "rgb(153,153,51)",
     "rgb(102,153,51)",
