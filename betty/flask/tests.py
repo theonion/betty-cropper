@@ -102,19 +102,8 @@ class BettyTestCase(unittest.TestCase):
         db_session.add(image)
         db_session.commit()
 
-        app.config['PLACEHOLDER'] = True
         res = self.client.get('/%s/1x1/256.jpg' % image.id )
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(res.headers['Content-Type'], 'image/jpeg')
-
-        res = self.client.get('/%s/original/256.jpg' % image.id )
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(res.headers['Content-Type'], 'image/jpeg')
-
-        app.config['PLACEHOLDER'] = False
-        res = self.client.get('/%s/1x1/256.jpg' % image.id )
-        self.assertEqual(res.status_code, 404)
-
+        self.assertEqual(res.status_code, 500)
 
     def test_image_upload(self):
         lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')

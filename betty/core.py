@@ -2,8 +2,23 @@
 """
 
 import os
+import random
 
-from wand.image import Image as WandImage
+from wand.color import Color
+from wand.drawing import Drawing
+from wand.image import Image
+
+EXTENSION_MAP = {
+    "jpg": {
+        "format": "jpeg",
+        "mime_type": "image/jpeg"
+    },
+    "png": {
+        "format": "png",
+        "mime_type": "image/png"
+    },
+}
+
 
 class Ratio(object):
     def __init__(self, ratio):
@@ -16,7 +31,6 @@ class Ratio(object):
                 raise ValueError("Improper ratio!")
             self.width = int(ratio.split("x")[0])
             self.height = int(ratio.split("x")[1])
-
 
 class BettyImageMixin(object):
     """This mixin provides utilites for image management"""
@@ -34,7 +48,7 @@ class BettyImageMixin(object):
         If the width exists in the database, that value will be returned,
         otherwise the width will be read from the filesystem."""
         if self.height in (None, 0):
-            with WandImage(filename=self.src_path()) as img:
+            with Image(filename=self.src_path()) as img:
                 self.height = img.size[1]
                 self.width = img.size[0]
         return self.height
@@ -45,7 +59,7 @@ class BettyImageMixin(object):
         If the width exists in the database, that value will be returned,
         otherwise the width will be read from the filesystem."""
         if self.width in (None, 0):
-            with WandImage(filename=self.src_path()) as img:
+            with Image(filename=self.src_path()) as img:
                 self.height = img.size[1]
                 self.width = img.size[0]
         return self.width
@@ -135,3 +149,35 @@ class BettyImageMixin(object):
             selection['y0'] = 0
 
         return selection
+
+BACKGROUND_COLORS = (
+    "rgb(153,153,51)",
+    "rgb(102,153,51)",
+    "rgb(51,153,51)",
+    "rgb(153,51,51)",
+    "rgb(194,133,71)",
+    "rgb(51,153,102)",
+    "rgb(153,51,102)",
+    "rgb(71,133,194)",
+    "rgb(51,153,153)",
+    "rgb(153,51,153)",
+)
+
+def placeholder(ratio, width, extension):
+    height = (width * ratio.height / float(ratio.width))
+    with Drawing() as draw:
+        draw.font = os.path.join(os.path.dirname(__file__), "font/OpenSans-Semibold.ttf")
+        draw.font_size = 52
+        draw.gravity = "center"
+        draw.fill_color = Color("white")
+        with Color(random.choice(BACKGROUND_COLORS)) as bg:
+            with Image(width=width, height=int(height), background=bg) as img:
+                draw.text(0, 0, ratio.string)
+                draw(img)
+
+                if extension == 'jpg':
+                    img.format = 'jpeg'
+                if extension == 'png':
+                    img.format = 'png'
+
+                return img.make_blob()

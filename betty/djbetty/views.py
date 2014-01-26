@@ -1,10 +1,19 @@
 from .conf import settings
 
+from betty.core import EXTENSION_MAP, Ratio, placeholder
+
 from django.http import Http404, HttpResponse, HttpResponseServerError, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 
-def crop(request, pk, ratio_slug, width, extension):
+from .models import Image
+
+def crop(request, id, ratio_slug, width, extension):
     if ratio_slug != "original" and ratio_slug not in settings.BETTY_CROPPER["RATIOS"]:
+        raise Http404
+
+    try:
+        ratio = Ratio(ratio_slug)
+    except ValueError:
         raise Http404
 
     try:
@@ -15,13 +24,37 @@ def crop(request, pk, ratio_slug, width, extension):
     if width > 2000:
         return HttpResponseServerError()
 
-    if len(pk) > 4 and "/" not in pk:
+    if len(id) > 4 and "/" not in id:
         id_string = ""
-        for index,char in enumerate(pk):
+        for index,char in enumerate(id):
             if index % 4 == 0 and index != 0:
                 id_string += "/"
             id_string += char
 
         return HttpResponseRedirect(reverse('betty.djbetty.views.crop', args=(id_string, ratio_slug, width, extension)))
+
+    try:
+        image_id = int(id.replace("/", ""))
+    except ValueError:
+        raise Http404
+
+    try:
+        image = Image.objects.get(id=image_id)
+    except Image.DoesNotExist:
+        if settings.BETTY_CROPPER["PLACEHOLDER"]:
+            img_blob = placeholder(ratio, width, extension)
+            resp = HttpResponse(img_blob)
+            resp["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            resp["Pragma"] = "no-cache"
+            resp["Expires"] = "0"
+            resp["Content-Type"] = EXTENSION_MAP[extension]["mime_type"]
+            return resp
+        else:
+            raise Http404
+
+    try:
+        source_file = open(image.src_path(), 'r')
+    except (IOError, ValueError):
+        return HttpResponseServerError()
 
     return HttpResponse("Whatevs")

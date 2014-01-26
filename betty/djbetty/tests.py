@@ -2,6 +2,7 @@ from django.test import TestCase, Client
 
 from betty.core import Ratio
 
+from .conf import settings
 from .models import Image
 
 class ImageSavingTestCase(TestCase):
@@ -86,4 +87,25 @@ class ImageSavingTestCase(TestCase):
 
     def test_image_redirect(self):
         res = self.client.get('/images/66666/1x1/100.jpg')
-        self.assertRedirects(res, "/images/6666/6/1x1/100.jpg", target_status_code=200)
+        self.assertRedirects(res, "/images/6666/6/1x1/100.jpg", target_status_code=404)
+
+    def test_placeholder(self):
+        settings.BETTY_CROPPER['PLACEHOLDER'] = True
+        res = self.client.get('/images/666/1x1/256.jpg')
+        assert res.status_code == 200
+        assert res['Content-Type'] == 'image/jpeg'
+
+        res = self.client.get('/images/666/1x1/256.png')
+        assert res['Content-Type'] == 'image/png'
+        assert res.status_code == 200
+
+        settings.BETTY_CROPPER["PLACEHOLDER"] = False
+        res = self.client.get('/images/666/1x1/256.jpg')
+        assert res.status_code == 404
+
+    def test_missing_file(self):
+        image = Image.objects.create(name="Lenna.gif", width=512, height=512)
+
+        res = self.client.get('/images/%s/1x1/256.jpg' % image.id )
+        self.assertEqual(res.status_code, 500)
+

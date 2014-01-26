@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
 import os
-import random
 import copy
 import shutil
 from datetime import timedelta
@@ -10,27 +9,13 @@ from functools import update_wrapper
 from betty.flask import app
 from betty.flask.database import db_session
 from betty.flask.models import Image as ImageObj
-from betty.core import Ratio
+from betty.core import EXTENSION_MAP, Ratio, placeholder
 
 from flask import abort, redirect, jsonify, request, current_app, render_template, make_response
 from werkzeug import secure_filename
 from wand.image import Image
-from wand.color import Color
-from wand.drawing import Drawing
-from slimit import minify
 
-BACKGROUND_COLORS = (
-    "rgb(153,153,51)",
-    "rgb(102,153,51)",
-    "rgb(51,153,51)",
-    "rgb(153,51,51)",
-    "rgb(194,133,71)",
-    "rgb(51,153,102)",
-    "rgb(153,51,102)",
-    "rgb(71,133,194)",
-    "rgb(51,153,153)",
-    "rgb(153,51,153)",
-)
+from slimit import minify
 
 def crossdomain(origin=None, methods=None, headers=None,
                 max_age=21600, attach_to_all=True,
@@ -125,21 +110,21 @@ def crop(id, ratio_slug, width, extension):
     image = ImageObj.query.get(image_id)
     if image is None:
         if current_app.config.get('PLACEHOLDER', False):
-            return placeholder(ratio, width, extension)
+            img_blob = placeholder(ratio, width, extension)
+
+            resp = make_response(img_blob, 200)
+            resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            resp.headers["Pragma"] = "no-cache"
+            resp.headers["Expires"] = "0"
+            resp.headers["Content-Type"] = EXTENSION_MAP[extension]["mime_type"]
+            return resp
         else:
             abort(404)
 
     try:
         source_file = open(image.src_path(), 'r')
     except IOError:
-        if current_app.config.get('PLACEHOLDER', False):
-            # We don't really know how to render an "original" placeholder, so we'll make it a 4x3
-            if ratio_slug == 'original':
-                ratio.width = 4
-                ratio.height = 3
-            return placeholder(ratio, width, extension)
-        else:
-            abort(404)
+        abort(500)
 
     with Image(file=source_file, format=extension) as img:
         if ratio_slug == 'original':
@@ -208,35 +193,6 @@ def crop(id, ratio_slug, width, extension):
         return resp
     abort(500)
 
-
-def placeholder(ratio, width, extension):
-    height = (width * ratio.height / float(ratio.width))
-    with Drawing() as draw:
-        draw.font = os.path.join(os.path.dirname(__file__), "font/OpenSans-Semibold.ttf")
-        draw.font_size = 52
-        draw.gravity = "center"
-        draw.fill_color = Color("white")
-        with Color(random.choice(BACKGROUND_COLORS)) as bg:
-            with Image(width=width, height=int(height), background=bg) as img:
-                draw.text(0, 0, ratio.string)
-                draw(img)
-
-                if extension == 'jpg':
-                    img.format = 'jpeg'
-                if extension == 'png':
-                    img.format = 'png'
-
-                img_blob = img.make_blob()
-
-                resp = make_response(img_blob, 200)
-                resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-                resp.headers["Pragma"] = "no-cache"
-                resp.headers["Expires"] = "0"
-                if extension == 'jpg':
-                   resp.headers["Content-Type"] = "image/jpeg"
-                if extension == 'png':
-                    resp.headers["Content-Type"] = "image/png"
-                return resp
 
 @app.route('/api/new', methods=['POST', 'OPTIONS'])
 @crossdomain(origin='*')

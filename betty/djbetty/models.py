@@ -21,3 +21,6 @@ class Image(models.Model, BettyImageMixin):
     @classmethod
     def get_settings(cls):
         return settings.BETTY_CROPPER
+
+    def src_path(self):
+        return self.source.path
