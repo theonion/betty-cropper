@@ -1,11 +1,14 @@
 import os
 
 from django.test import TestCase, Client
+from django.core.files import File
 
 from betty.core import Ratio
 
 from .conf import settings
 from .models import Image
+
+TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), '../../tests/images')
 
 class ImageSavingTestCase(TestCase):
 
@@ -120,25 +123,27 @@ class ImageSavingTestCase(TestCase):
     def test_image_save(self):
 
         image = Image.objects.create(
-            name="Lenna.gif",
+            name="Lenna.png",
             width=512,
             height=512
         )
+        lenna = File(open(os.path.join(TEST_DATA_PATH, "Lenna.png"), "r"))
+        image.source.save("Lenna.png", lenna)
 
         # Now let's test that a JPEG crop will return properly.
-        res = self.client.get('/%s/1x1/256.jpg' % image.id)
-        assert res.headers['Content-Type'] == 'image/jpeg'
+        res = self.client.get('/images/%s/1x1/256.jpg' % image.id)
+        assert res['Content-Type'] == 'image/jpeg'
         assert res.status_code == 200
         assert os.path.exists(os.path.join(image.path(), '1x1', '256.jpg'))
 
         # Now let's test that a PNG crop will return properly.
-        res = self.client.get('/%s/1x1/256.png' % image.id)
-        assert res.headers['Content-Type'] == 'image/png'
+        res = self.client.get('/images/%s/1x1/256.png' % image.id)
+        assert res['Content-Type'] == 'image/png'
         assert res.status_code == 200
         assert os.path.exists(os.path.join(image.path(), '1x1', '256.png'))
 
         # Finally, let's test an "original" crop
-        res = self.client.get('/%s/original/256.jpg' % image.id)
-        assert res.headers['Content-Type'] == 'image/jpeg'
+        res = self.client.get('/images/%s/original/256.jpg' % image.id)
+        assert res['Content-Type'] == 'image/jpeg'
         assert res.status_code == 200
         assert os.path.exists(os.path.join(image.path(), 'original', '256.jpg'))
