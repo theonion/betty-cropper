@@ -1,61 +1,63 @@
 import json
+import io
 
 from django.http import (
     HttpResponse,
     HttpResponseNotAllowed,
-    HttpResponseNotAuthorized,
+    HttpResponseForbidden,
     HttpResponseBadRequest
 )
 
 from .conf import settings
+from .models import Image
  
 ACC_HEADERS = {'Access-Control-Allow-Origin': '*', 
                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
                'Access-Control-Max-Age': 1000,
                'Access-Control-Allow-Headers': '*'}
- 
-def crossdomain(func, origin="*", methods=[], headers=["X-Betty-Api-Key", "Content-Type"]):
-    """ Sets Access Control request headers."""
-    def wrap(request, *args, **kwargs):
-        # Firefox sends 'OPTIONS' request for cross-domain javascript call.
-        if request.method != "OPTIONS": 
-            response = func(request, *args, **kwargs)
-        else:
-            response = HttpResponse()
-        response["Access-Control-Allow-Origin"] = "*"
-        if methods:
-            if request.method not in methods:
-                return HttpResponseNotAllowed(methods)
-            response["Access-Control-Allow-Methods"] = ", ".join(methods)
-        if headers:
-            response["Access-Control-Allow-Headers"] = ", ".join(headers)
-        return response
-    return wrap
+
+
+def crossdomain(origin="*", methods=[], headers=["X-Betty-Api-Key", "Content-Type"]):
+
+    def _method_wrapper(func):
+
+        def _crossdomain_wrapper(request, *args, **kwargs):
+            if request.method != "OPTIONS": 
+                response = func(request, *args, **kwargs)
+            else:
+                response = HttpResponse()
+            response["Access-Control-Allow-Origin"] = "*"
+            if methods:
+                if request.method not in methods:
+                    return HttpResponseNotAllowed(methods)
+                response["Access-Control-Allow-Methods"] = ", ".join(methods)
+            if headers:
+                response["Access-Control-Allow-Headers"] = ", ".join(headers)
+            return response
+
+        return _crossdomain_wrapper
+
+    return _method_wrapper
 
 
 @crossdomain(methods=['POST', 'OPTIONS'])
 def new(request):
-    if not settings.BETTY_CROPPER['DEBUG'] and request.META.get('X_BETTY_API_KEY') != settings.BETTY_CROPPER['API_KEY']:
-        return HttpResponseNotAuthorized(json.dumps({'message': 'Not authorized'}), content_type="application/json")
+    if request.META.get("HTTP_X_BETTY_API_KEY") != settings.BETTY_CROPPER["API_KEY"]:
+        print("{0} != {1}".format(request.META.get("HTTP_X_BETTY_API_KEY"), settings.BETTY_CROPPER["API_KEY"]))
+        return HttpResponseForbidden(json.dumps({'message': 'Not authorized'}), content_type="application/json")        
 
-    if 'image' not in request.files:
+    image_file = request.FILES.get("image")
+    if image_file is None:
         return HttpResponseBadRequest()
-    
-    image = Image.objects.create(name=image_file.filename)
-    path = image.set_file(image_file)
-    image.source.name = 
 
-    image_file = request.files['image']
-    with Image(file=image_file) as img:
-        width = img.size[0]
-        height = img.size[1]
-        
-        image = ImageObj(name=filename, width=width, height=height, selections={})
-        db_session.add(image)
-        db_session.commit()
+    with io.BytesIO() as f:
+        for chunk in image_file.chunks():
+            f.write(chunk)
+        f.seek(0)
 
-        os.makedirs(image.path())
-        img.save(filename=os.path.join(image.path(), filename))
-        os.symlink(filename, image.src_path())
+        image = Image.objects.create(name=image_file.name)
+        path = image.set_file(f)
+        image.source.name = path
+        image.save()
 
-    return jsonify(image.to_native())
+    return HttpResponse(json(image.to_native()), content_type="application/json")

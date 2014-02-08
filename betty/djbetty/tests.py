@@ -1,4 +1,6 @@
 import os
+import json
+import shutil
 
 from django.test import TestCase, Client
 from django.core.files import File
@@ -147,3 +149,50 @@ class ImageSavingTestCase(TestCase):
         assert res['Content-Type'] == 'image/jpeg'
         assert res.status_code == 200
         assert os.path.exists(os.path.join(image.path(), 'original', '256.jpg'))
+
+    def tearDown(self):
+        shutil.rmtree(settings.BETTY_CROPPER["IMAGE_ROOT"], ignore_errors=True)
+
+
+class APITestCase(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        settings.BETTY_CROPPER["API_KEY"] = "noop"
+
+    def test_image_upload(self):
+        lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
+        with open(lenna_path, 'r') as lenna:
+            res = self.client.post('/images/api/new', {"image": lenna}, HTTP_X_BETTY_API_KEY="noop")
+
+        print(res.content)
+        self.assertEqual(res.status_code, 200)
+        response_json = json.loads(res.content)
+        self.assertEqual(response_json.get('name'), 'Lenna.png')
+        self.assertEqual(response_json.get('width'), 512)
+        self.assertEqual(response_json.get('height'), 512)
+
+        image = Image.query.get(response_json['id'])
+        self.assertTrue(os.path.exists(image.path()))
+        self.assertTrue(os.path.exists(image.src_path()))
+
+        # Now let's test that a JPEG crop will return properly.
+        res = self.client.get('/%s/1x1/256.jpg' % image.id)
+        self.assertEqual(res.headers['Content-Type'], 'image/jpeg')
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(os.path.exists(os.path.join(image.path(), '1x1', '256.jpg')))
+
+        # Now let's test that a PNG crop will return properly.
+        res = self.client.get('/%s/1x1/256.png' % image.id)
+        self.assertEqual(res.headers['Content-Type'], 'image/png')
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(os.path.exists(os.path.join(image.path(), '1x1', '256.png')))
+
+        # Finally, let's test an "original" crop
+        res = self.client.get('/%s/original/256.jpg' % image.id)
+        self.assertEqual(res.headers['Content-Type'], 'image/jpeg')
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(os.path.exists(os.path.join(image.path(), 'original', '256.jpg')))
+
+    def tearDown(self):
+        shutil.rmtree(settings.BETTY_CROPPER["IMAGE_ROOT"], ignore_errors=True)

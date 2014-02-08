@@ -13,8 +13,8 @@ class Image(models.Model, BettyImageMixin):
 
     source = models.FileField(upload_to=upload_to)
     name = models.CharField(max_length=255)
-    height = models.IntegerField()
-    width = models.IntegerField()
+    height = models.IntegerField(null=True, blank=True)
+    width = models.IntegerField(null=True, blank=True)
     credit = models.CharField(max_length=120)
     selections = JSONField(null=True, blank=True)
 

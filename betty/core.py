@@ -103,7 +103,7 @@ class BettyImageMixin(object):
             self.selections = {}
 
             os.makedirs(self.path())
-            img.save(filename=os.path.join(self.path(), secure_filename(image_file.filename)))
+            img.save(filename=os.path.join(self.path(), secure_filename(self.name)))
             os.symlink(os.path.join(self.path(), "src"), self.src_path())
 
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import unittest
+import tempfile
 
 import django
 from django.conf import settings, global_settings as default_settings
@@ -29,6 +30,7 @@ if __name__ == '__main__':
                 'NAME': ':memory:'
             }
         },
+        MEDIA_ROOT = tempfile.mkdtemp("bettycropper"),
         TEMPLATE_DIRS = (os.path.join(module_root, 'tests', 'templates'), ),
         TEMPLATE_LOADERS = (
             'django.template.loaders.filesystem.Loader',
