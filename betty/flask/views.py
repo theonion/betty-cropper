@@ -17,17 +17,9 @@ from wand.image import Image
 
 from slimit import minify
 
-def crossdomain(origin=None, methods=None, headers=None,
-                max_age=21600, attach_to_all=True,
-                automatic_options=True):
+def crossdomain(methods=None, headers=["X-Betty-Api-Key", "Content-Type"]):
     if methods is not None:
         methods = ', '.join(sorted(x.upper() for x in methods))
-    if headers is not None and not isinstance(headers, basestring):
-        headers = ', '.join(x.upper() for x in headers)
-    if not isinstance(origin, basestring):
-        origin = ', '.join(origin)
-    if isinstance(max_age, timedelta):
-        max_age = max_age.total_seconds()
 
     def get_methods():
         if methods is not None:
@@ -38,22 +30,19 @@ def crossdomain(origin=None, methods=None, headers=None,
 
     def decorator(f):
         def wrapped_function(*args, **kwargs):
-            if automatic_options and request.method == 'OPTIONS':
+            if request.method == 'OPTIONS':
                 resp = current_app.make_default_options_response()
             else:
                 resp = make_response(f(*args, **kwargs))
-            if not attach_to_all and request.method != 'OPTIONS':
-                return resp
 
             h = resp.headers
 
-            h['Access-Control-Allow-Origin'] = origin
+            h['Access-Control-Allow-Origin'] = "*"
             h['Access-Control-Allow-Methods'] = get_methods()
-            h['Access-Control-Max-Age'] = str(max_age)
-            if headers is not None:
-                h['Access-Control-Allow-Headers'] = headers
+            if headers:
+                h['Access-Control-Allow-Headers'] = ", ".join(x.upper() for x in headers)
             else:
-                h['Access-Control-Allow-Headers'] = "X-Betty-Api-Key, Content-Type"
+                h['Access-Control-Allow-Headers'] = "Content-Type"
             return resp
 
         f.provide_automatic_options = False
@@ -76,7 +65,6 @@ def image_js():
 def shutdown_session(exception=None):
     db_session.remove()
 
-@crossdomain(origin='*')
 @app.route('/<path:id>/<string:ratio_slug>/<int:width>.<string:extension>', methods=['GET'])
 def crop(id, ratio_slug, width, extension):
     if ratio_slug != "original" and ratio_slug not in current_app.config["RATIOS"]:
@@ -132,7 +120,7 @@ def crop(id, ratio_slug, width, extension):
 
 
 @app.route('/api/new', methods=['POST', 'OPTIONS'])
-@crossdomain(origin='*')
+@crossdomain()
 def new():
     if not app.config['DEBUG'] and request.headers.get('X-Betty-Api-Key') != app.config['API_KEY']:
         response = jsonify({'message': 'Not authorized'})
@@ -160,7 +148,7 @@ def new():
     return jsonify(image.to_native())
 
 @app.route('/api/<int:id>/<string:ratio>', methods=['POST', 'OPTIONS'])
-@crossdomain(origin='*')
+@crossdomain()
 def update_selection(id, ratio):
     # TODO: move this to a decorator or similar
     if not app.config['DEBUG'] and request.headers.get('X-Betty-Api-Key') != app.config['API_KEY']:
@@ -214,7 +202,7 @@ def update_selection(id, ratio):
     return jsonify({'message': 'OK', 'error': False})
     
 @app.route('/api/search', methods=['GET', 'OPTIONS'])
-@crossdomain(origin='*')
+@crossdomain()
 def search():
     if not app.config['DEBUG'] and request.headers.get('X-Betty-Api-Key') != app.config['API_KEY']:
         response = jsonify({'message': 'Not authorized'})
@@ -234,7 +222,7 @@ def search():
     return jsonify({'results': results})
 
 @app.route('/api/<int:id>', methods=['GET', 'OPTIONS', 'PATCH'])
-@crossdomain(origin='*')
+@crossdomain()
 def image_detail(id):
     if not app.config['DEBUG'] and request.headers.get('X-Betty-Api-Key') != app.config['API_KEY']:
         response = jsonify({'message': 'Not authorized'})

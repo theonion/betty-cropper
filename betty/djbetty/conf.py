@@ -17,7 +17,6 @@ DEFAULTS = {
     "STORAGE": FileSystemStorage
 }
 
-
 class BettySettings(object):
     '''
     Lazy Django settings wrapper for Betty Cropper

@@ -7,6 +7,7 @@ import random
 from wand.color import Color
 from wand.drawing import Drawing
 from wand.image import Image
+from werkzeug import secure_filename
 
 EXTENSION_MAP = {
     "jpg": {
@@ -89,6 +90,22 @@ class BettyImageMixin(object):
         for ratio in self.get_settings()['RATIOS']:
             data['selections'][ratio] = self.get_selection(Ratio(ratio))
         return data
+
+
+    def set_file(self, image_file):
+        with Image(file=image_file) as img:        
+            self.width = img.size[0]
+            self.height = img.size[1]
+
+            if self.name is None:
+                self.name = secure_filename(image_file.filename)
+
+            self.selections = {}
+
+            os.makedirs(self.path())
+            img.save(filename=os.path.join(self.path(), secure_filename(image_file.filename)))
+            os.symlink(os.path.join(self.path(), "src"), self.src_path())
+
 
     def get_selection(self, ratio):
         """Returns the image selection for a given ratio
