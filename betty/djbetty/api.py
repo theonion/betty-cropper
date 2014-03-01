@@ -143,10 +143,29 @@ def search(request):
 
 
 @crossdomain(methods=["GET", "POST", "OPTIONS"])
-def detail(request):
+def detail(request, image_id):
     if request.META.get("HTTP_X_BETTY_API_KEY") != settings.BETTY_CROPPER["API_KEY"]:
         response_text = json.dumps({'message': 'Not authorized'})
         return HttpResponseForbidden(response_text, content_type="application/json")
 
-    
+    try:
+        image = Image.objects.get(id=image_id)
+    except Image.DoesNotExist:
+        message = json.dumps({"message": "No such image!"})
+        return HttpResponseNotFound(message, content_type="application/json")
+
+    if request.method == 'PATCH':
+        if request.json:
+            if 'name' in request.json:
+                image.name = request.json['name']
+            if 'credit' in request.json:
+                image.credit = request.json['credit']
+            db_session.add(image)
+            db_session.commit()
+        else:
+            response = jsonify({'message': 'No data', 'error': True})
+            response.status_code = 400
+            return response
+
+    return jsonify(image.to_native())
 
