@@ -9,17 +9,15 @@ import sys
 
 name = 'betty-cropper'
 package = 'betty'
-description = "A flask-powered image server"
+description = "A django-powered image server"
 url = "https://github.com/theonion/betty-cropper"
 author = "Chris Sinchok"
 author_email = 'csinchok@theonion.com'
 license = 'MIT'
 requires = [
-    "Flask==0.10.1",
-    "SQLAlchemy==0.8.3",
+    "Django>=1.4",
     "slimit==0.8.1",
     "wand==0.3.5",
-    "blinker==1.3"
 ]
 
 

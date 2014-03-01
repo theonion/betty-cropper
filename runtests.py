@@ -2,10 +2,12 @@
 import tempfile
 
 import django
-from django.conf import settings, global_settings as default_settings
+from django.conf import settings
 import os.path
 import sys
 import os
+
+from betty.conf import server as betty_server_settings
 
 # from betty.flask.tests import CroppingTestCase, APITestCase
 
@@ -21,32 +23,9 @@ if __name__ == '__main__':
     # unittest.TextTestRunner(verbosity=2).run(flask_suite)
 
     settings.configure(
-        DEBUG=False,  # will be False anyway by DjangoTestRunner.
-        TEMPLATE_DEBUG=False,
-        DATABASES={
-            'default': {
-                'ENGINE': 'django.db.backends.sqlite3',
-                'NAME': ':memory:'
-            }
-        },
+        betty_server_settings,
         MEDIA_ROOT=tempfile.mkdtemp("bettycropper"),
         TEMPLATE_DIRS=(os.path.join(module_root, 'tests', 'templates'), ),
-        TEMPLATE_LOADERS = (
-            'django.template.loaders.filesystem.Loader',
-            'django.template.loaders.app_directories.Loader'
-        ),
-        TEMPLATE_CONTEXT_PROCESSORS = default_settings.TEMPLATE_CONTEXT_PROCESSORS + (
-            'django.core.context_processors.request',
-        ),
-        INSTALLED_APPS = (
-            'django.contrib.auth',
-            'django.contrib.contenttypes',
-
-            'betty',
-        ),
-        SITE_ID = 3,
-
-        ROOT_URLCONF = 'tests.urls',
     )
 
     if django.VERSION[1] < 6:

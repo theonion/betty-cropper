@@ -4,7 +4,7 @@ from django.db import models
 
 from wand.image import Image as WandImage
 
-from .conf import settings
+from .conf.app import settings
 from .fields import JSONField
 
 

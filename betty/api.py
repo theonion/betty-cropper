@@ -13,7 +13,7 @@ from django.http import (
 
 from wand.image import Image as WandImage
 
-from .conf import settings
+from .conf.app import settings
 from .models import Image, source_upload_to
  
 ACC_HEADERS = {

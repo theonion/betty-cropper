@@ -5,7 +5,7 @@ import shutil
 from django.test import TestCase, Client
 from django.core.files import File
 
-from .conf import settings
+from .conf.app import settings
 from .models import Image, Ratio
 
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), '../tests/images')

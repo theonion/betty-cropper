@@ -1,6 +1,6 @@
 import random
 
-from .conf import settings
+from .conf.app import settings
 
 from wand.color import Color
 from wand.drawing import Drawing
