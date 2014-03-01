@@ -42,7 +42,7 @@ if __name__ == '__main__':
             'django.contrib.auth',
             'django.contrib.contenttypes',
 
-            'betty.djbetty',
+            'betty',
         ),
         SITE_ID = 3,
 
@@ -62,7 +62,7 @@ if __name__ == '__main__':
     from django.test.utils import get_runner
     TestRunner = get_runner(settings)  # DjangoTestSuiteRunner
     runner = TestRunner(verbosity=verbosity, interactive=True, failfast=False)
-    failures = runner.run_tests(['betty.djbetty'])
+    failures = runner.run_tests(['betty'])
 
     if failures:
         sys.exit(bool(failures))

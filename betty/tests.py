@@ -8,7 +8,7 @@ from django.core.files import File
 from .conf import settings
 from .models import Image, Ratio
 
-TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), '../../tests/images')
+TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), '../tests/images')
 
 
 class ImageSavingTestCase(TestCase):

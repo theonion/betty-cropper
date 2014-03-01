@@ -84,7 +84,7 @@ def crop(request, id, ratio_slug, width, extension):
             id_string += char
 
         redirect_url = reverse(
-            'betty.djbetty.views.crop',
+            'betty.views.crop',
             args=(id_string, ratio_slug, width, extension)
         )
         return HttpResponseRedirect(redirect_url)

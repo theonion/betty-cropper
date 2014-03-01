@@ -10,6 +10,7 @@ try:
 except ImportError:
     SOUTH = False
 
+
 # This field has been copied wholesale from django-annoying.
 class JSONField(models.TextField):
     """
@@ -54,4 +55,4 @@ class JSONField(models.TextField):
         return json.dumps(value)
 
 if SOUTH:
-    add_introspection_rules([], ["^djbetty.fields.JSONField"])
+    add_introspection_rules([], ["^fields.JSONField"])
