@@ -1,20 +1,27 @@
 import json
-import io
+import os
+import copy
+import shutil
 
 from django.http import (
     HttpResponse,
     HttpResponseNotAllowed,
     HttpResponseForbidden,
-    HttpResponseBadRequest
+    HttpResponseBadRequest,
+    HttpResponseNotFound
 )
 
+from wand.image import Image as WandImage
+
 from .conf import settings
-from .models import Image
+from .models import Image, source_upload_to
  
-ACC_HEADERS = {'Access-Control-Allow-Origin': '*', 
-               'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-               'Access-Control-Max-Age': 1000,
-               'Access-Control-Allow-Headers': '*'}
+ACC_HEADERS = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Max-Age': 1000,
+    'Access-Control-Allow-Headers': '*'
+}
 
 
 def crossdomain(origin="*", methods=[], headers=["X-Betty-Api-Key", "Content-Type"]):
@@ -43,21 +50,103 @@ def crossdomain(origin="*", methods=[], headers=["X-Betty-Api-Key", "Content-Typ
 @crossdomain(methods=['POST', 'OPTIONS'])
 def new(request):
     if request.META.get("HTTP_X_BETTY_API_KEY") != settings.BETTY_CROPPER["API_KEY"]:
-        print("{0} != {1}".format(request.META.get("HTTP_X_BETTY_API_KEY"), settings.BETTY_CROPPER["API_KEY"]))
-        return HttpResponseForbidden(json.dumps({'message': 'Not authorized'}), content_type="application/json")        
+        response_text = json.dumps({'message': 'Not authorized'})
+        return HttpResponseForbidden(response_text, content_type="application/json")
 
     image_file = request.FILES.get("image")
     if image_file is None:
         return HttpResponseBadRequest()
 
-    with io.BytesIO() as f:
-        for chunk in image_file.chunks():
-            f.write(chunk)
-        f.seek(0)
+    image = Image.objects.create(name=image_file.name)
+    os.makedirs(image.path())
+    source_path = source_upload_to(image, image_file.name)
 
-        image = Image.objects.create(name=image_file.name)
-        path = image.set_file(f)
-        image.source.name = path
+    with open(source_path, 'wb+') as f:
+        partial_blob = ""
+        for chunk in image_file.chunks():
+            if partial_blob is not None:
+                partial_blob += chunk
+                with WandImage(blob=partial_blob) as img:
+                    image.width = img.size[0]
+                    image.height = img.size[1]
+                    partial_blob = None
+            f.write(chunk)
+        image.source.name = source_path
         image.save()
 
-    return HttpResponse(json(image.to_native()), content_type="application/json")
+    return HttpResponse(json.dumps(image.to_native()), content_type="application/json")
+
+
+@crossdomain(methods=['POST', 'OPTIONS'])
+def update_selection(request, image_id, ratio_slug):
+    if request.META.get("HTTP_X_BETTY_API_KEY") != settings.BETTY_CROPPER["API_KEY"]:
+        response_text = json.dumps({'message': 'Not authorized'})
+        return HttpResponseForbidden(response_text, content_type="application/json")
+
+    try:
+        image = Image.objects.get(id=image_id)
+    except Image.DoesNotExist:
+        message = json.dumps({"message": "No such image!"})
+        return HttpResponseNotFound(message, content_type="application/json")
+
+    try:
+        request_json = json.loads(request.body)
+    except Exception:
+        message = json.dumps({"message": "Bad selection"})
+        return HttpResponseBadRequest(message, content_type="application/json")
+    try:
+        selection = {
+            "x0": int(request_json["x0"]),
+            "y0": int(request_json["y0"]),
+            "x1": int(request_json["x1"]),
+            "y1": int(request_json["y1"]),
+        }
+    except (KeyError, ValueError):
+        message = json.dumps({"message": "Bad selection"})
+        return HttpResponseBadRequest(message, content_type="application/json")
+
+    selections = copy.copy(image.selections)
+    if selections is None:
+        selections = {}
+
+    if ratio_slug not in settings.BETTY_CROPPER['RATIOS']:
+        message = json.dumps({"message": "No such ratio"})
+        return HttpResponseBadRequest(message, content_type="application/json")
+
+    selections[ratio_slug] = selection
+    image.selections = selections
+    image.save()
+
+    # TODO: Use a celery task for this?
+    ratio_path = os.path.join(image.path(), ratio_slug)
+    if os.path.exists(ratio_path):
+        # crops = os.listdir(ratio_path)
+        # TODO: flush cache on crops
+        shutil.rmtree(ratio_path)
+    
+    message = json.dumps({"message": "Update sucessfull"})
+    return HttpResponse(message, content_type="application/json")
+
+
+@crossdomain(methods=['GET', 'OPTIONS'])
+def search(request):
+    if request.META.get("HTTP_X_BETTY_API_KEY") != settings.BETTY_CROPPER["API_KEY"]:
+        response_text = json.dumps({'message': 'Not authorized'})
+        return HttpResponseForbidden(response_text, content_type="application/json")
+
+    results = []
+    query = request.GET.get("q")
+    if query:
+        for image in Image.objects.filter(name__icontains=query)[:20]:
+            results.append(image.to_native())
+    return HttpResponse(json.dumps(results), content_type="application/json")
+
+
+@crossdomain(methods=["GET", "POST", "OPTIONS"])
+def detail(request):
+    if request.META.get("HTTP_X_BETTY_API_KEY") != settings.BETTY_CROPPER["API_KEY"]:
+        response_text = json.dumps({'message': 'Not authorized'})
+        return HttpResponseForbidden(response_text, content_type="application/json")
+
+    
+

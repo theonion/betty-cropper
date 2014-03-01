@@ -5,12 +5,11 @@ import shutil
 from django.test import TestCase, Client
 from django.core.files import File
 
-from betty.core import Ratio
-
 from .conf import settings
-from .models import Image
+from .models import Image, Ratio
 
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), '../../tests/images')
+
 
 class ImageSavingTestCase(TestCase):
 
@@ -119,7 +118,7 @@ class ImageSavingTestCase(TestCase):
     def test_missing_file(self):
         image = Image.objects.create(name="Lenna.gif", width=512, height=512)
 
-        res = self.client.get('/images/%s/1x1/256.jpg' % image.id )
+        res = self.client.get('/images/{}/1x1/256.jpg'.format(image.id))
         self.assertEqual(res.status_code, 500)
 
     def test_image_save(self):
@@ -160,39 +159,112 @@ class APITestCase(TestCase):
         self.client = Client()
         settings.BETTY_CROPPER["API_KEY"] = "noop"
 
+    def test_no_api_key(self):
+        res = self.client.post('/images/api/new')
+        self.assertEqual(res.status_code, 403)
+
+        res = self.client.get('/images/api/1')
+        self.assertEqual(res.status_code, 403)
+
+        res = self.client.post('/images/api/1/1x1')
+        self.assertEqual(res.status_code, 403)
+
+        res = self.client.patch('/images/api/1')
+        self.assertEqual(res.status_code, 403)
+
+        res = self.client.get('/images/api/search')
+        self.assertEqual(res.status_code, 403)
+
     def test_image_upload(self):
         lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
         with open(lenna_path, 'r') as lenna:
             res = self.client.post('/images/api/new', {"image": lenna}, HTTP_X_BETTY_API_KEY="noop")
 
-        print(res.content)
         self.assertEqual(res.status_code, 200)
         response_json = json.loads(res.content)
         self.assertEqual(response_json.get('name'), 'Lenna.png')
         self.assertEqual(response_json.get('width'), 512)
         self.assertEqual(response_json.get('height'), 512)
 
-        image = Image.query.get(response_json['id'])
+        image = Image.objects.get(id=response_json['id'])
         self.assertTrue(os.path.exists(image.path()))
         self.assertTrue(os.path.exists(image.src_path()))
 
         # Now let's test that a JPEG crop will return properly.
-        res = self.client.get('/%s/1x1/256.jpg' % image.id)
-        self.assertEqual(res.headers['Content-Type'], 'image/jpeg')
+        res = self.client.get('/images/%s/1x1/256.jpg' % image.id)
         self.assertEqual(res.status_code, 200)
+        self.assertEqual(res['Content-Type'], 'image/jpeg')
         self.assertTrue(os.path.exists(os.path.join(image.path(), '1x1', '256.jpg')))
 
         # Now let's test that a PNG crop will return properly.
-        res = self.client.get('/%s/1x1/256.png' % image.id)
-        self.assertEqual(res.headers['Content-Type'], 'image/png')
+        res = self.client.get('/images/%s/1x1/256.png' % image.id)
+        self.assertEqual(res['Content-Type'], 'image/png')
         self.assertEqual(res.status_code, 200)
         self.assertTrue(os.path.exists(os.path.join(image.path(), '1x1', '256.png')))
 
         # Finally, let's test an "original" crop
-        res = self.client.get('/%s/original/256.jpg' % image.id)
-        self.assertEqual(res.headers['Content-Type'], 'image/jpeg')
+        res = self.client.get('/images/%s/original/256.jpg' % image.id)
+        self.assertEqual(res['Content-Type'], 'image/jpeg')
         self.assertEqual(res.status_code, 200)
         self.assertTrue(os.path.exists(os.path.join(image.path(), 'original', '256.jpg')))
+
+    def test_update_selection(self):
+        image = Image.objects.create(name="Testing", width=512, height=512)
+
+        new_selection = {
+            "x0": 1,
+            "y0": 1,
+            "x1": 510,
+            "y1": 510
+        }
+
+        res = self.client.post(
+            "/images/api/{}/1x1".format(image.id),
+            data=json.dumps(new_selection),
+            content_type="application/json",
+            HTTP_X_BETTY_API_KEY="noop"
+        )
+        self.assertEqual(res.status_code, 200)
+
+        image = Image.objects.get(id=image.id)
+        self.assertEqual(new_selection, image.selections['1x1'])
+
+        res = self.client.post(
+            "/images/api/{}/original".format(image.id),
+            data=json.dumps(new_selection),
+            content_type="application/json",
+            HTTP_X_BETTY_API_KEY="noop"
+        )
+        self.assertEqual(res.status_code, 400)
+
+        bad_selection = {
+            'x0': 1,
+            'x1': 510
+        }
+        res = self.client.post(
+            "/images/api/{}/1x1".format(image.id),
+            data=json.dumps(bad_selection),
+            content_type="application/json",
+            HTTP_X_BETTY_API_KEY="noop"
+        )
+        self.assertEqual(res.status_code, 400)
+
+        res = self.client.post(
+            "/images/api/1000001/1x1",
+            data=json.dumps(bad_selection),
+            content_type="application/json",
+            HTTP_X_BETTY_API_KEY="noop"
+        )
+        self.assertEqual(res.status_code, 404)
+
+    def test_image_search(self):
+        image = Image.objects.create(name="BLERGH", width=512, height=512)
+
+        res = self.client.get('/images/api/search?q=blergh', HTTP_X_BETTY_API_KEY="noop")
+        self.assertEqual(res.status_code, 200)
+        results = json.loads(res.content)
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["id"], image.id)
 
     def tearDown(self):
         shutil.rmtree(settings.BETTY_CROPPER["IMAGE_ROOT"], ignore_errors=True)

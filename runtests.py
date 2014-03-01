@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import unittest
 import tempfile
 
 import django
@@ -8,7 +7,7 @@ import os.path
 import sys
 import os
 
-from betty.flask.tests import CroppingTestCase, APITestCase
+# from betty.flask.tests import CroppingTestCase, APITestCase
 
 # Detect location and available modules
 module_root = os.path.dirname(os.path.realpath(__file__))
@@ -16,22 +15,22 @@ module_root = os.path.dirname(os.path.realpath(__file__))
 if __name__ == '__main__':
 
     # Run the Flask suite
-    cropping_suite = unittest.TestLoader().loadTestsFromTestCase(CroppingTestCase)
-    api_suite = unittest.TestLoader().loadTestsFromTestCase(APITestCase)
-    flask_suite = unittest.TestSuite([cropping_suite, api_suite])
-    unittest.TextTestRunner(verbosity=2).run(flask_suite)
+    # cropping_suite = unittest.TestLoader().loadTestsFromTestCase(CroppingTestCase)
+    # api_suite = unittest.TestLoader().loadTestsFromTestCase(APITestCase)
+    # flask_suite = unittest.TestSuite([cropping_suite, api_suite])
+    # unittest.TextTestRunner(verbosity=2).run(flask_suite)
 
     settings.configure(
-        DEBUG = False,  # will be False anyway by DjangoTestRunner.
-        TEMPLATE_DEBUG = False,
-        DATABASES = {
+        DEBUG=False,  # will be False anyway by DjangoTestRunner.
+        TEMPLATE_DEBUG=False,
+        DATABASES={
             'default': {
                 'ENGINE': 'django.db.backends.sqlite3',
                 'NAME': ':memory:'
             }
         },
-        MEDIA_ROOT = tempfile.mkdtemp("bettycropper"),
-        TEMPLATE_DIRS = (os.path.join(module_root, 'tests', 'templates'), ),
+        MEDIA_ROOT=tempfile.mkdtemp("bettycropper"),
+        TEMPLATE_DIRS=(os.path.join(module_root, 'tests', 'templates'), ),
         TEMPLATE_LOADERS = (
             'django.template.loaders.filesystem.Loader',
             'django.template.loaders.app_directories.Loader'
@@ -63,7 +62,7 @@ if __name__ == '__main__':
     from django.test.utils import get_runner
     TestRunner = get_runner(settings)  # DjangoTestSuiteRunner
     runner = TestRunner(verbosity=verbosity, interactive=True, failfast=False)
-    failures = runner.run_tests(['betty.djbetty',])
+    failures = runner.run_tests(['betty.djbetty'])
 
     if failures:
         sys.exit(bool(failures))
