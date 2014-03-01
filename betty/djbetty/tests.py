@@ -257,6 +257,23 @@ class APITestCase(TestCase):
         )
         self.assertEqual(res.status_code, 404)
 
+    def test_image_detail(self):
+        image = Image.objects.create(name="Testing", width=512, height=512)
+
+        res = self.client.get("/images/api/{}".format(image.id), HTTP_X_BETTY_API_KEY="noop")
+        self.assertEqual(res.status_code, 200)
+
+        res = self.client.patch(
+            "/images/api/{}".format(image.id),
+            data=json.dumps({"name": "Updated"}),
+            content_type="application/json",
+            HTTP_X_BETTY_API_KEY="noop"
+        )
+        self.assertEqual(res.status_code, 200)
+
+        image = Image.objects.get(id=image.id)
+        self.assertEqual(image.name, "Updated")
+
     def test_image_search(self):
         image = Image.objects.create(name="BLERGH", width=512, height=512)
 
@@ -265,6 +282,31 @@ class APITestCase(TestCase):
         results = json.loads(res.content)
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]["id"], image.id)
+
+    def test_bad_image_data(self):
+        lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
+        with open(lenna_path, 'r') as lenna:
+            res = self.client.post('/images/api/new', {"image": lenna}, HTTP_X_BETTY_API_KEY="noop")
+
+        self.assertEqual(res.status_code, 200)
+        response_json = json.loads(res.content)
+        self.assertEqual(response_json.get("name"), "Lenna.png")
+        self.assertEqual(response_json.get("width"), 512)
+        self.assertEqual(response_json.get("height"), 512)
+
+        # Now that the image is uploaded, let's fuck up the data.
+        image = Image.objects.get(id=response_json['id'])
+        image.width = 1024
+        image.height = 1024
+        image.save()
+
+        id_string = ""
+        for index, char in enumerate(str(image.id)):
+            if index % 4 == 0:
+                id_string += "/"
+            id_string += char
+        res = self.client.get('/images/{}/1x1/400.jpg'.format(id_string))
+        assert res.status_code == 200
 
     def tearDown(self):
         shutil.rmtree(settings.BETTY_CROPPER["IMAGE_ROOT"], ignore_errors=True)

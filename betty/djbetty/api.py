@@ -142,7 +142,7 @@ def search(request):
     return HttpResponse(json.dumps(results), content_type="application/json")
 
 
-@crossdomain(methods=["GET", "POST", "OPTIONS"])
+@crossdomain(methods=["GET", "PATCH", "OPTIONS"])
 def detail(request, image_id):
     if request.META.get("HTTP_X_BETTY_API_KEY") != settings.BETTY_CROPPER["API_KEY"]:
         response_text = json.dumps({'message': 'Not authorized'})
@@ -154,18 +154,19 @@ def detail(request, image_id):
         message = json.dumps({"message": "No such image!"})
         return HttpResponseNotFound(message, content_type="application/json")
 
-    if request.method == 'PATCH':
-        if request.json:
-            if 'name' in request.json:
-                image.name = request.json['name']
-            if 'credit' in request.json:
-                image.credit = request.json['credit']
-            db_session.add(image)
-            db_session.commit()
-        else:
-            response = jsonify({'message': 'No data', 'error': True})
-            response.status_code = 400
-            return response
+    if request.method == "PATCH":
+        try:
+            request_json = json.loads(request.body)
+        except Exception:
+            message = json.dumps({"message": "Bad Request"})
+            return HttpResponseBadRequest(message, content_type="application/json")
 
-    return jsonify(image.to_native())
+        update_fields = []
+        for field in ("name", "credit", "selections"):
+            if field in request_json:
+                setattr(image, field, request_json[field])
+                update_fields.append(field)
+        image.save(update_fields=update_fields)
+
+    return HttpResponse(json.dumps(image.to_native()), content_type="application/json")
 
