@@ -9,7 +9,7 @@ env: SETTINGS_MODULE=testsettings
 install:
   - pip install -r requirements-dev.txt --download-cache $HOME/.pip-cache
 script:
-  - py.test betty/ --cov betty --cov-report term-missing
+  - py.test tests/ --cov betty --cov-report term-missing
 after_success:
   - coveralls
 notifications:

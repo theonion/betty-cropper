@@ -67,7 +67,7 @@ def get_package_data(package):
 class PyTest(TestCommand):
     def finalize_options(self):
         TestCommand.finalize_options(self)
-        self.test_args = ['betty']
+        self.test_args = ['tests']
         self.test_suite = True
 
     def run_tests(self):
