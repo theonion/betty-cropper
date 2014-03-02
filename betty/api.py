@@ -62,15 +62,13 @@ def new(request):
     source_path = source_upload_to(image, image_file.name)
 
     with open(source_path, 'wb+') as f:
-        partial_blob = ""
         for chunk in image_file.chunks():
-            if partial_blob is not None:
-                partial_blob += chunk
-                with WandImage(blob=partial_blob) as img:
-                    image.width = img.size[0]
-                    image.height = img.size[1]
-                    partial_blob = None
             f.write(chunk)
+        f.seek(0)
+        with WandImage(file=f) as img:
+            image.width = img.size[0]
+            image.height = img.size[1]
+
         image.source.name = source_path
         image.save()
 
