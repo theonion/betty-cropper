@@ -1,14 +1,6 @@
-"""
-sentry.conf.urls
-~~~~~~~~~~~~~~~~
+import urlparse
 
-These are additional urls used by the Sentry-provided web server
-
-:copyright: (c) 2012 by the Sentry Team, see AUTHORS for more details.
-:license: BSD, see LICENSE for more details.
-"""
-
-import os
+from .app import settings
 
 try:
     from django.conf.urls import include, patterns, url
@@ -40,6 +32,11 @@ except ImportError:
 #     t = loader.get_template('sentry/500.html')
 #     return HttpResponseServerError(t.render(Context(context)))
 
+image_path = urlparse.urlparse(settings.BETTY_IMAGE_URL).path
+if image_path.startswith("/"):
+    image_path = image_path[1:]
+
+
 urlpatterns = patterns('',
-    url(r'^images/', include("betty.urls")),  # noqa
+    url(r'^{0}'.format(image_path), include("betty.urls")),  # noqa
 )

@@ -9,7 +9,7 @@ def generate_settings():
     """
     return """
 BETTY_IMAGE_ROOT = "images"
-BETTY_IMAGE_URL = "/images/"
+BETTY_IMAGE_URL = "/"
 BETTY_RATIOS = ("1x1", "2x1", "3x1", "3x4", "4x3", "16x9")
 BETTY_WIDTHS = (80, 150, 240, 300, 320, 400, 480, 620, 640, 820, 960, 1200, 1600)
 BETTY_PLACEHOLDER = True
@@ -19,9 +19,9 @@ BETTY_PLACEHOLDER = True
 def main():
     run_app(
         project='betty',
-        default_config_path='.betty/betty.conf.py',
+        default_config_path='betty.conf.py',
         default_settings='betty.conf.server',
-        settings_initializer='betty.utils.runner.generate_settings',
+        settings_initializer=generate_settings,
         settings_envvar='BETTY_CONF',
     )
 
