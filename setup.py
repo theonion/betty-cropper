@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup
+from setuptools.command.test import test as TestCommand
 import re
 import os
 import sys
@@ -14,19 +15,27 @@ url = "https://github.com/theonion/betty-cropper"
 author = "Chris Sinchok"
 author_email = 'csinchok@theonion.com'
 license = 'MIT'
-requires = [
+
+setup_requires = []
+
+if 'test' in sys.argv:
+    setup_requires.append('pytest')
+
+
+tests_require = [
+    "flake8>=2.0,<2.1",
+    "pytest",
+    "pytest-django",
+    "pytest-cov>=1.4",
+    "python-coveralls"
+]
+
+
+install_requires = [
     "Django>=1.4",
     "slimit==0.8.1",
     "wand==0.3.5",
 ]
-
-
-def get_version(package):
-    """
-    Return package version as listed in `__version__` in `init.py`.
-    """
-    init_py = open(os.path.join(package, '__init__.py')).read()
-    return re.search("^__version__ = ['\"]([^'\"]+)['\"]", init_py, re.MULTILINE).group(1)
 
 
 def get_packages(package):
@@ -54,18 +63,22 @@ def get_package_data(package):
     return {package: filepaths}
 
 
-if sys.argv[-1] == 'publish':
-    os.system("python setup.py sdist upload")
-    args = {'version': get_version(package)}
-    print "You probably want to also tag the version now:"
-    print "  git tag -a %(version)s -m 'version %(version)s'" % args
-    print "  git push --tags"
-    sys.exit()
+class PyTest(TestCommand):
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = ['betty']
+        self.test_suite = True
+
+    def run_tests(self):
+        #import here, cause outside the eggs aren't loaded
+        import pytest
+        errno = pytest.main(self.test_args)
+        sys.exit(errno)
 
 
 setup(
     name=name,
-    version=get_version(package),
+    version="0.1",
     url=url,
     license=license,
     description=description,
@@ -75,5 +88,10 @@ setup(
     package_data={
         "betty/templates": ["betty/templates/image.js.j2"]
     },
-    install_requires=requires
+    install_requires=install_requires,
+    tests_require=tests_require,
+    extras_require={
+        'tests': tests_require,
+    },
+    cmdclass={'test': PyTest}
 )

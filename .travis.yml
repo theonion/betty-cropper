@@ -8,9 +8,8 @@ cache:
 env: SETTINGS_MODULE=testsettings
 install:
   - pip install -r requirements-dev.txt --download-cache $HOME/.pip-cache
-  - pip install coveralls
 script:
-  - SETTINGS_MODULE=testsettings coverage run --source=betty --omit=tests runtests.py
+  - py.test betty/ --cov betty --cov-report term-missing
 after_success:
   - coveralls
 notifications:

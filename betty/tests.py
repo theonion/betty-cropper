@@ -2,6 +2,9 @@ import os
 import json
 import shutil
 
+import pytest
+pytestmark = pytest.mark.django_db
+
 from django.test import TestCase, Client
 from django.core.files import File
 
