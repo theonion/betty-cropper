@@ -35,7 +35,7 @@ install_requires = [
     "slimit==0.8.1",
     "wand==0.3.5",
     "South==0.8.4",
-    "logan>=0.5.8.2,<0.6.0"
+    "logan==0.5.9.1"
 ]
 
 
