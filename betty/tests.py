@@ -2,11 +2,10 @@ import os
 import json
 import shutil
 
-import pytest
-pytestmark = pytest.mark.django_db
-
 from django.test import TestCase, Client
 from django.core.files import File
+from django.contrib.auth import get_user_model, authenticate
+User = get_user_model()
 
 from .conf.app import settings
 from .models import Image, Ratio
@@ -159,8 +158,10 @@ class ImageSavingTestCase(TestCase):
 class APITestCase(TestCase):
 
     def setUp(self):
+        self.password = User.objects.make_random_password()
+        user = User.objects.create_superuser(username="admin", email="tech@theonion.com", password=self.password)
+        user.save()
         self.client = Client()
-        settings.BETTY_API_KEY = "noop"
 
     def test_no_api_key(self):
         res = self.client.post('/images/api/new')
@@ -179,6 +180,8 @@ class APITestCase(TestCase):
         self.assertEqual(res.status_code, 403)
 
     def test_image_upload(self):
+        assert self.client.login(username="admin", password=self.password)
+
         lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
         with open(lenna_path, 'r') as lenna:
             res = self.client.post('/images/api/new', {"image": lenna}, HTTP_X_BETTY_API_KEY="noop")
@@ -212,6 +215,8 @@ class APITestCase(TestCase):
         self.assertTrue(os.path.exists(os.path.join(image.path(), 'original', '256.jpg')))
 
     def test_update_selection(self):
+        assert self.client.login(username="admin", password=self.password)
+
         image = Image.objects.create(name="Testing", width=512, height=512)
 
         new_selection = {
@@ -261,6 +266,7 @@ class APITestCase(TestCase):
         self.assertEqual(res.status_code, 404)
 
     def test_image_detail(self):
+        assert self.client.login(username="admin", password=self.password)
         image = Image.objects.create(name="Testing", width=512, height=512)
 
         res = self.client.get("/images/api/{0}".format(image.id), HTTP_X_BETTY_API_KEY="noop")
@@ -278,6 +284,7 @@ class APITestCase(TestCase):
         self.assertEqual(image.name, "Updated")
 
     def test_image_search(self):
+        assert self.client.login(username="admin", password=self.password)
         image = Image.objects.create(name="BLERGH", width=512, height=512)
 
         res = self.client.get('/images/api/search?q=blergh', HTTP_X_BETTY_API_KEY="noop")
@@ -287,6 +294,7 @@ class APITestCase(TestCase):
         self.assertEqual(results[0]["id"], image.id)
 
     def test_bad_image_data(self):
+        assert self.client.login(username="admin", password=self.password)
         lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
         with open(lenna_path, 'r') as lenna:
             res = self.client.post('/images/api/new', {"image": lenna}, HTTP_X_BETTY_API_KEY="noop")

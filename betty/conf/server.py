@@ -5,7 +5,6 @@ import os
 import os.path
 import socket
 import sys
-import urlparse
 
 socket.setdefaulttimeout(5)
 
@@ -40,26 +39,6 @@ DATABASES = {
         'PORT': '',
     }
 }
-
-if 'DATABASE_URL' in os.environ:
-    url = urlparse.urlparse(os.environ['DATABASE_URL'])
-
-    # Ensure default database exists.
-    DATABASES['default'] = DATABASES.get('default', {})
-
-    # Update with environment configuration.
-    DATABASES['default'].update({
-        'NAME': url.path[1:],
-        'USER': url.username,
-        'PASSWORD': url.password,
-        'HOST': url.hostname,
-        'PORT': url.port,
-    })
-    if url.scheme == 'postgres':
-        DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql_psycopg2'
-
-    if url.scheme == 'mysql':
-        DATABASES['default']['ENGINE'] = 'django.db.backends.mysql'
 
 EMAIL_SUBJECT_PREFIX = '[Betty Cropper] '
 
@@ -106,13 +85,12 @@ TEMPLATE_DIRS = (
     os.path.join(PROJECT_ROOT, 'templates'),
 )
 
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.core.context_processors.request',
-)
-
 INSTALLED_APPS = (
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'django.contrib.messages',
+    'django.contrib.sessions',
     'django.contrib.staticfiles',
 
     'betty',
@@ -120,7 +98,7 @@ INSTALLED_APPS = (
 )
 
 STATIC_ROOT = os.path.realpath(os.path.join(PROJECT_ROOT, 'static'))
-STATIC_URL = '/_static/'
+STATIC_URL = '/static/'
 
 STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.FileSystemFinder",

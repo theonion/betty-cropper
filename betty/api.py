@@ -49,7 +49,7 @@ def crossdomain(origin="*", methods=[], headers=["X-Betty-Api-Key", "Content-Typ
 
 @crossdomain(methods=['POST', 'OPTIONS'])
 def new(request):
-    if request.META.get("HTTP_X_BETTY_API_KEY") != settings.BETTY_API_KEY:
+    if not (request.user.is_superuser or request.user.has_perm("betty.add_image")):
         response_text = json.dumps({'message': 'Not authorized'})
         return HttpResponseForbidden(response_text, content_type="application/json")
 
@@ -77,7 +77,7 @@ def new(request):
 
 @crossdomain(methods=['POST', 'OPTIONS'])
 def update_selection(request, image_id, ratio_slug):
-    if request.META.get("HTTP_X_BETTY_API_KEY") != settings.BETTY_API_KEY:
+    if not (request.user.is_superuser or request.user.has_perm("betty.change_image")):
         response_text = json.dumps({'message': 'Not authorized'})
         return HttpResponseForbidden(response_text, content_type="application/json")
 
@@ -128,7 +128,7 @@ def update_selection(request, image_id, ratio_slug):
 
 @crossdomain(methods=['GET', 'OPTIONS'])
 def search(request):
-    if request.META.get("HTTP_X_BETTY_API_KEY") != settings.BETTY_API_KEY:
+    if not request.user.is_staff:
         response_text = json.dumps({'message': 'Not authorized'})
         return HttpResponseForbidden(response_text, content_type="application/json")
 
@@ -142,7 +142,7 @@ def search(request):
 
 @crossdomain(methods=["GET", "PATCH", "OPTIONS"])
 def detail(request, image_id):
-    if request.META.get("HTTP_X_BETTY_API_KEY") != settings.BETTY_API_KEY:
+    if not (request.user.is_superuser or request.user.has_perm("betty.change_image")):
         response_text = json.dumps({'message': 'Not authorized'})
         return HttpResponseForbidden(response_text, content_type="application/json")
 
@@ -167,4 +167,3 @@ def detail(request, image_id):
         image.save(update_fields=update_fields)
 
     return HttpResponse(json.dumps(image.to_native()), content_type="application/json")
-
