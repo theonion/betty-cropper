@@ -1,5 +1,4 @@
 -r requirements.txt
-django
 django-discover-runner
 flake8>=2.0,<2.1
 pytest
