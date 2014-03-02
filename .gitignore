@@ -1,7 +1,7 @@
 *.py[co]
+*.egg-info
 lib
 bin
 include
 .Python
-settings.py
 .DS_Store
