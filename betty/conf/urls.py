@@ -15,30 +15,30 @@ try:
 except ImportError:
     # django < 1.5 compat
     from django.conf.urls.defaults import include, patterns, url  # noqa
-from django.contrib import admin
-from django.views.defaults import page_not_found
+# from django.contrib import admin
+# from django.views.defaults import page_not_found
 
-admin.autodiscover()
-admin_media_dir = os.path.join(os.path.dirname(admin.__file__), 'media')
-
-
-handler404 = lambda x: page_not_found(x, template_name='sentry/404.html')
+# admin.autodiscover()
+# admin_media_dir = os.path.join(os.path.dirname(admin.__file__), 'media')
 
 
-def handler500(request):
-    """
-    500 error handler.
+# handler404 = lambda x: page_not_found(x, template_name='sentry/404.html')
 
-    Templates: `500.html`
-    Context: None
-    """
-    from django.template import Context, loader
-    from django.http import HttpResponseServerError
 
-    context = {'request': request}
+# def handler500(request):
+#     """
+#     500 error handler.
 
-    t = loader.get_template('sentry/500.html')
-    return HttpResponseServerError(t.render(Context(context)))
+#     Templates: `500.html`
+#     Context: None
+#     """
+#     from django.template import Context, loader
+#     from django.http import HttpResponseServerError
+
+#     context = {'request': request}
+
+#     t = loader.get_template('sentry/500.html')
+#     return HttpResponseServerError(t.render(Context(context)))
 
 urlpatterns = patterns('',
     url(r'^images/', include("betty.urls")),  # noqa

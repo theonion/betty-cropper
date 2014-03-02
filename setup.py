@@ -34,7 +34,8 @@ install_requires = [
     "Django>=1.4",
     "slimit==0.8.1",
     "wand==0.3.5",
-    "South==0.8.4"
+    "South==0.8.4",
+    "logan>=0.5.8.2,<0.6.0"
 ]
 
 
@@ -92,6 +93,11 @@ setup(
     tests_require=tests_require,
     extras_require={
         'tests': tests_require,
+    },
+    entry_points={
+        "console_scripts": [
+            "betty-cropper = betty.utils.runner:main",
+        ],
     },
     cmdclass={'test': PyTest}
 )

@@ -1,11 +1,18 @@
 import os
 
 from django.db import models
+from django.core.files.storage import FileSystemStorage
 
 from wand.image import Image as WandImage
 
 from .conf.app import settings
 from .fields import JSONField
+
+
+betty_storage = FileSystemStorage(
+    location=settings.BETTY_IMAGE_ROOT,
+    base_url=settings.BETTY_IMAGE_URL
+)
 
 
 def source_upload_to(instance, filename):
@@ -27,7 +34,7 @@ class Ratio(object):
 
 class Image(models.Model):
 
-    source = models.FileField(upload_to=source_upload_to)
+    source = models.FileField(upload_to=source_upload_to, storage=betty_storage)
     name = models.CharField(max_length=255)
     height = models.IntegerField(null=True, blank=True)
     width = models.IntegerField(null=True, blank=True)
@@ -122,7 +129,7 @@ class Image(models.Model):
             if index % 4 == 0:
                 id_string += "/"
             id_string += char
-        return os.path.join(settings.BETTY_CROPPER['IMAGE_ROOT'], id_string[1:])
+        return os.path.join(settings.BETTY_IMAGE_ROOT, id_string[1:])
 
     def crop(self, ratio, width, extension):
         source_file = open(self.src_path(), 'r')
@@ -175,7 +182,7 @@ class Image(models.Model):
             'credit': self.credit,
             'selections': {}
         }
-        for ratio in settings.BETTY_CROPPER['RATIOS']:
+        for ratio in settings.BETTY_RATIOS:
             data['selections'][ratio] = self.get_selection(Ratio(ratio))
         return data
 

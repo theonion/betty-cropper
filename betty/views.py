@@ -60,7 +60,7 @@ def placeholder(ratio, width, extension):
 
 
 def crop(request, id, ratio_slug, width, extension):
-    if ratio_slug != "original" and ratio_slug not in settings.BETTY_CROPPER["RATIOS"]:
+    if ratio_slug != "original" and ratio_slug not in settings.BETTY_RATIOS:
         raise Http404
 
     try:
@@ -97,7 +97,7 @@ def crop(request, id, ratio_slug, width, extension):
     try:
         image = Image.objects.get(id=image_id)
     except Image.DoesNotExist:
-        if settings.BETTY_CROPPER["PLACEHOLDER"]:
+        if settings.BETTY_PLACEHOLDER:
             img_blob = placeholder(ratio, width, extension)
             resp = HttpResponse(img_blob)
             resp["Cache-Control"] = "no-cache, no-store, must-revalidate"

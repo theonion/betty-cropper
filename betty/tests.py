@@ -100,7 +100,7 @@ class ImageSavingTestCase(TestCase):
         self.assertRedirects(res, "/images/6666/6/1x1/100.jpg", target_status_code=404)
 
     def test_placeholder(self):
-        settings.BETTY_CROPPER['PLACEHOLDER'] = True
+        settings.BETTY_PLACEHOLDER = True
 
         res = self.client.get('/images/666/original/256.jpg')
         assert res['Content-Type'] == 'image/jpeg'
@@ -114,7 +114,7 @@ class ImageSavingTestCase(TestCase):
         assert res['Content-Type'] == 'image/png'
         assert res.status_code == 200
 
-        settings.BETTY_CROPPER["PLACEHOLDER"] = False
+        settings.BETTY_PLACEHOLDER = False
         res = self.client.get('/images/666/1x1/256.jpg')
         assert res.status_code == 404
 
@@ -153,14 +153,14 @@ class ImageSavingTestCase(TestCase):
         assert os.path.exists(os.path.join(image.path(), 'original', '256.jpg'))
 
     def tearDown(self):
-        shutil.rmtree(settings.BETTY_CROPPER["IMAGE_ROOT"], ignore_errors=True)
+        shutil.rmtree(settings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
 
 class APITestCase(TestCase):
 
     def setUp(self):
         self.client = Client()
-        settings.BETTY_CROPPER["API_KEY"] = "noop"
+        settings.BETTY_API_KEY = "noop"
 
     def test_no_api_key(self):
         res = self.client.post('/images/api/new')
@@ -312,4 +312,4 @@ class APITestCase(TestCase):
         assert res.status_code == 200
 
     def tearDown(self):
-        shutil.rmtree(settings.BETTY_CROPPER["IMAGE_ROOT"], ignore_errors=True)
+        shutil.rmtree(settings.BETTY_IMAGE_ROOT, ignore_errors=True)

@@ -7,9 +7,6 @@ import socket
 import sys
 import urlparse
 
-from datetime import timedelta
-
-
 socket.setdefaulttimeout(5)
 
 DEBUG = False

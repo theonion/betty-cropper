@@ -49,7 +49,7 @@ def crossdomain(origin="*", methods=[], headers=["X-Betty-Api-Key", "Content-Typ
 
 @crossdomain(methods=['POST', 'OPTIONS'])
 def new(request):
-    if request.META.get("HTTP_X_BETTY_API_KEY") != settings.BETTY_CROPPER["API_KEY"]:
+    if request.META.get("HTTP_X_BETTY_API_KEY") != settings.BETTY_API_KEY:
         response_text = json.dumps({'message': 'Not authorized'})
         return HttpResponseForbidden(response_text, content_type="application/json")
 
@@ -79,7 +79,7 @@ def new(request):
 
 @crossdomain(methods=['POST', 'OPTIONS'])
 def update_selection(request, image_id, ratio_slug):
-    if request.META.get("HTTP_X_BETTY_API_KEY") != settings.BETTY_CROPPER["API_KEY"]:
+    if request.META.get("HTTP_X_BETTY_API_KEY") != settings.BETTY_API_KEY:
         response_text = json.dumps({'message': 'Not authorized'})
         return HttpResponseForbidden(response_text, content_type="application/json")
 
@@ -109,7 +109,7 @@ def update_selection(request, image_id, ratio_slug):
     if selections is None:
         selections = {}
 
-    if ratio_slug not in settings.BETTY_CROPPER['RATIOS']:
+    if ratio_slug not in settings.BETTY_RATIOS:
         message = json.dumps({"message": "No such ratio"})
         return HttpResponseBadRequest(message, content_type="application/json")
 
@@ -130,7 +130,7 @@ def update_selection(request, image_id, ratio_slug):
 
 @crossdomain(methods=['GET', 'OPTIONS'])
 def search(request):
-    if request.META.get("HTTP_X_BETTY_API_KEY") != settings.BETTY_CROPPER["API_KEY"]:
+    if request.META.get("HTTP_X_BETTY_API_KEY") != settings.BETTY_API_KEY:
         response_text = json.dumps({'message': 'Not authorized'})
         return HttpResponseForbidden(response_text, content_type="application/json")
 
@@ -144,7 +144,7 @@ def search(request):
 
 @crossdomain(methods=["GET", "PATCH", "OPTIONS"])
 def detail(request, image_id):
-    if request.META.get("HTTP_X_BETTY_API_KEY") != settings.BETTY_CROPPER["API_KEY"]:
+    if request.META.get("HTTP_X_BETTY_API_KEY") != settings.BETTY_API_KEY:
         response_text = json.dumps({'message': 'Not authorized'})
         return HttpResponseForbidden(response_text, content_type="application/json")
 
