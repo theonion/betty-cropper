@@ -29,7 +29,7 @@ def crossdomain(origin="*", methods=[], headers=["X-Betty-Api-Key", "Content-Typ
     def _method_wrapper(func):
 
         def _crossdomain_wrapper(request, *args, **kwargs):
-            if request.method != "OPTIONS": 
+            if request.method != "OPTIONS":
                 response = func(request, *args, **kwargs)
             else:
                 response = HttpResponse()

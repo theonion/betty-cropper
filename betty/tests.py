@@ -121,7 +121,7 @@ class ImageSavingTestCase(TestCase):
     def test_missing_file(self):
         image = Image.objects.create(name="Lenna.gif", width=512, height=512)
 
-        res = self.client.get('/images/{}/1x1/256.jpg'.format(image.id))
+        res = self.client.get('/images/{0}/1x1/256.jpg'.format(image.id))
         self.assertEqual(res.status_code, 500)
 
     def test_image_save(self):
@@ -222,7 +222,7 @@ class APITestCase(TestCase):
         }
 
         res = self.client.post(
-            "/images/api/{}/1x1".format(image.id),
+            "/images/api/{0}/1x1".format(image.id),
             data=json.dumps(new_selection),
             content_type="application/json",
             HTTP_X_BETTY_API_KEY="noop"
@@ -233,7 +233,7 @@ class APITestCase(TestCase):
         self.assertEqual(new_selection, image.selections['1x1'])
 
         res = self.client.post(
-            "/images/api/{}/original".format(image.id),
+            "/images/api/{0}/original".format(image.id),
             data=json.dumps(new_selection),
             content_type="application/json",
             HTTP_X_BETTY_API_KEY="noop"
@@ -245,7 +245,7 @@ class APITestCase(TestCase):
             'x1': 510
         }
         res = self.client.post(
-            "/images/api/{}/1x1".format(image.id),
+            "/images/api/{0}/1x1".format(image.id),
             data=json.dumps(bad_selection),
             content_type="application/json",
             HTTP_X_BETTY_API_KEY="noop"
@@ -263,11 +263,11 @@ class APITestCase(TestCase):
     def test_image_detail(self):
         image = Image.objects.create(name="Testing", width=512, height=512)
 
-        res = self.client.get("/images/api/{}".format(image.id), HTTP_X_BETTY_API_KEY="noop")
+        res = self.client.get("/images/api/{0}".format(image.id), HTTP_X_BETTY_API_KEY="noop")
         self.assertEqual(res.status_code, 200)
 
         res = self.client.patch(
-            "/images/api/{}".format(image.id),
+            "/images/api/{0}".format(image.id),
             data=json.dumps({"name": "Updated"}),
             content_type="application/json",
             HTTP_X_BETTY_API_KEY="noop"
@@ -308,7 +308,7 @@ class APITestCase(TestCase):
             if index % 4 == 0:
                 id_string += "/"
             id_string += char
-        res = self.client.get('/images/{}/1x1/400.jpg'.format(id_string))
+        res = self.client.get('/images/{0}/1x1/400.jpg'.format(id_string))
         assert res.status_code == 200
 
     def tearDown(self):

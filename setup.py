@@ -3,7 +3,6 @@
 
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
-import re
 import os
 import sys
 

@@ -31,6 +31,6 @@ class BettySettings(object):
         elif name == "BETTY_CROPPER":
             return DEFAULTS
         else:
-            raise AttributeError("'%s' setting not found" % name)
+            raise AttributeError("'{0}' setting not found".format(name))
 
 settings = BettySettings(_settings)
