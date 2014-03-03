@@ -1,6 +1,5 @@
 function processFile(file){
     var previewEl = $(".preview")[0];
-    previewEl.err = false;
     previewEl.onload = function(){
         $(".upload-form").hide();
         $(".image-form").show();
@@ -10,9 +9,18 @@ function processFile(file){
         $(".name-input").val(name);
         $(".upload-button").removeAttr("disabled");
     }
-    previewEl.onerrer = function(){
+    previewEl.onerror = function(){
+        console.log("Error!");
         $(".image-form").hide();
         $(".upload-form").show();
+
+        var error = $('<div class="alert alert-danger alert-bad-image"><strong>Whoops!</strong> It looks like that isn\'t a valid image.</div>');
+        error.slideDown();
+        $(".upload-form").prepend(error);
+        error.fadeIn();
+        window.setTimeout(function(){
+            error.slideUp(function(){$(this).remove();})
+        }, 3000);
     }
     var reader = new FileReader();
     reader.onload = function(e){
