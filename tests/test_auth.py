@@ -35,6 +35,5 @@ class UserTestCase(TestCase):
             password="whatevs"
         )
         client = Client()
-        self.assertTrue(client.login(api_key=admin.api_key))
-        response = client.get("/images/api/search?q=testing")
-        self.assertTrue(response.status_code, 200)
+        response = client.get("/images/api/search?q=testing", HTTP_X_BETTY_API_KEY=admin.api_key)
+        self.assertEquals(response.status_code, 200)

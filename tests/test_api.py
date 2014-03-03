@@ -92,7 +92,6 @@ class APITestCase(TestCase):
             "/images/api/{0}/1x1".format(image.id),
             data=json.dumps(new_selection),
             content_type="application/json",
-            HTTP_X_BETTY_API_KEY="noop"
         )
         self.assertEqual(res.status_code, 200)
 

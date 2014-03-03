@@ -93,7 +93,7 @@ def update_selection(request, image_id, ratio_slug):
     try:
         request_json = json.loads(request.body)
     except Exception:
-        message = json.dumps({"message": "Bad selection"})
+        message = json.dumps({"message": "Bad JSON"})
         return HttpResponseBadRequest(message, content_type="application/json")
     try:
         selection = {
@@ -125,7 +125,7 @@ def update_selection(request, image_id, ratio_slug):
         # TODO: flush cache on crops
         shutil.rmtree(ratio_path)
     
-    message = json.dumps({"message": "Update sucessfull"})
+    message = json.dumps({"message": "Update sucessful"})
     return HttpResponse(message, content_type="application/json")
 
 
