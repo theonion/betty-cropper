@@ -102,7 +102,6 @@ class APITestCase(TestCase):
             "/images/api/{0}/original".format(image.id),
             data=json.dumps(new_selection),
             content_type="application/json",
-            HTTP_X_BETTY_API_KEY="noop"
         )
         self.assertEqual(res.status_code, 400)
 
@@ -114,7 +113,6 @@ class APITestCase(TestCase):
             "/images/api/{0}/1x1".format(image.id),
             data=json.dumps(bad_selection),
             content_type="application/json",
-            HTTP_X_BETTY_API_KEY="noop"
         )
         self.assertEqual(res.status_code, 400)
 
@@ -122,7 +120,6 @@ class APITestCase(TestCase):
             "/images/api/1000001/1x1",
             data=json.dumps(bad_selection),
             content_type="application/json",
-            HTTP_X_BETTY_API_KEY="noop"
         )
         self.assertEqual(res.status_code, 404)
 
@@ -130,14 +127,13 @@ class APITestCase(TestCase):
         assert self.client.login(username="admin", password=self.password)
         image = Image.objects.create(name="Testing", width=512, height=512)
 
-        res = self.client.get("/images/api/{0}".format(image.id), HTTP_X_BETTY_API_KEY="noop")
+        res = self.client.get("/images/api/{0}".format(image.id))
         self.assertEqual(res.status_code, 200)
 
         res = self.client.patch(
             "/images/api/{0}".format(image.id),
             data=json.dumps({"name": "Updated"}),
             content_type="application/json",
-            HTTP_X_BETTY_API_KEY="noop"
         )
         self.assertEqual(res.status_code, 200)
 
@@ -148,7 +144,7 @@ class APITestCase(TestCase):
         assert self.client.login(username="admin", password=self.password)
         image = Image.objects.create(name="BLERGH", width=512, height=512)
 
-        res = self.client.get('/images/api/search?q=blergh', HTTP_X_BETTY_API_KEY="noop")
+        res = self.client.get('/images/api/search?q=blergh')
         self.assertEqual(res.status_code, 200)
         results = json.loads(res.content)
         self.assertEqual(len(results), 1)
@@ -158,7 +154,7 @@ class APITestCase(TestCase):
         assert self.client.login(username="admin", password=self.password)
         lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
         with open(lenna_path, 'r') as lenna:
-            res = self.client.post('/images/api/new', {"image": lenna}, HTTP_X_BETTY_API_KEY="noop")
+            res = self.client.post('/images/api/new', {"image": lenna})
 
         self.assertEqual(res.status_code, 200)
         response_json = json.loads(res.content)
