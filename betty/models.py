@@ -30,6 +30,11 @@ def random_api_key():
 
 
 class User(AbstractUser):
+
+    class Meta:
+        # We only need this if betty is running on its own.
+        managed = settings.BETTY_STANDALONE_SERVER
+
     api_key = models.CharField(max_length=255, default=random_api_key)
 
 

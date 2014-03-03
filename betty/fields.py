@@ -55,4 +55,4 @@ class JSONField(models.TextField):
         return json.dumps(value)
 
 if SOUTH:
-    add_introspection_rules([], ["^fields.JSONField"])
+    add_introspection_rules([], ["^betty.fields.JSONField"])
