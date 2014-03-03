@@ -57,7 +57,10 @@ def new(request):
     if image_file is None:
         return HttpResponseBadRequest()
 
-    image = Image.objects.create(name=image_file.name)
+    image = Image.objects.create(
+        name=request.POST.get("name") or image_file.name,
+        credit=request.POST.get("credit")
+    )
     os.makedirs(image.path())
     source_path = source_upload_to(image, image_file.name)
 

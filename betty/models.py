@@ -38,7 +38,7 @@ class Image(models.Model):
     name = models.CharField(max_length=255)
     height = models.IntegerField(null=True, blank=True)
     width = models.IntegerField(null=True, blank=True)
-    credit = models.CharField(max_length=120)
+    credit = models.CharField(max_length=120, null=True, blank=True)
     selections = JSONField(null=True, blank=True)
 
     def get_height(self):

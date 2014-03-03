@@ -41,17 +41,22 @@ class APITestCase(TestCase):
 
         lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
         with open(lenna_path, 'r') as lenna:
-            res = self.client.post('/images/api/new', {"image": lenna}, HTTP_X_BETTY_API_KEY="noop")
+            data = {"image": lenna, "name": "LENNA DOT PNG", "credit": "Playboy"}
+            res = self.client.post('/images/api/new', data, HTTP_X_BETTY_API_KEY="noop")
 
         self.assertEqual(res.status_code, 200)
         response_json = json.loads(res.content)
-        self.assertEqual(response_json.get('name'), 'Lenna.png')
+        self.assertEqual(response_json.get('name'), 'LENNA DOT PNG')
+        self.assertEqual(response_json.get('credit'), 'Playboy')
         self.assertEqual(response_json.get('width'), 512)
         self.assertEqual(response_json.get('height'), 512)
 
         image = Image.objects.get(id=response_json['id'])
         self.assertTrue(os.path.exists(image.path()))
         self.assertTrue(os.path.exists(image.src_path()))
+        self.assertEqual(os.path.basename(image.src_path()), "Lenna.png")
+        self.assertEqual(image.name, "LENNA DOT PNG")
+        self.assertEqual(image.credit, "Playboy")
 
         # Now let's test that a JPEG crop will return properly.
         res = self.client.get('/images/%s/1x1/256.jpg' % image.id)
