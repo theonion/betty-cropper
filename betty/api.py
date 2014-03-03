@@ -10,6 +10,7 @@ from django.http import (
     HttpResponseBadRequest,
     HttpResponseNotFound
 )
+from django.views.decorators.csrf import csrf_exempt
 
 from wand.image import Image as WandImage
 
@@ -47,6 +48,7 @@ def crossdomain(origin="*", methods=[], headers=["X-Betty-Api-Key", "Content-Typ
     return _method_wrapper
 
 
+@csrf_exempt
 @crossdomain(methods=['POST', 'OPTIONS'])
 def new(request):
     if not request.user.has_perm("betty.add_image"):
@@ -55,7 +57,7 @@ def new(request):
 
     image_file = request.FILES.get("image")
     if image_file is None:
-        return HttpResponseBadRequest()
+        return HttpResponseBadRequest(json.dumps({'message': 'No image!'}))
 
     image = Image.objects.create(
         name=request.POST.get("name") or image_file.name,
@@ -78,6 +80,7 @@ def new(request):
     return HttpResponse(json.dumps(image.to_native()), content_type="application/json")
 
 
+@csrf_exempt
 @crossdomain(methods=['POST', 'OPTIONS'])
 def update_selection(request, image_id, ratio_slug):
     if not request.user.has_perm("betty.change_image"):
@@ -129,6 +132,7 @@ def update_selection(request, image_id, ratio_slug):
     return HttpResponse(message, content_type="application/json")
 
 
+@csrf_exempt
 @crossdomain(methods=['GET', 'OPTIONS'])
 def search(request):
     if not request.user.is_staff:
@@ -143,6 +147,7 @@ def search(request):
     return HttpResponse(json.dumps(results), content_type="application/json")
 
 
+@csrf_exempt
 @crossdomain(methods=["GET", "PATCH", "OPTIONS"])
 def detail(request, image_id):
     if not request.user.has_perm("betty.change_image"):

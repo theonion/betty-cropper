@@ -114,6 +114,11 @@ INSTALLED_APPS = (
     'south',
 )
 
+BETTY_CROPPER_SERVER = ""
+
+LOGIN_URL = "/login/"
+LOGIN_REDIRECT_URL = "/"
+
 STATIC_ROOT = os.path.realpath(os.path.join(PROJECT_ROOT, 'static'))
 STATIC_URL = '/static/'
 

@@ -1,5 +1,6 @@
 from .conf.app import settings
 
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse, HttpResponseServerError, HttpResponseRedirect
@@ -92,10 +93,13 @@ def crop(request, id, ratio_slug, width, extension):
     return resp
 
 
+@login_required
 def index(request):
     queryset = Image.objects.all()
     if request.GET.get("size", "all") in SIZE_MAP:
         queryset = queryset.filter(**SIZE_MAP[request.GET["size"]])
+    if request.GET.get("q", "") != "":
+        queryset = queryset.filter(name__icontains=request.GET.get("q"))
 
     paginator = Paginator(queryset, 48)
     page = request.GET.get('page')
@@ -106,11 +110,9 @@ def index(request):
     except EmptyPage:
         images = paginator.page(paginator.num_pages)
 
-    images = [{
-        "id": count
-    } for count in xrange(48)]
     context = {
-        "images": images
+        "images": images,
+        "q": request.GET.get("q")
     }
     return render(request, "index.html", context)
 

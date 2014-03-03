@@ -13,7 +13,7 @@
       <div class="container">
         <form class="navbar-form navbar-left" role="search">
           <div class="form-group">
-            <input type="text" class="form-control search" name="q" placeholder="Search">
+            <input type="text" class="form-control search" name="q" placeholder="{{ q|default:"Search" }}">
             <select name="size" class="form-control">
               <option value="all" selected>All</option>
               <option value="large">Large</option>
@@ -38,17 +38,25 @@
       </ul>
       <div class="row">
         <ul class="pagination">
-          <li><a href="#">&laquo;</a></li>
-          <li><a href="#">1</a></li>
-          <li><a href="#">2</a></li>
-          <li><a href="#">3</a></li>
-          <li><a href="#">4</a></li>
-          <li><a href="#">5</a></li>
-          <li><a href="#">&raquo;</a></li>
+          {% if images.has_previous %}
+          <li><a href="?page={{ images.previous_page_number }}">&laquo;</a></li>
+          {% endif %}
+          {% for page_number in images.paginator.page_range %}
+          <li><a href="?page={{ page_number }}">{{ page_number }}</a></li>
+          {% endfor %}
+          {% if images.has_next %}
+          <li><a href="?page={{ images.next_page_number }}">&raquo;</a></li>
+          {% endif %}
         </ul>
       </div>
     </div>
     <div class="modal fade" id="upload-modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="detail-modal" tabindex="-1" role="dialog">
       <div class="modal-dialog">
         <div class="modal-content">
         </div>

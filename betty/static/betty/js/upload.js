@@ -1,12 +1,32 @@
-function upload() {
-    return false;
+function showMessage(message, messageClass) {
+    message = message || "An unknown error occurred";
+    messageClass = messageClass || "danger";
+    var error = $('<div class="alert alert-' + messageClass + '">' + message + '</div>');
+    var x = $('<button type="button" class="close" aria-hidden="true">&times;</button>');
+    error.append(x);
+
+    $(".modal-body").prepend(error);
+    error.slideDown();
+    var errorTimeout = window.setTimeout(function(){
+        error.slideUp(function(){$(this).remove();})
+    }, 5000);
+
+    x.click(function(){
+        window.clearTimeout(errorTimeout);
+        error.slideUp(function(){$(this).remove();})
+    });
+    console.log(message);
 }
 
 function processFile(file){
     var previewEl = $(".preview")[0];
-    previewEl.onload = function(){
+    previewEl.onload = function(e){
         $(".upload-form").hide();
         $(".image-form").show();
+
+        if(this.width < 1000) {
+            showMessage("<strong>Small Image!</strong> This image is pretty small, and may look pixelated.");
+        }
 
         var name = file.name.split(".")[0];
 
@@ -18,13 +38,7 @@ function processFile(file){
         $(".image-form").hide();
         $(".upload-form").show();
 
-        var error = $('<div class="alert alert-danger alert-bad-image"><strong>Whoops!</strong> It looks like that isn\'t a valid image.</div>');
-        error.slideDown();
-        $(".upload-form").prepend(error);
-        error.fadeIn();
-        window.setTimeout(function(){
-            error.slideUp(function(){$(this).remove();})
-        }, 3000);
+        showMessage("<strong>Whoops!</strong> It looks like that isn't a valid image.");
     }
     var reader = new FileReader();
     reader.onload = function(e){
@@ -33,8 +47,35 @@ function processFile(file){
     reader.readAsDataURL(file);
 }
 
+
 function initUploadModal(el){
-    $(".upload-form").onsubmit = upload;
+    $(".image-form").submit(function(e){
+        e.preventDefault();
+
+        var name = $(".image-form .name input").val();
+        var credit = $(".image-form .credit input").val();
+        if(name == "") {
+            $(".image-form .name").addClass("has-error");
+        }
+
+        var data = new FormData();
+        var file = $(".image-picker")[0].files[0];
+        data.append("image", file);
+        data.append("name", name);
+        if (credit !== "") {
+            data.append("credit", credit);
+        }
+        $.ajax({
+            url: this.action,
+            type: "POST",
+            data: data,
+            processData: false,
+            contentType: false,
+            success: function(data, textStatus, xhr){
+                $("#upload-modal").modal("hide");
+            }
+        });
+    });
     $(".upload-well").click(function(){
         $(".image-picker").click();
     });

@@ -9,25 +9,25 @@
     </div>
   </div>
 
-  <form class="form-horizontal image-form" method="post" action="api/new" role="form">
+  <form class="form-horizontal image-form" method="post" action="api/new" role="form" enctype="multipart/form-data">
     <div class="form-group">
       <img class="img-thumbnail preview" />
     </div>
     <hr />
-    <div class="form-group">
+    <div class="form-group name">
       <label for="name" class="col-sm-2 control-label">Name</label>
       <div class="col-sm-10">
-        <input type="text" class="form-control name-input" placeholder="The Butt Butt Book">
+        <input type="text" name="name" class="form-control name-input" placeholder="The Butt Butt Book">
       </div>
     </div>
-    <div class="form-group">
+    <div class="form-group credit">
       <label for="credit" class="col-sm-2 control-label">Credit</label>
       <div class="col-sm-10">
-        <input type="text" class="form-control credit-input" placeholder="Some Jabrone">
+        <input type="text" name="credit" class="form-control credit-input" placeholder="Some Jabrone">
       </div>
     </div>
     <div class="form-group">
-      <button type="submit" class="btn btn-primary upload-button" disabled="disabled">Start Upload</button>
+      <button type="submit" class="btn btn-primary upload-button" disabled="disabled">Upload</button>
     </div>
     <input type="file" name="image" class="image-picker" >
   </form>
