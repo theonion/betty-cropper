@@ -1,5 +1,4 @@
 from django.contrib.auth.models import AnonymousUser
-from django.utils.functional import SimpleLazyObject
 
 from betty.backends import BettyApiKeyBackend
 
