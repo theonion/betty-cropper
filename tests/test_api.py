@@ -16,7 +16,11 @@ class APITestCase(TestCase):
 
     def setUp(self):
         self.password = User.objects.make_random_password()
-        user = User.objects.create_superuser(username="admin", email="tech@theonion.com", password=self.password)
+        user = User.objects.create_superuser(
+            username="admin",
+            email="tech@theonion.com",
+            password=self.password
+        )
         user.save()
         self.client = Client()
 
