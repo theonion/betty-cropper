@@ -1,3 +1,7 @@
+function upload() {
+    return false;
+}
+
 function processFile(file){
     var previewEl = $(".preview")[0];
     previewEl.onload = function(){
@@ -30,6 +34,7 @@ function processFile(file){
 }
 
 function initUploadModal(el){
+    $(".upload-form").onsubmit = upload;
     $(".upload-well").click(function(){
         $(".image-picker").click();
     });

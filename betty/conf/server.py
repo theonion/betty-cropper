@@ -13,6 +13,8 @@ TEMPLATE_DEBUG = False
 
 ADMINS = ()
 
+AUTH_USER_MODEL = 'betty.User'
+
 INTERNAL_IPS = ('127.0.0.1',)
 
 MANAGERS = ADMINS
@@ -39,6 +41,11 @@ DATABASES = {
         'PORT': '',
     }
 }
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'betty.backends.BettyApiKeyBackend'
+)
 
 EMAIL_SUBJECT_PREFIX = '[Betty Cropper] '
 
