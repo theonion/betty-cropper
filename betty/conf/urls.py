@@ -1,6 +1,7 @@
 import urlparse
 
 from .app import settings
+from django.conf.urls.static import static
 
 try:
     from django.conf.urls import include, patterns, url
@@ -40,3 +41,6 @@ if image_path.startswith("/"):
 urlpatterns = patterns('',
     url(r'^{0}'.format(image_path), include("betty.urls")),  # noqa
 )
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

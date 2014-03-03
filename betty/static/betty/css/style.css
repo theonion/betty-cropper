@@ -1,0 +1,21 @@
+.results {
+    list-style-type: none;
+}
+
+
+/* Upload modal stuff*/
+#upload-modal .upload-well {
+    font-size: 5em;
+    text-align: center;
+    cursor: pointer;
+}
+#upload-modal .upload-well:hover {
+    background-color: #e3e3e3;
+    border-color: #d1d1d1;
+}
+#upload-modal .image-form {
+    display: none;
+}
+#upload-modal input.image-picker {
+    display: none;
+}

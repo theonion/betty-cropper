@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Betty Cropper</title>
+    <link href="{{ STATIC_URL }}betty/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}betty/css/style.css" rel="stylesheet">
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-static-top" role="navigation">
+      <div class="container">
+        <form class="navbar-form navbar-left" role="search">
+          <div class="form-group">
+            <input type="text" class="form-control search" name="q" placeholder="Search">
+            <select name="size" class="form-control">
+              <option value="all" selected>All</option>
+              <option value="large">Large</option>
+              <option value="medium">Medium</option>
+              <option value="small">Small</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
+        </form>
+        <a data-toggle="modal" href="upload.html" data-target="#upload-modal" class="btn btn-default navbar-btn navbar-right"><span class="glyphicon glyphicon-plus"></span></a>
+      </div>
+    </nav>
+    <div class="container">
+      <ul class="results row">
+        {% for image in images %}
+        <li class="col-xs-6 col-sm-3 col-md-2">
+          <a href="#" class="thumbnail">
+            <img src="/{{ image.id }}/1x1/180.jpg" alt="testing">
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+      <div class="row">
+        <ul class="pagination">
+          <li><a href="#">&laquo;</a></li>
+          <li><a href="#">1</a></li>
+          <li><a href="#">2</a></li>
+          <li><a href="#">3</a></li>
+          <li><a href="#">4</a></li>
+          <li><a href="#">5</a></li>
+          <li><a href="#">&raquo;</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="modal fade" id="upload-modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+      </div>
+    </div>
+    <script src="{{ STATIC_URL }}betty/js/jquery.min.js"></script>
+    <script src="{{ STATIC_URL }}betty/js/bootstrap.min.js"></script>
+    <script src="{{ STATIC_URL }}betty/js/index.js"></script>
+    <script src="{{ STATIC_URL }}betty/js/upload.js"></script>
+  </body>
+</html>

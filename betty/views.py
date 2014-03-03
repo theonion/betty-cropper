@@ -1,7 +1,9 @@
 from .conf.app import settings
 
-from django.http import Http404, HttpResponse, HttpResponseServerError, HttpResponseRedirect
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.core.urlresolvers import reverse
+from django.http import Http404, HttpResponse, HttpResponseServerError, HttpResponseRedirect
+from django.shortcuts import render
 
 from .models import Image, Ratio
 from .utils.placeholder import placeholder
@@ -15,6 +17,19 @@ EXTENSION_MAP = {
         "format": "png",
         "mime_type": "image/png"
     },
+}
+
+SIZE_MAP = {
+    "large": {
+        "width__gte": 1024,
+    },
+    "medium": {
+        "width__gte": 400,
+        "width__lt": 1024
+    },
+    "small": {
+        "width__lt": 400
+    }
 }
 
 
@@ -75,3 +90,30 @@ def crop(request, id, ratio_slug, width, extension):
     resp = HttpResponse(image_blob)
     resp["Content-Type"] = EXTENSION_MAP[extension]["mime_type"]
     return resp
+
+
+def index(request):
+    queryset = Image.objects.all()
+    if request.GET.get("size", "all") in SIZE_MAP:
+        queryset = queryset.filter(**SIZE_MAP[request.GET["size"]])
+
+    paginator = Paginator(queryset, 48)
+    page = request.GET.get('page')
+    try:
+        images = paginator.page(page)
+    except PageNotAnInteger:
+        images = paginator.page(1)
+    except EmptyPage:
+        images = paginator.page(paginator.num_pages)
+
+    images = [{
+        "id": count
+    } for count in xrange(48)]
+    context = {
+        "images": images
+    }
+    return render(request, "index.html", context)
+
+
+def upload(request):
+    return render(request, "upload.html", {})
