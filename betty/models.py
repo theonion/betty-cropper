@@ -104,7 +104,7 @@ class Image(models.Model):
 
             min_x = 0
             min_y = 0
-            
+
             max_x = self.get_width()
             max_y = self.get_height()
 

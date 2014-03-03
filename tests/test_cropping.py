@@ -26,7 +26,7 @@ class ImageSavingTestCase(TestCase):
 
         # Test to make sure the default selections work
         assert image.get_selection(Ratio('1x1')) == {'x0': 0, 'y0': 0, 'x1': 512, 'y1': 512}
-        
+
         # Now let's add some bad data
         image.selections = {
             '1x1': {
@@ -64,7 +64,7 @@ class ImageSavingTestCase(TestCase):
         }
         image.save()
         assert image.get_selection(Ratio('1x1')) == {'x0': 0, 'y0': 0, 'x1': 512, 'y1': 512}
-        
+
         # Try with bad x values
         image.selections = {
             '1x1': {

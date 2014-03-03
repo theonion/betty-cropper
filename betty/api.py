@@ -15,7 +15,7 @@ from wand.image import Image as WandImage
 
 from .conf.app import settings
 from .models import Image, source_upload_to
- 
+
 ACC_HEADERS = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -124,7 +124,7 @@ def update_selection(request, image_id, ratio_slug):
         # crops = os.listdir(ratio_path)
         # TODO: flush cache on crops
         shutil.rmtree(ratio_path)
-    
+
     message = json.dumps({"message": "Update sucessful"})
     return HttpResponse(message, content_type="application/json")
 
