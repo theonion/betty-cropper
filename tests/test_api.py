@@ -46,7 +46,7 @@ class APITestCase(TestCase):
         lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
         with open(lenna_path, 'r') as lenna:
             data = {"image": lenna, "name": "LENNA DOT PNG", "credit": "Playboy"}
-            res = self.client.post('/images/api/new', data, HTTP_X_BETTY_API_KEY="noop")
+            res = self.client.post('/images/api/new', data)
 
         self.assertEqual(res.status_code, 200)
         response_json = json.loads(res.content)

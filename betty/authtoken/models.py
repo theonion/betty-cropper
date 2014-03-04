@@ -12,7 +12,7 @@ def random_api_key():
     return base64.b64encode(random_256, random_encode).rstrip('==')
 
 
-class AuthTokenMixin(object):
+class AuthTokenMixin(models.Model):
     api_key = models.CharField(max_length=255, default=random_api_key)
 
 
