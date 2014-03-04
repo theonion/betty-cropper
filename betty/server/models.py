@@ -5,7 +5,7 @@ from django.core.files.storage import FileSystemStorage
 
 from wand.image import Image as WandImage
 
-from .conf.app import settings
+from betty.conf.app import settings
 from .fields import JSONField
 
 

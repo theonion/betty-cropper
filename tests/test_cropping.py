@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 from betty.conf.app import settings
-from betty.models import Image, Ratio
+from betty.server.models import Image, Ratio
 
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'images')
 

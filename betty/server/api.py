@@ -14,7 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from wand.image import Image as WandImage
 
-from .conf.app import settings
+from betty.conf.app import settings
 from .models import Image, source_upload_to
 
 ACC_HEADERS = {

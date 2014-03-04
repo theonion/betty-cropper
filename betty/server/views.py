@@ -1,4 +1,4 @@
-from .conf.app import settings
+from betty.conf.app import settings
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
@@ -59,7 +59,7 @@ def crop(request, id, ratio_slug, width, extension):
             id_string += char
 
         redirect_url = reverse(
-            'betty.views.crop',
+            'betty.server.views.crop',
             args=(id_string, ratio_slug, width, extension)
         )
         return HttpResponseRedirect(redirect_url)

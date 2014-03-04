@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AnonymousUser
 
-from betty.backends import BettyApiKeyBackend
+from betty.authtoken.backends import BettyApiKeyBackend
 
 
 class BettyApiKeyMiddleware(object):

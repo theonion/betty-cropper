@@ -110,7 +110,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.staticfiles',
 
-    'betty',
+    'betty.server',
+    'betty.client',
     'betty.authtoken',
     'south',
 )
