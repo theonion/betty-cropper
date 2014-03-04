@@ -1,11 +1,7 @@
 import os
-import base64
-import hashlib
-import random
 
 from django.db import models
 from django.core.files.storage import FileSystemStorage
-from django.contrib.auth.models import AbstractUser
 
 from wand.image import Image as WandImage
 
@@ -21,21 +17,6 @@ betty_storage = FileSystemStorage(
 
 def source_upload_to(instance, filename):
     return os.path.join(instance.path(), filename)
-
-
-def random_api_key():
-    random_256 = hashlib.sha256(str(random.getrandbits(256))).digest()
-    random_encode = random.choice(['rA', 'aZ', 'gQ', 'hH', 'hG', 'aR', 'DD'])
-    return base64.b64encode(random_256, random_encode).rstrip('==')
-
-
-class User(AbstractUser):
-
-    class Meta:
-        # We only need this if betty is running on its own.
-        managed = settings.BETTY_STANDALONE_SERVER
-
-    api_key = models.CharField(max_length=255, default=random_api_key)
 
 
 class Ratio(object):

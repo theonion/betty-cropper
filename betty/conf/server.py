@@ -13,7 +13,7 @@ TEMPLATE_DEBUG = False
 
 ADMINS = ()
 
-AUTH_USER_MODEL = 'betty.User'
+AUTH_USER_MODEL = 'authtoken.User'
 
 INTERNAL_IPS = ('127.0.0.1',)
 
@@ -44,7 +44,7 @@ DATABASES = {
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
-    'betty.backends.BettyApiKeyBackend'
+    'betty.authtoken.backends.BettyApiKeyBackend'
 )
 
 EMAIL_SUBJECT_PREFIX = '[Betty Cropper] '
@@ -90,7 +90,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'betty.middleware.BettyApiKeyMiddleware'
+    'betty.authtoken.middleware.BettyApiKeyMiddleware'
 )
 
 ROOT_URLCONF = 'betty.conf.urls'
@@ -111,6 +111,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 
     'betty',
+    'betty.authtoken',
     'south',
 )
 
