@@ -1,0 +1,9 @@
+<div class="modal-header">
+  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+  <h4 class="modal-title" id="myModalLabel">Choose an image</h4>
+</div>
+<div class="modal-body crop-modal-body" data-image-id="1">
+    {% for ratio in ratios %}
+        <div class="thumbnail" style="background-image: url('/0/{{ ratio.name }}/{{ ratio.width }}.jpg');height:{{ ratio.height }}px;width:{{ ratio.width }}px;"></div>
+    {% endfor %}
+</div>

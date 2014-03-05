@@ -20,19 +20,6 @@ EXTENSION_MAP = {
     },
 }
 
-SIZE_MAP = {
-    "large": {
-        "width__gte": 1024,
-    },
-    "medium": {
-        "width__gte": 400,
-        "width__lt": 1024
-    },
-    "small": {
-        "width__lt": 400
-    }
-}
-
 
 def crop(request, id, ratio_slug, width, extension):
     if ratio_slug != "original" and ratio_slug not in settings.BETTY_RATIOS:

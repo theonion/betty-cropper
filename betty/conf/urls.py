@@ -40,6 +40,7 @@ if image_path.startswith("/"):
 
 urlpatterns = patterns('',
     url(r'^{0}'.format(image_path), include("betty.server.urls")),  # noqa
+    url(r'client/', include("betty.client.urls")),
     url(r'login/', "django.contrib.auth.views.login")
 )
 
