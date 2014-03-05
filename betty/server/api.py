@@ -15,6 +15,7 @@ from django.views.decorators.csrf import csrf_exempt
 from wand.image import Image as WandImage
 
 from betty.conf.app import settings
+from .decorators import betty_token_auth
 from .models import Image, source_upload_to
 
 ACC_HEADERS = {
@@ -50,10 +51,8 @@ def crossdomain(origin="*", methods=[], headers=["X-Betty-Api-Key", "Content-Typ
 
 @csrf_exempt
 @crossdomain(methods=['POST', 'OPTIONS'])
+@betty_token_auth(["server.image_add"])
 def new(request):
-    if not request.user.has_perm("server.image_add"):
-        response_text = json.dumps({'message': 'Not authorized'})
-        return HttpResponseForbidden(response_text, content_type="application/json")
 
     image_file = request.FILES.get("image")
     if image_file is None:
@@ -82,10 +81,8 @@ def new(request):
 
 @csrf_exempt
 @crossdomain(methods=['POST', 'OPTIONS'])
+@betty_token_auth(["server.image_crop"])
 def update_selection(request, image_id, ratio_slug):
-    if not request.user.has_perm("server.image_crop"):
-        response_text = json.dumps({'message': 'Not authorized'})
-        return HttpResponseForbidden(response_text, content_type="application/json")
 
     try:
         image = Image.objects.get(id=image_id)
@@ -134,10 +131,8 @@ def update_selection(request, image_id, ratio_slug):
 
 @csrf_exempt
 @crossdomain(methods=['GET', 'OPTIONS'])
+@betty_token_auth(["server.image_read"])
 def search(request):
-    if not request.user.has_perm("server.image_read"):
-        response_text = json.dumps({'message': 'Not authorized'})
-        return HttpResponseForbidden(response_text, content_type="application/json")
 
     results = []
     query = request.GET.get("q")
@@ -150,20 +145,16 @@ def search(request):
 @csrf_exempt
 @crossdomain(methods=["GET", "PATCH", "OPTIONS"])
 def detail(request, image_id):
-    if request.method == "PATCH" and not request.user.has_perm("server.image_change"):
-        response_text = json.dumps({'message': 'Not authorized'})
-        return HttpResponseForbidden(response_text, content_type="application/json")
-    elif not request.user.has_perm("server.image_read"):
-        response_text = json.dumps({'message': 'Not authorized'})
-        return HttpResponseForbidden(response_text, content_type="application/json")
 
-    try:
-        image = Image.objects.get(id=image_id)
-    except Image.DoesNotExist:
-        message = json.dumps({"message": "No such image!"})
-        return HttpResponseNotFound(message, content_type="application/json")
+    @betty_token_auth(["server.image_change"])
+    def patch(request, image_id):
 
-    if request.method == "PATCH":
+        try:
+            image = Image.objects.get(id=image_id)
+        except Image.DoesNotExist:
+            message = json.dumps({"message": "No such image!"})
+            return HttpResponseNotFound(message, content_type="application/json")
+
         try:
             request_json = json.loads(request.body)
         except Exception:
@@ -177,4 +168,18 @@ def detail(request, image_id):
                 update_fields.append(field)
         image.save(update_fields=update_fields)
 
-    return HttpResponse(json.dumps(image.to_native()), content_type="application/json")
+        return HttpResponse(json.dumps(image.to_native()), content_type="application/json")
+
+    @betty_token_auth(["server.image_read"])
+    def get(request, image_id):
+        try:
+            image = Image.objects.get(id=image_id)
+        except Image.DoesNotExist:
+            message = json.dumps({"message": "No such image!"})
+            return HttpResponseNotFound(message, content_type="application/json")
+
+        return HttpResponse(json.dumps(image.to_native()), content_type="application/json")
+
+    if request.method == "PATCH":
+        return patch(request, image_id)
+    return get(request, image_id)

@@ -83,7 +83,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'betty.server.middleware.BettyApiKeyMiddleware'
+    # 'betty.server.middleware.BettyApiKeyMiddleware'
 )
 
 ROOT_URLCONF = 'betty.conf.urls'
@@ -96,7 +96,6 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.messages',
