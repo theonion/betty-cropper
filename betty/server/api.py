@@ -51,7 +51,7 @@ def crossdomain(origin="*", methods=[], headers=["X-Betty-Api-Key", "Content-Typ
 @csrf_exempt
 @crossdomain(methods=['POST', 'OPTIONS'])
 def new(request):
-    if not request.user.has_perm("betty.add_image"):
+    if not request.user.has_perm("server.image_add"):
         response_text = json.dumps({'message': 'Not authorized'})
         return HttpResponseForbidden(response_text, content_type="application/json")
 
@@ -83,7 +83,7 @@ def new(request):
 @csrf_exempt
 @crossdomain(methods=['POST', 'OPTIONS'])
 def update_selection(request, image_id, ratio_slug):
-    if not request.user.has_perm("betty.change_image"):
+    if not request.user.has_perm("server.image_crop"):
         response_text = json.dumps({'message': 'Not authorized'})
         return HttpResponseForbidden(response_text, content_type="application/json")
 
@@ -135,7 +135,7 @@ def update_selection(request, image_id, ratio_slug):
 @csrf_exempt
 @crossdomain(methods=['GET', 'OPTIONS'])
 def search(request):
-    if not request.user.is_staff:
+    if not request.user.has_perm("server.image_read"):
         response_text = json.dumps({'message': 'Not authorized'})
         return HttpResponseForbidden(response_text, content_type="application/json")
 
@@ -150,7 +150,10 @@ def search(request):
 @csrf_exempt
 @crossdomain(methods=["GET", "PATCH", "OPTIONS"])
 def detail(request, image_id):
-    if not request.user.has_perm("betty.change_image"):
+    if request.method == "PATCH" and not request.user.has_perm("server.image_change"):
+        response_text = json.dumps({'message': 'Not authorized'})
+        return HttpResponseForbidden(response_text, content_type="application/json")
+    elif not request.user.has_perm("server.image_read"):
         response_text = json.dumps({'message': 'Not authorized'})
         return HttpResponseForbidden(response_text, content_type="application/json")
 

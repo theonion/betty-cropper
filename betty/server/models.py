@@ -41,6 +41,12 @@ class Image(models.Model):
     credit = models.CharField(max_length=120, null=True, blank=True)
     selections = JSONField(null=True, blank=True)
 
+    class Meta:
+        permissions = (
+            ("read", "Can search images, and see the detail data"),
+            ("crop", "Can crop images")
+        )
+
     def get_height(self):
         """Lazily returns the height of the image
 

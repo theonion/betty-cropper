@@ -1,6 +1,5 @@
 from django.contrib.auth.models import AnonymousUser
-
-from betty.authtoken.backends import BettyApiKeyBackend
+from .auth import ApiToken
 
 
 class BettyApiKeyMiddleware(object):
@@ -10,7 +9,9 @@ class BettyApiKeyMiddleware(object):
             return
 
         api_key = request.META["HTTP_X_BETTY_API_KEY"]
-        backend = BettyApiKeyBackend()
-        user = backend.authenticate(api_key=api_key)
-        request.user = user or AnonymousUser()
-        return
+        try:
+            token = ApiToken.objects.get(public_token=api_key)
+        except ApiToken.DoesNotExist:
+            request.user = AnonymousUser()
+        else:
+            request.user = token.get_user()
