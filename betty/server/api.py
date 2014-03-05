@@ -6,7 +6,6 @@ import shutil
 from django.http import (
     HttpResponse,
     HttpResponseNotAllowed,
-    HttpResponseForbidden,
     HttpResponseBadRequest,
     HttpResponseNotFound
 )

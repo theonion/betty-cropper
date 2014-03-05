@@ -29,7 +29,7 @@ def betty_token_auth(permissions):
             if request.user.is_anonymous():
                 if "HTTP_X_BETTY_API_KEY" not in request.META:
                     return forbidden()
-                
+
                 api_key = request.META["HTTP_X_BETTY_API_KEY"]
                 try:
                     token = ApiToken.objects.get(public_token=api_key)
