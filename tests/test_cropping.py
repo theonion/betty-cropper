@@ -133,22 +133,28 @@ class ImageSavingTestCase(TestCase):
         image.source.save("Lenna.png", lenna)
 
         # Now let's test that a JPEG crop will return properly.
-        res = self.client.get('/images/%s/1x1/256.jpg' % image.id)
+        res = self.client.get('/images/%s/1x1/240.jpg' % image.id)
         assert res['Content-Type'] == 'image/jpeg'
         assert res.status_code == 200
-        assert os.path.exists(os.path.join(image.path(), '1x1', '256.jpg'))
+        assert os.path.exists(os.path.join(image.path(), '1x1', '240.jpg'))
 
         # Now let's test that a PNG crop will return properly.
-        res = self.client.get('/images/%s/1x1/256.png' % image.id)
+        res = self.client.get('/images/%s/1x1/240.png' % image.id)
         assert res['Content-Type'] == 'image/png'
         assert res.status_code == 200
-        assert os.path.exists(os.path.join(image.path(), '1x1', '256.png'))
+        assert os.path.exists(os.path.join(image.path(), '1x1', '240.png'))
 
-        # Finally, let's test an "original" crop
-        res = self.client.get('/images/%s/original/256.jpg' % image.id)
+        # Let's test an "original" crop
+        res = self.client.get('/images/%s/original/240.jpg' % image.id)
         assert res['Content-Type'] == 'image/jpeg'
         assert res.status_code == 200
-        assert os.path.exists(os.path.join(image.path(), 'original', '256.jpg'))
+        assert os.path.exists(os.path.join(image.path(), 'original', '240.jpg'))
+
+        # Finally, let's test a width that doesn't exist
+        res = self.client.get('/images/%s/original/666.jpg' % image.id)
+        self.assertEqual(res['Content-Type'], 'image/jpeg')
+        self.assertEqual(res.status_code, 200)
+        self.assertFalse(os.path.exists(os.path.join(image.path(), 'original', '666.jpg')))
 
     def tearDown(self):
         shutil.rmtree(settings.BETTY_IMAGE_ROOT, ignore_errors=True)
