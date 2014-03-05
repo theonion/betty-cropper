@@ -1,10 +1,7 @@
 from betty.conf.app import settings
 
-from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse, HttpResponseServerError, HttpResponseRedirect
-from django.shortcuts import render
 
 from .models import Image, Ratio
 from .utils.placeholder import placeholder
@@ -78,31 +75,3 @@ def crop(request, id, ratio_slug, width, extension):
     resp = HttpResponse(image_blob)
     resp["Content-Type"] = EXTENSION_MAP[extension]["mime_type"]
     return resp
-
-
-@login_required
-def index(request):
-    queryset = Image.objects.all()
-    if request.GET.get("size", "all") in SIZE_MAP:
-        queryset = queryset.filter(**SIZE_MAP[request.GET["size"]])
-    if request.GET.get("q", "") != "":
-        queryset = queryset.filter(name__icontains=request.GET.get("q"))
-
-    paginator = Paginator(queryset, 48)
-    page = request.GET.get('page')
-    try:
-        images = paginator.page(page)
-    except PageNotAnInteger:
-        images = paginator.page(1)
-    except EmptyPage:
-        images = paginator.page(paginator.num_pages)
-
-    context = {
-        "images": images,
-        "q": request.GET.get("q")
-    }
-    return render(request, "index.html", context)
-
-
-def upload(request):
-    return render(request, "upload.html", {})
