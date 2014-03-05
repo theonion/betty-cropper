@@ -5,20 +5,20 @@ python:
   - "3.2"
   - "3.3"
 env:
-  - DJANGO=django==1.4
-  - DJANGO=django==1.5
-  - DJANGO=django==1.6
+  - DJANGO_VERSION==1.4
+  - DJANGO_VERSION==1.5
+  - DJANGO_VERSION==1.6
 matrix:
   exclude:
   - python: "3.3"
-    env: DJANGO=django==1.4
+    env: DJANGO_VERSION==1.4
   - python: "3.2"
-    env: DJANGO=django==1.4
+    env: DJANGO_VERSION==1.4
 cache:
   directories:
     - $HOME/.pip-cache/
 install:
-  - pip install Django==$DJANGO
+  - pip install django==$DJANGO_VERSION
   - pip install -r requirements-dev.txt --download-cache $HOME/.pip-cache
 script:
   - py.test tests/ --cov betty --cov-report term-missing
