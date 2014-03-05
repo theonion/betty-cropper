@@ -12,6 +12,12 @@ from betty.server.models import Image
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'images')
 
 
+class PatchClient(Client):
+    def patch(self, *args, **kwargs):
+        kwargs["REQUEST_METHOD"] = "PATCH"
+        return super(PatchClient, self).post(*args, **kwargs)
+
+
 class APITestCase(TestCase):
 
     def setUp(self):
@@ -22,7 +28,7 @@ class APITestCase(TestCase):
             password=self.password
         )
         user.save()
-        self.client = Client()
+        self.client = PatchClient()
 
     def test_no_api_key(self):
         res = self.client.post('/images/api/new')
