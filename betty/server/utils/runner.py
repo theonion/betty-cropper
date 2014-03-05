@@ -1,4 +1,8 @@
+import os
+
 from logan.runner import run_app
+
+BETTY_IMAGE_ROOT = os.path.normpath(os.path.join(os.getcwd(), "images"))
 
 
 def generate_settings():
@@ -8,12 +12,12 @@ def generate_settings():
     settings file.
     """
     return """
-BETTY_IMAGE_ROOT = "images"
+BETTY_IMAGE_ROOT = "{0}"
 BETTY_IMAGE_URL = "/"
 BETTY_RATIOS = ("1x1", "2x1", "3x1", "3x4", "4x3", "16x9")
 BETTY_WIDTHS = (80, 150, 240, 300, 320, 400, 480, 620, 640, 820, 960, 1200, 1600)
 BETTY_PLACEHOLDER = True
-"""
+""".format(BETTY_IMAGE_ROOT)
 
 
 def main():
