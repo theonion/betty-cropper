@@ -50,7 +50,7 @@ class APITestCase(TestCase):
         assert self.client.login(username="admin", password=self.password)
 
         lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
-        with open(lenna_path, 'r', encoding="utf=8") as lenna:
+        with open(lenna_path, "rb") as lenna:
             data = {"image": lenna, "name": "LENNA DOT PNG", "credit": "Playboy"}
             res = self.client.post('/images/api/new', data)
 
@@ -151,7 +151,7 @@ class APITestCase(TestCase):
     def test_bad_image_data(self):
         assert self.client.login(username="admin", password=self.password)
         lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
-        with open(lenna_path, 'r', encoding="utf=8") as lenna:
+        with open(lenna_path, "rb") as lenna:
             res = self.client.post('/images/api/new', {"image": lenna})
 
         self.assertEqual(res.status_code, 200)
