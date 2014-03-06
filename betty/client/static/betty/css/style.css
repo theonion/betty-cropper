@@ -56,3 +56,10 @@
     transform: rotate(360deg);
   }
 }
+
+
+@media (min-width: 768px) { .collapse { display: block; } }
+
+
+
+
