@@ -53,7 +53,6 @@ class APITestCase(TestCase):
         with open(lenna_path, "rb") as lenna:
             data = {"image": lenna, "name": "LENNA DOT PNG", "credit": "Playboy"}
             res = self.client.post('/images/api/new', data)
-        print(res.content.decode("utf-8"))
         self.assertEqual(res.status_code, 200)
         response_json = json.loads(res.content.decode("utf-8"))
         self.assertEqual(response_json.get('name'), 'LENNA DOT PNG')
@@ -69,9 +68,9 @@ class APITestCase(TestCase):
         self.assertEqual(image.credit, "Playboy")
 
         # Now let's test that a JPEG crop will return properly.
-        res = self.client.get('/images/%s/1x1/240.jpg' % image.id)
+        res = self.client.get("/images/{}/1x1/240.jpg".format(image.id))
         self.assertEqual(res.status_code, 200)
-        self.assertEqual(res['Content-Type'], 'image/jpeg')
+        self.assertEqual(res["Content-Type"], "image/jpeg")
         self.assertTrue(os.path.exists(os.path.join(image.path(), '1x1', '240.jpg')))
 
     def test_update_selection(self):
