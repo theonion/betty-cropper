@@ -176,7 +176,7 @@ class Image(models.Model):
                         if e.errno != 17:
                             raise e
 
-                    with open(os.path.join(ratio_dir, "%d.%s" % (width, extension)), 'w+') as out:
+                    with open(os.path.join(ratio_dir, "%d.%s" % (width, extension)), 'wb+') as out:
                         out.write(img_blob)
                 return img_blob
 
