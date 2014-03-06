@@ -21,7 +21,6 @@ install:
   - pip install -r requirements-dev.txt --download-cache $HOME/.pip-cache
 script:
   - py.test tests/ --cov betty --cov-report term-missing
-  - flake8 --count
 after_success:
   - coveralls
 notifications:
