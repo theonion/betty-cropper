@@ -12,6 +12,12 @@ from betty.server.models import Image
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'images')
 
 
+class PatchClient(Client):
+    def patch(self, *args, **kwargs):
+        kwargs["REQUEST_METHOD"] = "PATCH"
+        return super(PatchClient, self).post(*args, **kwargs)
+
+
 class APITestCase(TestCase):
 
     def setUp(self):
@@ -22,7 +28,7 @@ class APITestCase(TestCase):
             password=self.password
         )
         user.save()
-        self.client = Client()
+        self.client = PatchClient()
 
     def test_no_api_key(self):
         res = self.client.post('/images/api/new')
@@ -63,22 +69,10 @@ class APITestCase(TestCase):
         self.assertEqual(image.credit, "Playboy")
 
         # Now let's test that a JPEG crop will return properly.
-        res = self.client.get('/images/%s/1x1/256.jpg' % image.id)
+        res = self.client.get('/images/%s/1x1/240.jpg' % image.id)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res['Content-Type'], 'image/jpeg')
-        self.assertTrue(os.path.exists(os.path.join(image.path(), '1x1', '256.jpg')))
-
-        # Now let's test that a PNG crop will return properly.
-        res = self.client.get('/images/%s/1x1/256.png' % image.id)
-        self.assertEqual(res['Content-Type'], 'image/png')
-        self.assertEqual(res.status_code, 200)
-        self.assertTrue(os.path.exists(os.path.join(image.path(), '1x1', '256.png')))
-
-        # Finally, let's test an "original" crop
-        res = self.client.get('/images/%s/original/256.jpg' % image.id)
-        self.assertEqual(res['Content-Type'], 'image/jpeg')
-        self.assertEqual(res.status_code, 200)
-        self.assertTrue(os.path.exists(os.path.join(image.path(), 'original', '256.jpg')))
+        self.assertTrue(os.path.exists(os.path.join(image.path(), '1x1', '240.jpg')))
 
     def test_update_selection(self):
         assert self.client.login(username="admin", password=self.password)

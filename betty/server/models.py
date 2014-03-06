@@ -168,14 +168,17 @@ class Image(models.Model):
             img_blob = img.make_blob()
 
             ratio_dir = os.path.join(self.path(), ratio.string)
-            try:
-                os.makedirs(ratio_dir)
-            except OSError as e:
-                if e.errno != 17:
-                    raise e
 
-            with open(os.path.join(ratio_dir, "%d.%s" % (width, extension)), 'w+') as out:
-                out.write(img_blob)
+            if width in settings.BETTY_WIDTHS:
+                # We only want to save this to the filesystem if it's one of our usual widths.
+                try:
+                    os.makedirs(ratio_dir)
+                except OSError as e:
+                    if e.errno != 17:
+                        raise e
+
+                with open(os.path.join(ratio_dir, "%d.%s" % (width, extension)), 'w+') as out:
+                    out.write(img_blob)
             return img_blob
 
     def to_native(self):

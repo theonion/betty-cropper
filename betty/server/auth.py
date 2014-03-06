@@ -2,6 +2,7 @@ import base64
 import hashlib
 import random
 
+import django
 from django.db import models
 from django.db.models.manager import EmptyManager
 from django.contrib.auth.models import Group
@@ -14,7 +15,10 @@ class BettyCropperUser(object):
     is_staff = False
     is_active = False
     is_superuser = False
-    _groups = EmptyManager(Group)
+    if django.VERSION[1] < 6:
+        _groups = EmptyManager()
+    else:
+        _groups = EmptyManager(Group)
 
     def __init__(self, permissions):
         self._permissions = permissions
