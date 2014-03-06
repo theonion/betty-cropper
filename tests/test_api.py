@@ -3,8 +3,8 @@ import json
 import shutil
 
 from django.test import TestCase, Client
-from django.contrib.auth import get_user_model
-User = get_user_model()
+
+from django.contrib.auth.models import User
 
 from betty.conf.app import settings
 from betty.server.models import Image
