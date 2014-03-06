@@ -53,7 +53,7 @@ class APITestCase(TestCase):
         with open(lenna_path, "rb") as lenna:
             data = {"image": lenna, "name": "LENNA DOT PNG", "credit": "Playboy"}
             res = self.client.post('/images/api/new', data)
-
+        print(res.content.decode("utf-8"))
         self.assertEqual(res.status_code, 200)
         response_json = json.loads(res.content.decode("utf-8"))
         self.assertEqual(response_json.get('name'), 'LENNA DOT PNG')
