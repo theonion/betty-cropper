@@ -138,48 +138,47 @@ class Image(models.Model):
         return os.path.join(settings.BETTY_IMAGE_ROOT, id_string[1:])
 
     def crop(self, ratio, width, extension):
-        source_file = open(self.src_path(), 'r')
-
-        with WandImage(file=source_file) as img:
-            if ratio.string == 'original':
-                ratio.width = img.size[0]
-                ratio.height = img.size[1]
-
-            selection = self.get_selection(ratio)
-            try:
-                img.crop(selection['x0'], selection['y0'], selection['x1'], selection['y1'])
-            except ValueError:
-                # Looks like we have bad height and width data. Let's reload that and try again.
-                self.width = img.size[0]
-                self.height = img.size[1]
-                self.save()
+        with open(self.src_path(), 'rb') as source_file:
+            with WandImage(file=source_file) as img:
+                if ratio.string == 'original':
+                    ratio.width = img.size[0]
+                    ratio.height = img.size[1]
 
                 selection = self.get_selection(ratio)
-                img.crop(selection['x0'], selection['y0'], selection['x1'], selection['y1'])
-
-            img.transform(resize='%dx' % width)
-
-            if extension == 'jpg':
-                img.format = 'jpeg'
-                img.compression_quality = 80
-            if extension == 'png':
-                img.format = 'png'
-
-            img_blob = img.make_blob()
-
-            ratio_dir = os.path.join(self.path(), ratio.string)
-
-            if width in settings.BETTY_WIDTHS:
-                # We only want to save this to the filesystem if it's one of our usual widths.
                 try:
-                    os.makedirs(ratio_dir)
-                except OSError as e:
-                    if e.errno != 17:
-                        raise e
+                    img.crop(selection['x0'], selection['y0'], selection['x1'], selection['y1'])
+                except ValueError:
+                    # Looks like we have bad height and width data. Let's reload that and try again.
+                    self.width = img.size[0]
+                    self.height = img.size[1]
+                    self.save()
 
-                with open(os.path.join(ratio_dir, "%d.%s" % (width, extension)), 'w+') as out:
-                    out.write(img_blob)
-            return img_blob
+                    selection = self.get_selection(ratio)
+                    img.crop(selection['x0'], selection['y0'], selection['x1'], selection['y1'])
+
+                img.transform(resize='%dx' % width)
+
+                if extension == 'jpg':
+                    img.format = 'jpeg'
+                    img.compression_quality = 80
+                if extension == 'png':
+                    img.format = 'png'
+
+                img_blob = img.make_blob()
+
+                ratio_dir = os.path.join(self.path(), ratio.string)
+
+                if width in settings.BETTY_WIDTHS:
+                    # We only want to save this to the filesystem if it's one of our usual widths.
+                    try:
+                        os.makedirs(ratio_dir)
+                    except OSError as e:
+                        if e.errno != 17:
+                            raise e
+
+                    with open(os.path.join(ratio_dir, "%d.%s" % (width, extension)), 'w+') as out:
+                        out.write(img_blob)
+                return img_blob
 
     def to_native(self):
         """Returns a Python dictionary, sutiable for Serialization"""
