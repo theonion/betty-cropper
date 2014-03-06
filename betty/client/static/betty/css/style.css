@@ -1,6 +1,11 @@
-.results {
-    list-style-type: none;
+.hide-overflow { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+#results { padding: 10px 0 0; }
+#results li {
+text-align: center;
+margin-bottom: 10px;
 }
+#results li img { max-width: 100%;}
+#results li a + div { padding-top: 5px; }
 
 
 /* Upload modal stuff*/

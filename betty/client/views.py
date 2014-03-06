@@ -27,7 +27,7 @@ def search(request):
     if request.GET.get("q", "") != "":
         queryset = queryset.filter(name__icontains=request.GET.get("q"))
 
-    paginator = Paginator(queryset, 48)
+    paginator = Paginator(queryset, 24)
     page = request.GET.get('page')
     try:
         images = paginator.page(page)

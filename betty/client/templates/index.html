@@ -57,38 +57,37 @@
 				</a>
 			</div>
 		</nav>
+		<div id="results" class="row">
 
-		<div class="container">
-			<ul class="results row">
+			<ul id="scroll" class="list-unstyled container-fluid">
 
 				{% for image in images %}
 				<li class="col-xs-6 col-sm-3 col-md-2">
-					<a data-toggle="modal" href="crop.html" data-target="#crop-modal" class="thumbnail">
+					<a data-toggle="modal" href="crop.html" data-target="#crop-modal" class="img-thumbnail">
 						<img src="/{{ image.id }}/1x1/180.jpg" alt="testing">
 					</a>
+					<div id="detail-{{ image.id }}" class="small muted hide-overflow">
+						<span class="name" title="{{ image.name }}">{{ image.name }}</span> <br /> <span class="dimensions">{{ image.width }} x {{ image.height }}</span>
+					</div>
 				</li>
 				{% endfor %}
 
 			</ul>
 
-			<div class="row">
-				<ul class="pagination">
+			<ul id="pagination" class="pagination">
 
-					{% if images.has_previous %}
-					<li><a href="?page={{ images.previous_page_number }}">&laquo;</a></li>
-					{% endif %}
+				{% if images.has_previous %}
+				<li><a id="prev" href="?page={{ images.previous_page_number }}">&laquo;</a></li>
+				{% endif %}
 
-					{% for page_number in images.paginator.page_range %}
-					<li><a href="?page={{ page_number }}">{{ page_number }}</a></li>
-					{% endfor %}
+				{% if images.has_next %}
+				<li><a id="next" href="?page={{ images.next_page_number }}">&raquo;</a></li>
+				{% endif %}
 
-					{% if images.has_next %}
-					<li><a href="?page={{ images.next_page_number }}">&raquo;</a></li>
-					{% endif %}
+			</ul>
 
-				</ul>
-			</div>
 		</div>
+				
 
 		<div class="modal fade" id="upload-modal" tabindex="-1" role="dialog">
 			<div class="modal-dialog">
@@ -106,8 +105,23 @@
 
 	<script src="{{ STATIC_URL }}betty/js/jquery.min.js"></script>
 	<script src="{{ STATIC_URL }}betty/js/bootstrap.min.js"></script>
+	<script src="{{ STATIC_URL }}betty/js/jquery.infinitescroll.min.js"></script>
 	<script src="{{ STATIC_URL }}betty/js/index.js"></script>
 	<script src="{{ STATIC_URL }}betty/js/upload.js"></script>
+
+
+	<script>
+	
+	
+	$('#scroll').infinitescroll({
+		navSelector  	: "#pagination",
+		nextSelector 	: "a#next",
+		itemSelector 	: "#scroll li",
+		animate			: true,
+		donetext		: "End of available images."
+    });
+	</script>
+
 
 	</body>
 </html>
