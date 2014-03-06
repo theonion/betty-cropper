@@ -3,8 +3,6 @@ import shutil
 
 from django.test import TestCase, Client
 from django.core.files import File
-from django.contrib.auth import get_user_model
-User = get_user_model()
 
 from betty.conf.app import settings
 from betty.server.models import Image, Ratio
