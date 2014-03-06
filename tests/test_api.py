@@ -155,7 +155,8 @@ class APITestCase(TestCase):
             res = self.client.post('/images/api/new', {"image": lenna})
 
         self.assertEqual(res.status_code, 200)
-        response_json = json.loads(res.content)
+        json_string = res.content.encode("utf-8")
+        response_json = json.loads(json_string)
         self.assertEqual(response_json.get("name"), "Lenna.png")
         self.assertEqual(response_json.get("width"), 512)
         self.assertEqual(response_json.get("height"), 512)

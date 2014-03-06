@@ -91,7 +91,7 @@ def update_selection(request, image_id, ratio_slug):
         return HttpResponseNotFound(message, content_type="application/json")
 
     try:
-        request_json = json.loads(request.body)
+        request_json = json.loads(request.body.encode("utf-8"))
     except Exception:
         message = json.dumps({"message": "Bad JSON"})
         return HttpResponseBadRequest(message, content_type="application/json")
@@ -156,7 +156,7 @@ def detail(request, image_id):
             return HttpResponseNotFound(message, content_type="application/json")
 
         try:
-            request_json = json.loads(request.body)
+            request_json = json.loads(request.body.encode("utf-8"))
         except Exception:
             message = json.dumps({"message": "Bad Request"})
             return HttpResponseBadRequest(message, content_type="application/json")

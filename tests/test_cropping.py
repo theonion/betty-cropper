@@ -142,7 +142,7 @@ class ImageSavingTestCase(TestCase):
             width=512,
             height=512
         )
-        lenna = File(open(os.path.join(TEST_DATA_PATH, "Lenna.png"), "r"))
+        lenna = File(open(os.path.join(TEST_DATA_PATH, "Lenna.png"), "rb"))
         image.source.save("Lenna.png", lenna)
 
         # Now let's test that a JPEG crop will return properly.

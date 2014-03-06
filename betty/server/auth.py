@@ -81,8 +81,9 @@ class BettyCropperUser(object):
 
 
 class ApiTokenManager(models.Manager):
+
     def random_token(self):
-        random_256 = hashlib.sha256(str(random.getrandbits(256))).digest()
+        random_256 = hashlib.sha256(str(random.getrandbits(256)).encode("utf-8")).digest()
         random_encode = random.choice(['rA', 'aZ', 'gQ', 'hH', 'hG', 'aR', 'DD'])
         return base64.b64encode(random_256, random_encode).rstrip('==')
 
