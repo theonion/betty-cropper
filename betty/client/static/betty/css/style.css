@@ -57,8 +57,12 @@
   }
 }
 
-
-@media (min-width: 768px) { .collapse { display: block; } }
+@media (max-width: 767px) { 
+  #search-images { padding: 0 10px 10px; clear: both; } 
+  .visible-xs .btn-group { padding: 10px; }}
+@media (min-width: 768px) { 
+  .collapse { display: block; } 
+  #search-nav { padding: 10px 0; }}
 
 
 

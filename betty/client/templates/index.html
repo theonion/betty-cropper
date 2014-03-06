@@ -11,7 +11,18 @@
 	<body>
 	<div class="body container-fluid">
 
-		<nav class="row" role="navigation">
+		<nav id="search-nav" class="row" role="navigation">
+
+			<div class="visible-xs">
+				<div class="btn-group btn-group-lg pull-right">
+					<a title="Toggle search" class="btn btn-default" data-toggle="collapse" data-target="#search-images">
+						<span class="glyphicon glyphicon-search"></span>
+					</a>
+					<a data-toggle="modal" href="upload.html" title="Add new images" data-target="#upload-modal" class="btn btn-default">
+						<span class="glyphicon glyphicon-plus"></span>
+					</a>
+				</div>
+			</div>
 
 			<form role="search" class="collapse col-sm-7" id="search-images">
 				<div class="input-group">
@@ -44,17 +55,6 @@
 				<a data-toggle="modal" href="upload.html" title="Add new images" data-target="#upload-modal" class="btn btn-primary">
 					<span class="glyphicon glyphicon-plus"></span>
 				</a>
-			</div>
-
-			<div class="visible-xs">
-				<div class="btn-group btn-group-lg">
-					<a title="Toggle search" class="btn btn-default" data-toggle="collapse" data-target="#search-images">
-						<span class="glyphicon glyphicon-search"></span>
-					</a>
-					<a data-toggle="modal" href="upload.html" title="Add new images" data-target="#upload-modal" class="btn btn-default">
-						<span class="glyphicon glyphicon-plus"></span>
-					</a>
-				</div>
 			</div>
 		</nav>
 
@@ -108,6 +108,6 @@
 	<script src="{{ STATIC_URL }}betty/js/bootstrap.min.js"></script>
 	<script src="{{ STATIC_URL }}betty/js/index.js"></script>
 	<script src="{{ STATIC_URL }}betty/js/upload.js"></script>
-	
+
 	</body>
 </html>
