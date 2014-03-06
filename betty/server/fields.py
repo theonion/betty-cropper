@@ -1,7 +1,14 @@
-import json
+try:
+    import json
+except ImportError:
+    from django.utils import simplejson as json
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
+try:
+    from django.utils import six
+except ImportError:
+    import six
 
 # South support.
 try:
@@ -35,7 +42,7 @@ class JSONField(models.TextField):
             return None
 
         try:
-            if isinstance(value, basestring):
+            if isinstance(value, six.string_types):
                 return json.loads(value)
         except ValueError:
             pass
