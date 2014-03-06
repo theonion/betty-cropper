@@ -70,7 +70,7 @@ def crop(request, id, ratio_slug, width, extension):
     try:
         image_blob = image.crop(ratio, width, extension)
     except Exception:
-        raise
+        return HttpResponseServerError("Cropping error")
 
     resp = HttpResponse(image_blob)
     resp["Content-Type"] = EXTENSION_MAP[extension]["mime_type"]
