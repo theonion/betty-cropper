@@ -21,7 +21,7 @@ SIZE_MAP = {
 
 @login_required
 def search(request):
-    queryset = Image.objects.all()
+    queryset = Image.objects.all().order_by('-id')
     if request.GET.get("size", "all") in SIZE_MAP:
         queryset = queryset.filter(**SIZE_MAP[request.GET["size"]])
     if request.GET.get("q", "") != "":

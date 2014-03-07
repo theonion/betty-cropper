@@ -5,8 +5,11 @@ text-align: center;
 margin-bottom: 10px;
 }
 #results li img { max-width: 100%;}
-#results li a + div { padding-top: 5px; }
 
+#results .popover { min-width: 150px;}
+#results .popover dt { margin-top: 5px; }
+#results .popover dt:first-child { margin-top: 0; }
+.details {  }
 
 /* Upload modal stuff*/
 #upload-modal .upload-well {

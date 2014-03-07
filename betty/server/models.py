@@ -6,7 +6,9 @@ from django.core.files.storage import FileSystemStorage
 from wand.image import Image as WandImage
 
 from betty.conf.app import settings
-from jsonfield import JSONField
+
+# from jsonfield import JSONField -- not working for me ~scook
+from .fields import JSONField
 
 
 betty_storage = FileSystemStorage(

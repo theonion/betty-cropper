@@ -66,8 +66,26 @@
 					<a data-toggle="modal" href="crop.html" data-target="#crop-modal" class="img-thumbnail">
 						<img src="/{{ image.id }}/1x1/180.jpg" alt="testing">
 					</a>
-					<div id="detail-{{ image.id }}" class="small muted hide-overflow">
-						<span class="name" title="{{ image.name }}">{{ image.name }}</span> <br /> <span class="dimensions">{{ image.width }} x {{ image.height }}</span>
+
+					<div id="detail-{{ image.id }}" class="hidden details">
+						<dl class="small muted">
+
+							<dt class="">Name:</dt>
+							<dd class="hide-overflow" title="{{ image.name }}">{{ image.name }}</dd>
+
+							<dt class="">Credit:</dt>
+							<dd class="">{{ image.credit }}</dd>
+
+							<dt class="">Size:</dt>
+							<dd class="">{{ image.width }} x {{ image.height }}</dd>
+
+							<dt class="">Added:</dt>
+							<dd class="hide-overflow" title="xxx">xxx</dd>
+
+							<dt class="">Uploader:</dt>
+							<dd class="hide-overflow" title="xxx">xxx</dd>
+
+						</dl>
 					</div>
 				</li>
 				{% endfor %}
@@ -108,20 +126,5 @@
 	<script src="{{ STATIC_URL }}betty/js/jquery.infinitescroll.min.js"></script>
 	<script src="{{ STATIC_URL }}betty/js/index.js"></script>
 	<script src="{{ STATIC_URL }}betty/js/upload.js"></script>
-
-
-	<script>
-	
-	
-	$('#scroll').infinitescroll({
-		navSelector  	: "#pagination",
-		nextSelector 	: "a#next",
-		itemSelector 	: "#scroll li",
-		animate			: true,
-		donetext		: "End of available images."
-    });
-	</script>
-
-
 	</body>
 </html>

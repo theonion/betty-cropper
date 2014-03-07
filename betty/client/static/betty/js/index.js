@@ -1,4 +1,14 @@
+$('#scroll').infinitescroll({
+    navSelector     : "#pagination",
+    nextSelector    : "a#next",
+    itemSelector    : "#scroll li",
+    animate         : true,
+    donetext        : "End of available images."
+},function(){ initPopover(); });
+
 $(document).ready(function(){
+    initPopover();
+
     $('#upload-modal').on("loaded.bs.modal", function(e){
         initUploadModal(this);
     });
@@ -17,3 +27,14 @@ $(document.body).on('click', '#size-select li', function (event) {
         .children('.dropdown-toggle').dropdown('toggle');
     return false;
 });
+
+function initPopover() {
+    $('#results li a').popover({ 
+        html : true,
+        content: function() { return $(this).next('.details').html(); },
+        trigger: 'hover', // Need 2 figure out something to do at mobile bc no hover
+        placement: 'auto',
+        delay: { show: 500, hide: 100 },
+        title: 'Details'
+    });
+}
