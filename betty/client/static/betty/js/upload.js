@@ -73,6 +73,7 @@ function initUploadModal(el){
             contentType: false,
             success: function(data, textStatus, xhr){
                 $("#upload-modal").modal("hide");
+                window.location.reload();
             }
         });
     });
