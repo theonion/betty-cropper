@@ -87,6 +87,10 @@ function initUploadModal(el){
     });
 }
 
+$('#upload-modal').on('show.bs.modal', function (e) {
+    $('.alert').alert('close'); // hide the alerts on modal open
+})
+
 function clearUploadModal(el) {
     $(el).find(".image-form").hide();
     $(el).find(".upload-form").show();
