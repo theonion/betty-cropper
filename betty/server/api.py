@@ -3,6 +3,7 @@ import os
 import copy
 import shutil
 
+import django
 from django.http import (
     HttpResponse,
     HttpResponseNotAllowed,
@@ -90,7 +91,7 @@ def update_selection(request, image_id, ratio_slug):
         return HttpResponseNotFound(message, content_type="application/json")
 
     try:
-        request_json = json.loads(request.body)
+        request_json = json.loads(request.body.decode("utf-8"))
     except Exception:
         message = json.dumps({"message": "Bad JSON"})
         return HttpResponseBadRequest(message, content_type="application/json")
@@ -155,17 +156,15 @@ def detail(request, image_id):
             return HttpResponseNotFound(message, content_type="application/json")
 
         try:
-            request_json = json.loads(request.body)
+            request_json = json.loads(request.body.decode("utf-8"))
         except Exception:
             message = json.dumps({"message": "Bad Request"})
             return HttpResponseBadRequest(message, content_type="application/json")
 
-        update_fields = []
         for field in ("name", "credit", "selections"):
             if field in request_json:
                 setattr(image, field, request_json[field])
-                update_fields.append(field)
-        image.save(update_fields=update_fields)
+        image.save()
 
         return HttpResponse(json.dumps(image.to_native()), content_type="application/json")
 

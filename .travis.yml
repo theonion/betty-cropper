@@ -18,12 +18,12 @@ cache:
     - $HOME/.pip-cache/
 install:
   - pip install django==$DJANGO_VERSION
-  - pip install -r requirements-dev.txt --download-cache $HOME/.pip-cache
+  - pip install --download-cache $HOME/.pip-cache -r requirements-dev.txt
 script:
   - py.test tests/ --cov betty --cov-report term-missing
-  - flake8 --count
 after_success:
   - coveralls
 notifications:
   email:
     - csinchok@theonion.com
+  on_failure: change

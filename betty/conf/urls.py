@@ -1,4 +1,7 @@
-import urlparse
+try:
+    from urlparse import urlparse
+except ImportError:
+    from urllib.parse import urlparse
 
 from .app import settings
 from django.conf.urls.static import static
@@ -10,7 +13,7 @@ except ImportError:
     from django.conf.urls.defaults import include, patterns, url  # noqa
 
 
-image_path = urlparse.urlparse(settings.BETTY_IMAGE_URL).path
+image_path = urlparse(settings.BETTY_IMAGE_URL).path
 if image_path.startswith("/"):
     image_path = image_path[1:]
 

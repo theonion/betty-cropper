@@ -3,8 +3,6 @@ import shutil
 
 from django.test import TestCase, Client
 from django.core.files import File
-from django.contrib.auth import get_user_model
-User = get_user_model()
 
 from betty.conf.app import settings
 from betty.server.models import Image, Ratio
@@ -144,29 +142,29 @@ class ImageSavingTestCase(TestCase):
             width=512,
             height=512
         )
-        lenna = File(open(os.path.join(TEST_DATA_PATH, "Lenna.png"), "r"))
+        lenna = File(open(os.path.join(TEST_DATA_PATH, "Lenna.png"), "rb"))
         image.source.save("Lenna.png", lenna)
 
         # Now let's test that a JPEG crop will return properly.
-        res = self.client.get('/images/%s/1x1/240.jpg' % image.id)
+        res = self.client.get('/images/{}/1x1/240.jpg'.format(image.id))
         self.assertEqual(res['Content-Type'], 'image/jpeg')
         self.assertEqual(res.status_code, 200)
         self.assertTrue(os.path.exists(os.path.join(image.path(), '1x1', '240.jpg')))
 
         # Now let's test that a PNG crop will return properly.
-        res = self.client.get('/images/%s/1x1/240.png' % image.id)
+        res = self.client.get('/images/{}/1x1/240.png'.format(image.id))
         self.assertEqual(res['Content-Type'], 'image/png')
         self.assertEqual(res.status_code, 200)
         self.assertTrue(os.path.exists(os.path.join(image.path(), '1x1', '240.png')))
 
         # Let's test an "original" crop
-        res = self.client.get('/images/%s/original/240.jpg' % image.id)
+        res = self.client.get('/images/{}/original/240.jpg'.format(image.id))
         self.assertEqual(res['Content-Type'], 'image/jpeg')
         self.assertEqual(res.status_code, 200)
         self.assertTrue(os.path.exists(os.path.join(image.path(), 'original', '240.jpg')))
 
         # Finally, let's test a width that doesn't exist
-        res = self.client.get('/images/%s/original/666.jpg' % image.id)
+        res = self.client.get('/images/{}/original/666.jpg'.format(image.id))
         self.assertEqual(res['Content-Type'], 'image/jpeg')
         self.assertEqual(res.status_code, 200)
         self.assertFalse(os.path.exists(os.path.join(image.path(), 'original', '666.jpg')))

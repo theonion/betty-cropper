@@ -3,8 +3,8 @@ import json
 import shutil
 
 from django.test import TestCase, Client
-from django.contrib.auth import get_user_model
-User = get_user_model()
+
+from django.contrib.auth.models import User
 
 from betty.conf.app import settings
 from betty.server.models import Image
@@ -50,12 +50,11 @@ class APITestCase(TestCase):
         assert self.client.login(username="admin", password=self.password)
 
         lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
-        with open(lenna_path, 'r') as lenna:
+        with open(lenna_path, "rb") as lenna:
             data = {"image": lenna, "name": "LENNA DOT PNG", "credit": "Playboy"}
             res = self.client.post('/images/api/new', data)
-
         self.assertEqual(res.status_code, 200)
-        response_json = json.loads(res.content)
+        response_json = json.loads(res.content.decode("utf-8"))
         self.assertEqual(response_json.get('name'), 'LENNA DOT PNG')
         self.assertEqual(response_json.get('credit'), 'Playboy')
         self.assertEqual(response_json.get('width'), 512)
@@ -69,9 +68,9 @@ class APITestCase(TestCase):
         self.assertEqual(image.credit, "Playboy")
 
         # Now let's test that a JPEG crop will return properly.
-        res = self.client.get('/images/%s/1x1/240.jpg' % image.id)
+        res = self.client.get("/images/{}/1x1/240.jpg".format(image.id))
         self.assertEqual(res.status_code, 200)
-        self.assertEqual(res['Content-Type'], 'image/jpeg')
+        self.assertEqual(res["Content-Type"], "image/jpeg")
         self.assertTrue(os.path.exists(os.path.join(image.path(), '1x1', '240.jpg')))
 
     def test_update_selection(self):
@@ -144,18 +143,18 @@ class APITestCase(TestCase):
 
         res = self.client.get('/images/api/search?q=blergh')
         self.assertEqual(res.status_code, 200)
-        results = json.loads(res.content)
+        results = json.loads(res.content.decode("utf-8"))
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]["id"], image.id)
 
     def test_bad_image_data(self):
         assert self.client.login(username="admin", password=self.password)
         lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
-        with open(lenna_path, 'r') as lenna:
+        with open(lenna_path, "rb") as lenna:
             res = self.client.post('/images/api/new', {"image": lenna})
 
         self.assertEqual(res.status_code, 200)
-        response_json = json.loads(res.content)
+        response_json = json.loads(res.content.decode("utf-8"))
         self.assertEqual(response_json.get("name"), "Lenna.png")
         self.assertEqual(response_json.get("width"), 512)
         self.assertEqual(response_json.get("height"), 512)
