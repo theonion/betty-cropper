@@ -2,7 +2,7 @@ function showMessage(message, messageClass) {
     message = message || "An unknown error occurred";
     messageClass = messageClass || "danger";
     var error = $('<div class="alert alert-' + messageClass + '">' + message + '</div>');
-    var x = $('<button type="button" class="close" aria-hidden="true">&times;</button>');
+    var x = $('<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>');
     error.append(x);
 
     $(".modal-body").prepend(error);
@@ -49,13 +49,13 @@ function processFile(file){
 
 
 function initUploadModal(el){
-    $(".image-form").submit(function(e){
+    $("#upload-image").submit(function(e){
         e.preventDefault();
 
-        var name = $(".image-form .name input").val();
-        var credit = $(".image-form .credit input").val();
+        var name = $("#upload-image .name input").val();
+        var credit = $("#upload-image .credit input").val();
         if(name == "") {
-            $(".image-form .name").addClass("has-error");
+            $("#upload-image .name").addClass("has-error");
         }
 
         var data = new FormData();
