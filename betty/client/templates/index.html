@@ -36,13 +36,16 @@
 						<ul class="dropdown-menu" role="menu">
 							<li><a href="#" data-title="all">All sizes</a></li>
 							<li class="divider"></li>
-							<li><a href="#" data-title="large">Large</a></li>
-							<li><a href="#" data-title="medium">Medium</a></li>
-							<li><a href="#" data-title="small">Small</a></li>
+							<li><a href="#" data-title="large">Large 
+								<small class="pull-right text-muted">&gt; 1024px</small></a></li>
+							<li><a href="#" data-title="medium">Medium
+								<small class="pull-right text-muted">400 &ndash; 1024px</small></a></li>
+							<li><a href="#" data-title="small">Small
+								<small class="pull-right text-muted">&lt; 400px</small></a></li>
 						</ul>
 					</div>
 					
-					<input type="text" class="form-control" name="q" placeholder="{{ q|default:"Search..." }}">
+					<input type="text" class="form-control" name="q" placeholder="{{ q|default:"Search titles..." }}">
 					<span class="input-group-btn">
 						<button title="Search for images" type="submit" class="btn btn-default ">
 							<span class="glyphicon glyphicon-search"></span>
@@ -59,16 +62,19 @@
 		</nav>
 		<div id="results" class="row">
 
-			<ul id="scroll" class="list-unstyled container-fluid">
+			<ul id="scroll" class="list-unstyled container-fluid media-list">
 
 				{% for image in images %}
-				<li class="col-xs-6 col-sm-3 col-md-2">
-					<a data-toggle="modal" href="crop.html" data-target="#crop-modal" class="img-thumbnail">
-						<img src="/{{ image.id }}/1x1/180.jpg" alt="testing">
-					</a>
+				<li class="col-xs-12 col-sm-3 col-md-2 media">
 
-					<div id="detail-{{ image.id }}" class="hidden details">
-						<dl class="small muted">
+					<div class="pull-left">
+						<a data-toggle="modal" href="crop.html" data-target="#crop-modal" class="img-thumbnail">
+							<img src="/{{ image.id }}/1x1/180.jpg" alt="testing">
+						</a>
+					</div>
+
+					<div id="detail-{{ image.id }}" class="details media-body">
+						<dl class="small text-left">
 
 							<dt class="">Name:</dt>
 							<dd class="hide-overflow" title="{{ image.name }}">{{ image.name }}</dd>

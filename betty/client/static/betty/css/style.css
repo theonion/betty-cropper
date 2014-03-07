@@ -5,11 +5,12 @@ text-align: center;
 margin-bottom: 10px;
 }
 #results li img { max-width: 100%;}
-
+.details { display: block; }
 #results .popover { min-width: 150px;}
 #results .popover dt { margin-top: 5px; }
 #results .popover dt:first-child { margin-top: 0; }
-.details {  }
+
+#size-select .dropdown-menu { min-width: 200px; }
 
 /* Upload modal stuff*/
 #upload-modal .upload-well {
@@ -27,6 +28,8 @@ margin-bottom: 10px;
 #upload-modal input.image-picker {
     display: none;
 }
+
+
 
 .spin {
   -webkit-animation: spin 2s infinite linear;
@@ -67,8 +70,11 @@ margin-bottom: 10px;
 
 @media (max-width: 767px) { 
   #search-images { padding: 0 10px 10px; clear: both; } 
-  .visible-xs .btn-group { padding: 10px; }}
+  .visible-xs .btn-group { padding: 10px; } 
+  .popover { display: none !important; } }
 @media (min-width: 768px) { 
+  .details { display: none; }
+  #results .media, #results .media-body { overflow: visible; }
   .collapse { display: block; } 
   #search-nav { padding: 10px 0; }}
 

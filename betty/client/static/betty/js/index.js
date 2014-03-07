@@ -31,8 +31,8 @@ $(document.body).on('click', '#size-select li', function (event) {
 function initPopover() {
     $('#results li a').popover({ 
         html : true,
-        content: function() { return $(this).next('.details').html(); },
-        trigger: 'hover', // Need 2 figure out something to do at mobile bc no hover
+        content: function() { return $(this).closest('li').find('.details').html(); },
+        trigger: 'hover', 
         placement: 'auto',
         delay: { show: 500, hide: 100 },
         title: 'Details'
