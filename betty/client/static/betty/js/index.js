@@ -6,6 +6,17 @@ $('#scroll').infinitescroll({
     donetext        : "End of available images."
 },function(){ initPopover(); });
 
+$(window).unbind('.infscr');
+
+$("#next-trigger .btn").click(function(){
+    $('#scroll').infinitescroll('retrieve');
+    return false;
+});
+
+$(document).ajaxError(function (e, xhr, opt) {
+    if (xhr.status == 404) $('a#next').remove();
+});
+
 $(document).ready(function(){
     initPopover();
 

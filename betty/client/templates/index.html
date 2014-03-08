@@ -97,8 +97,12 @@
 				{% endfor %}
 
 			</ul>
+			
+			<p class="text-center" id="next-trigger">			
+				<a class="btn btn-primary btn-lg">More images</a>
+			</p>
 
-			<ul id="pagination" class="pagination">
+			<ul id="pagination" class="hidden pagination">
 
 				{% if images.has_previous %}
 				<li><a id="prev" href="?page={{ images.previous_page_number }}">&laquo;</a></li>
@@ -130,6 +134,7 @@
 	<script src="{{ STATIC_URL }}betty/js/jquery.min.js"></script>
 	<script src="{{ STATIC_URL }}betty/js/bootstrap.min.js"></script>
 	<script src="{{ STATIC_URL }}betty/js/jquery.infinitescroll.min.js"></script>
+	<script src="{{ STATIC_URL }}betty/js/manual-trigger.js"></script>
 	<script src="{{ STATIC_URL }}betty/js/index.js"></script>
 	<script src="{{ STATIC_URL }}betty/js/upload.js"></script>
 	</body>
