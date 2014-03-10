@@ -6,8 +6,7 @@ from django.core.files.storage import FileSystemStorage
 from wand.image import Image as WandImage
 
 from betty.conf.app import settings
-from .auth import ApiToken  # noqa
-from jsonfield import JSONField
+
 
 
 betty_storage = FileSystemStorage(

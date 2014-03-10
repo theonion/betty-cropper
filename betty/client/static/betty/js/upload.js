@@ -1,11 +1,11 @@
 function showMessage(message, messageClass) {
-    message = message || "An unknown error occurred";
-    messageClass = messageClass || "danger";
+    message = message || 'An unknown error occurred';
+    messageClass = messageClass || 'danger';
     var error = $('<div class="alert alert-' + messageClass + '">' + message + '</div>');
-    var x = $('<button type="button" class="close" aria-hidden="true">&times;</button>');
+    var x = $('<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>');
     error.append(x);
 
-    $(".modal-body").prepend(error);
+    $('.modal-body').prepend(error);
     error.slideDown();
     var errorTimeout = window.setTimeout(function(){
         error.slideUp(function(){$(this).remove();})
@@ -19,26 +19,27 @@ function showMessage(message, messageClass) {
 }
 
 function processFile(file){
-    var previewEl = $(".preview")[0];
+    var previewEl = $('.preview')[0];
     previewEl.onload = function(e){
-        $(".upload-form").hide();
-        $(".image-form").show();
+        $('.upload-form').hide();
+        $('.image-form').show();
+        $('.name-input').focus();
 
         if(this.width < 1000) {
-            showMessage("<strong>Small Image!</strong> This image is pretty small, and may look pixelated.");
+            showMessage('<strong>Small image!</strong> This image is pretty small, and may look pixelated.');
         }
 
-        var name = file.name.split(".")[0];
+        var name = file.name.split('.')[0];
 
-        $(".name-input").val(name);
-        $(".upload-button").removeAttr("disabled");
+        $('.name-input').val(name);
+        $('.upload-button').removeAttr('disabled');
     }
     previewEl.onerror = function(){
-        console.log("Error!");
-        $(".image-form").hide();
-        $(".upload-form").show();
+        console.log('Error!');
+        $('.image-form').hide();
+        $('.upload-form').show();
 
-        showMessage("<strong>Whoops!</strong> It looks like that isn't a valid image.");
+        showMessage('<strong>Whoops!</strong> It looks like that isn\'t a valid image.');
     }
     var reader = new FileReader();
     reader.onload = function(e){
@@ -49,37 +50,38 @@ function processFile(file){
 
 
 function initUploadModal(el){
-    $(".image-form").submit(function(e){
+    $('#upload-image').submit(function(e){
         e.preventDefault();
 
-        var name = $(".image-form .name input").val();
-        var credit = $(".image-form .credit input").val();
-        if(name == "") {
-            $(".image-form .name").addClass("has-error");
+        var name = $('#upload-image .name input').val();
+        var credit = $('#upload-image .credit input').val();
+        if(name == '') {
+            $('#upload-image .name').addClass('has-error');
         }
 
         var data = new FormData();
-        var file = $(".image-picker")[0].files[0];
-        data.append("image", file);
-        data.append("name", name);
-        if (credit !== "") {
-            data.append("credit", credit);
+        var file = $('.image-picker')[0].files[0];
+        data.append('image', file);
+        data.append('name', name);
+        if (credit !== '') {
+            data.append('credit', credit);
         }
         $.ajax({
             url: this.action,
-            type: "POST",
+            type: 'POST',
             data: data,
             processData: false,
             contentType: false,
             success: function(data, textStatus, xhr){
-                $("#upload-modal").modal("hide");
+                $('#upload-modal').modal('hide');
+                window.location.reload();
             }
         });
     });
-    $(".upload-well").click(function(){
-        $(".image-picker").click();
+    $('.upload-well').click(function(){
+        $('.image-picker').click();
     });
-    $(".image-picker").change(function(){
+    $('.image-picker').change(function(){
         if (this.files.length == 1) {
             var file = this.files[0];
             processFile(file);
@@ -87,10 +89,14 @@ function initUploadModal(el){
     });
 }
 
-function clearUploadModal(el) {
-    $(el).find(".image-form").hide();
-    $(el).find(".upload-form").show();
+$('#upload-modal').on('show.bs.modal', function (e) {
+    $('.alert').alert('close'); // hide the alerts on modal open
+})
 
-    var previewEl = $(".preview")[0];
+function clearUploadModal(el) {
+    $(el).find('.image-form').hide();
+    $(el).find('.upload-form').show();
+
+    var previewEl = $('.preview')[0];
     previewEl.src = null;
 }
