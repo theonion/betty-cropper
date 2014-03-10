@@ -10,19 +10,13 @@ from betty.server.auth import ApiToken
 class CreateTokenTestCase(TestCase):
 
     def test_create_token(self):
-        with io.BytesIO() as f:
-            management.call_command("create_token", stdout=f)
-            self.assertEqual(ApiToken.objects.count(), 1)
-
-            self.assertTrue("Public token: " in f.getvalue())
-            self.assertTrue("Private token: " in f.getvalue())
+        management.call_command("create_token")
+        self.assertEqual(ApiToken.objects.count(), 1)
 
     def test_create_specific_token(self):
-        with io.BytesIO() as f:
-            management.call_command("create_token", "noop", "noop", stdout=f)
-            self.assertEqual(ApiToken.objects.count(), 1)
-
-            self.assertEquals("Public token: noop\nPrivate token: noop\n", f.getvalue())
+        management.call_command("create_token", "noop", "noop")
+        self.assertEqual(ApiToken.objects.count(), 1)
+        self.assertEqual(ApiToken.objects.filter(private_token="noop", public_token="noop").count(), 1)
 
     def test_command_error(self):
         if django.VERSION[1] > 4:
