@@ -3,7 +3,6 @@ import os
 import copy
 import shutil
 
-import django
 from django.http import (
     HttpResponse,
     HttpResponseNotAllowed,

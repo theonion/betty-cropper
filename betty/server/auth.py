@@ -83,7 +83,7 @@ class ApiTokenManager(models.Manager):
 
     def random_token(self):
         return binascii.hexlify(os.urandom(20))
-    
+
     def create_superuser(self):
         return self.create(
             image_read_permission=True,
