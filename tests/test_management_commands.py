@@ -1,5 +1,6 @@
 import io
 
+import django
 from django.core import management
 from django.core.management.base import CommandError
 from django.test import TestCase
@@ -24,8 +25,9 @@ class CreateTokenTestCase(TestCase):
             self.assertEquals("Public token: noop\nPrivate token: noop\n", f.getvalue())
 
     def test_command_error(self):
-        with self.assertRaises(CommandError):
-            management.call_command("create_token", "noop")
+        if django.VERSION[1] > 4:
+            with self.assertRaises(CommandError):
+                management.call_command("create_token", "noop")
 
-        with self.assertRaises(CommandError):
-            management.call_command("create_token", "noop", "noop", "noop")
+            with self.assertRaises(CommandError):
+                management.call_command("create_token", "noop", "noop", "noop")
