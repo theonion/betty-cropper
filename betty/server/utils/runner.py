@@ -1,6 +1,6 @@
 import os
 
-from logan.runner import run_app
+from logan.runner import run_app, configure_app
 
 BETTY_IMAGE_ROOT = os.path.normpath(os.path.join(os.getcwd(), "images"))
 
@@ -18,6 +18,16 @@ BETTY_RATIOS = ("1x1", "2x1", "3x1", "3x4", "4x3", "16x9")
 BETTY_WIDTHS = (80, 150, 240, 300, 320, 400, 480, 620, 640, 820, 960, 1200, 1600)
 BETTY_PLACEHOLDER = True
 """.format(BETTY_IMAGE_ROOT)
+
+
+def configure():
+    configure_app(
+        project='betty',
+        default_config_path='betty.conf.py',
+        default_settings='betty.conf.server',
+        settings_initializer=generate_settings,
+        settings_envvar='BETTY_CONF',
+    )
 
 
 def main():

@@ -1,5 +1,3 @@
-import io
-
 import django
 from django.core import management
 from django.core.management.base import CommandError
@@ -16,7 +14,8 @@ class CreateTokenTestCase(TestCase):
     def test_create_specific_token(self):
         management.call_command("create_token", "noop", "noop")
         self.assertEqual(ApiToken.objects.count(), 1)
-        self.assertEqual(ApiToken.objects.filter(private_token="noop", public_token="noop").count(), 1)
+        qs = ApiToken.objects.filter(private_token="noop", public_token="noop")
+        self.assertEqual(qs.count(), 1)
 
     def test_command_error(self):
         if django.VERSION[1] > 4:
