@@ -1,7 +1,12 @@
 import requests
 
 from django import forms
-from django.core import checks
+
+try:  # Django < 1.5 doesn't have checks, so we'll just ignore that.
+    from django.core import checks
+except ImportError:
+    pass
+
 from django.core.cache import cache
 from django.db.models.fields import Field
 from django.core.files.base import File
@@ -114,9 +119,10 @@ class ImageField(Field):
     descriptor_class = ImageDescriptor
     description = _("ImageField")
 
-    def __init__(self, verbose_name=None, name=None, id=None, storage=None, **kwargs):
+    def __init__(self, verbose_name=None, name=None, storage=None, caption_field=None, alt_field=None, **kwargs):
         self._primary_key_set_explicitly = 'primary_key' in kwargs
         self._unique_set_explicitly = 'unique' in kwargs
+        self.caption_field, self.alt_field = caption_field, alt_field
 
         self.storage = storage or default_storage
         super(ImageField, self).__init__(verbose_name, name, default=None, **kwargs)
