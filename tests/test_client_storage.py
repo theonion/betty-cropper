@@ -1,7 +1,7 @@
 import os
-from urlparse import urljoin
 
 from django.test import LiveServerTestCase
+from django.utils.six.moves.urllib.parse import urljoin
 
 from betty.server.auth import ApiToken
 from betty.server.models import Image

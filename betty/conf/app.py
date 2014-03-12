@@ -2,12 +2,9 @@
 from __future__ import unicode_literals
 
 import os
-try:
-    from urlparse import urljoin
-except ImportError:
-    from urllib.parse import urljoin
-
 from django.conf import settings as _settings
+from django.utils.six.moves.urllib.parse import urljoin
+
 
 DEFAULTS = {
     "BETTY_IMAGE_ROOT": os.path.join(_settings.MEDIA_ROOT, "images"),
