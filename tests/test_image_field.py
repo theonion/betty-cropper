@@ -28,6 +28,9 @@ class ImageFieldTestCase(LiveServerTestCase):
         with open(lenna_path, "rb") as lenna:
             test = TestModel()
             test.image.save("Lenna.png", File(lenna))
-            test.save()
         image = Image.objects.get(id=test.image.id)
+        self.assertEqual(test.image.name, "Lenna.png")
         self.assertEqual(image.name, "Lenna.png")
+
+        test = TestModel.objects.get(id=test.id)
+        self.assertEqual(test.image.name, "Lenna.png")
