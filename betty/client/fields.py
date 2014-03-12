@@ -72,6 +72,11 @@ class ImageFieldFile(FieldFile):
 
 
 class ImageDescriptor(FileDescriptor):
+    """A custom descriptor for a Betty Cropper image
+
+    This is almost an exact replica of the FileDescriptor class, with
+    the notable exception that it works using an integer as an initial
+    value, rather than a string."""
 
     def __get__(self, instance=None, owner=None):
         if instance is None:
@@ -79,36 +84,17 @@ class ImageDescriptor(FileDescriptor):
                 "The '%s' attribute can only be accessed from %s instances."
                 % (self.field.name, owner.__name__))
 
-        # This is slightly complicated, so worth an explanation.
-        # instance.file`needs to ultimately return some instance of `File`,
-        # probably a subclass. Additionally, this returned object needs to have
-        # the FieldFile API so that users can easily do things like
-        # instance.file.path and have that delegated to the file storage engine.
-        # Easy enough if we're strict about assignment in __set__, but if you
-        # peek below you can see that we're not. So depending on the current
-        # value of the field we have to dynamically construct some sort of
-        # "thing" to return.
-
-        # The instance dict contains whatever was originally assigned
-        # in __set__.
         file = instance.__dict__[self.field.name]
         if isinstance(file, int) or file is None:
             attr = self.field.attr_class(instance, self.field, file)
             instance.__dict__[self.field.name] = attr
 
-        # Other types of files may be assigned as well, but they need to have
-        # the FieldFile interface added to the. Thus, we wrap any other type of
-        # File inside a FieldFile (well, the field's attr_class, which is
-        # usually FieldFile).
         elif isinstance(file, File) and not isinstance(file, ImageFieldFile):
             file_copy = self.field.attr_class(instance, self.field, file.name)
             file_copy.file = file
             file_copy._committed = False
             instance.__dict__[self.field.name] = file_copy
 
-        # Finally, because of the (some would say boneheaded) way pickle works,
-        # the underlying FieldFile might not actually itself have an associated
-        # file. So we need to reset the details of the FieldFile in those cases.
         elif isinstance(file, FieldFile) and not hasattr(file, 'field'):
             file.instance = instance
             file.field = self.field
@@ -116,9 +102,6 @@ class ImageDescriptor(FileDescriptor):
 
         # That was fun, wasn't it?
         return instance.__dict__[self.field.name]
-
-    def __set__(self, instance, value):
-        instance.__dict__[self.field.name] = value
 
 
 class ImageField(Field):
@@ -188,18 +171,6 @@ class ImageField(Field):
 
     def get_prep_lookup(self, lookup_type, value):
         return super(ImageField, self).get_prep_lookup(lookup_type, value.id)
-
-    # def to_python(self, value):
-    #     if value is None:
-    #         return value
-    #     try:
-    #         return str(value)
-    #     except (TypeError, ValueError):
-    #         raise exceptions.ValidationError(
-    #             self.error_messages['invalid'],
-    #             code='invalid',
-    #             params={'value': value},
-    #         )
 
     def pre_save(self, model_instance, add):
         "Returns field's value just before saving."
