@@ -105,15 +105,13 @@ class ImageDescriptor(FileDescriptor):
 
 
 class ImageField(Field):
-    """A clone of FileField, with betty-specific functionality
+    """Mostly just a clone of FileField, but with some betty-specific functionality
 
     Unfortunately, this can't be a subcalss of FileField, or else Django will
     freak out that this is a FileField and doesn't have an upload_to value"""
 
     attr_class = ImageFieldFile
-
     descriptor_class = ImageDescriptor
-
     description = _("ImageField")
 
     def __init__(self, verbose_name=None, name=None, id=None, storage=None, **kwargs):
