@@ -8,26 +8,37 @@ import requests
 class BettyCropperStorage(Storage):
 
     def __init__(self, base_url=None, public_token=None, private_token=None):
-        if base_url is None:
-            base_url = settings.BETTY_IMAGE_URL
-        if base_url[-1] == "/":
-            base_url = base_url[:-1]
-        self.base_url = base_url
-
-        if public_token is None:
-            public_token = settings.BETTY_PUBLIC_TOKEN
-        self.public_token = public_token
-
-        if private_token is None:
-            private_token = settings.BETTY_PRIVATE_TOKEN
-        self.private_token = private_token
+        self._base_url = base_url
+        self._public_token = public_token
+        self._private_token = private_token
 
     @property
     def auth_headers(self):
         return {"X-Betty-Api-Key": self.public_token}
 
+    @property
+    def base_url(self):
+        base_url = self._base_url
+        if not base_url:
+            base_url = settings.BETTY_IMAGE_URL
+        if base_url[-1] == "/":
+            base_url = base_url[:-1]
+        return base_url
+
+    @property
+    def public_token(self):
+        if self._public_token:
+            return self._public_token
+        return settings.BETTY_PUBLIC_TOKEN
+
+    @property
+    def private_token(self):
+        if self._private_token:
+            return self._private_token
+        return settings.BETTY_PRIVATE_TOKEN
+
     def delete(self, name):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def exists(self, name):
 
@@ -37,10 +48,10 @@ class BettyCropperStorage(Storage):
         return r.status_code == 200
 
     def listdir(self, path):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def size(self, name):
-        raise NotImplementedError
+        return 0
 
     def get_available_name(self, name):
         return name

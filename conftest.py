@@ -12,5 +12,6 @@ def pytest_configure():
     settings.configure(
         server,
         MEDIA_ROOT=tempfile.mkdtemp("bettycropper"),
-        TEMPLATE_DIRS=(os.path.join(MODULE_ROOT, 'tests', 'templates'),)
+        TEMPLATE_DIRS=(os.path.join(MODULE_ROOT, 'tests', 'templates'),),
+        INSTALLED_APPS=server.INSTALLED_APPS + ("tests.testapp",)
     )

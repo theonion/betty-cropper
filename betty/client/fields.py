@@ -1,33 +1,143 @@
-import math
+import requests
 
-from django.core import exceptions
-from django.db.models.fields.files import FieldFile, FileField
+from django import forms
+from django.core import exceptions, checks
+from django.core.cache import cache
+from django.db.models.fields import Field
+from django.db.models.fields.files import FieldFile, FileDescriptor
 from django.utils.translation import ugettext_lazy as _
 
 
 from betty.client.storage import BettyCropperStorage
 
+default_storage = BettyCropperStorage()
+
 
 class ImageFieldFile(FieldFile):
-    pass
+    
+    def __init__(self, instance, field, name=None):
+        super(ImageFieldFile, self).__init__(instance, field, None)
+        self.id = None
+        self._name = None
+
+    @property
+    def name(self):
+        if not self.id:
+            return None
+
+        cache_key = "betty-cropper-names-{0}".format(self.id)
+        self._name = self._name or cache.get(cache_key)
+        if not self._name:
+
+            detail_url = "{base_url}/api/{id}".format(base_url=self.field.storage.base_url, id=self.id)
+            response = requests.get(detail_url, headers=self.field.storage.auth_headers)
+            self._name = response.json()["name"]
+            cache.set(cache_key, self._name)
+
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        pass
+
+    def __eq__(self, other):
+        # Older code may be expecting FileField values to be simple strings.
+        # By overriding the == operator, it can remain backwards compatibility.
+        if hasattr(other, 'id'):
+            return self.id == other.id
+        return self.id == other
+
+    def __hash__(self):
+        return hash(self.id)
+
+    def save(self, name, content, save=True):
+        self.id = self.storage.save(name, content)
+        self._name = name
+        setattr(self.instance, self.field.name, self)
+
+        # Update the filesize cache
+        self._committed = True
+
+        # Save the object because it has changed, unless save is False
+        if save:
+            self.instance.save()
+    save.alters_data = True
+
+    def delete(self, save=True):
+        raise NotImplemented("You can't delete a remote image this way")
+
+    def get_crop_url(self, ratio="original", width=600, format="jpeg"):
+        return self.storage.url(self.name, ratio="original", width=600, format="jpeg")
 
 
-class ImageField(FileField):
+class ImageField(Field):
+    """A clone of FileField, with betty-specific functionality
+
+    Unfortunately, this can't be a subcalss of FileField, or else Django will
+    freak out that this is a FileField and doesn't have an upload_to value"""
 
     attr_class = ImageFieldFile
 
-    def __init__(self, verbose_name=None, name=None, storage=BettyCropperStorage, **kwargs):
+    descriptor_class = FileDescriptor
 
-        super(self, ImageField).__init__(
-            verbose_name=verbose_name,
-            name=name,
-            storage=storage,
-            **kwargs)
+    description = _("ImageField")
 
-    empty_strings_allowed = False
-    default_error_messages = {
-        'invalid': _("'%(value)s' value must be an integer."),
-    }
+    def __init__(self, verbose_name=None, name=None, id=None, storage=None, **kwargs):
+        self._primary_key_set_explicitly = 'primary_key' in kwargs
+        self._unique_set_explicitly = 'unique' in kwargs
+        self.id = None
+
+        self.storage = storage or default_storage
+        super(ImageField, self).__init__(verbose_name, name, **kwargs)
+
+    def check(self, **kwargs):
+        errors = super(ImageField, self).check(**kwargs)
+        errors.extend(self._check_unique())
+        errors.extend(self._check_primary_key())
+        return errors
+
+    def _check_unique(self):
+        if self._unique_set_explicitly:
+            return [
+                checks.Error(
+                    "'unique' is not a valid argument for a %s." % self.__class__.__name__,
+                    hint=None,
+                    obj=self,
+                    id='fields.E200',
+                )
+            ]
+        else:
+            return []
+
+    def _check_primary_key(self):
+        if self._primary_key_set_explicitly:
+            return [
+                checks.Error(
+                    "'primary_key' is not a valid argument for a %s." % self.__class__.__name__,
+                    hint=None,
+                    obj=self,
+                    id='fields.E201',
+                )
+            ]
+        else:
+            return []
+
+    def deconstruct(self):
+        name, path, args, kwargs = super(ImageField, self).deconstruct()
+        if self.storage is not default_storage:
+            kwargs['storage'] = self.storage
+        return name, path, args, kwargs
+
+    def get_internal_type(self):
+        return "IntegerField"
+
+    def get_prep_value(self, value):
+        if value is None:
+            return None
+        return value
+
+    def get_prep_lookup(self, lookup_type, value):
+        return super(ImageField, self).get_prep_lookup(lookup_type, value.id)
 
     def to_python(self, value):
         if value is None:
@@ -41,17 +151,40 @@ class ImageField(FileField):
                 params={'value': value},
             )
 
-    def get_prep_value(self, value):
-        value = super(ImageField, self).get_prep_value(value)
-        if value is None:
-            return None
-        return int(value)
+    def pre_save(self, model_instance, add):
+        "Returns field's value just before saving."
+        image_file = super(ImageField, self).pre_save(model_instance, add)
+        if image_file and not image_file._committed:
+            # Commit the file to storage prior to saving the model
+            image_file.save(image_file.name, image_file, save=False)
+        return image_file.id
 
-    def get_prep_lookup(self, lookup_type, value):
-        if ((lookup_type == 'gte' or lookup_type == 'lt')
-                and isinstance(value, float)):
-            value = math.ceil(value)
-        return super(ImageField, self).get_prep_lookup(lookup_type, value)
+    def contribute_to_class(self, cls, name):
+        super(ImageField, self).contribute_to_class(cls, name)
+        setattr(cls, self.name, self.descriptor_class(self))
 
-    def get_internal_type(self):
-        return "IntegerField"
+    def save_form_data(self, instance, data):
+        # Important: None means "no change", other false value means "clear"
+        # This subtle distinction (rather than a more explicit marker) is
+        # needed because we need to consume values that are also sane for a
+        # regular (non Model-) Form to find in its cleaned_data dictionary.
+        if data is not None:
+            # This value will be converted to unicode and stored in the
+            # database, so leaving False as-is is not acceptable.
+            if not data:
+                data = ''
+            setattr(instance, self.name, data)
+
+    def formfield(self, **kwargs):
+        defaults = {'form_class': forms.FileField, 'max_length': self.max_length}
+        # If a file has been provided previously, then the form doesn't require
+        # that a new file is provided this time.
+        # The code to mark the form field as not required is used by
+        # form_for_instance, but can probably be removed once form_for_instance
+        # is gone. ModelForm uses a different method to check for an existing file.
+        if 'initial' in kwargs:
+            defaults['required'] = False
+        defaults.update(kwargs)
+        return super(ImageField, self).formfield(**defaults)
+
+
