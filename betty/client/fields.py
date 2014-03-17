@@ -46,6 +46,26 @@ class ImageFieldFile(FieldFile):
     def name(self, value):
         pass
 
+    @property
+    def alt(self):
+        if self.field.alt_field:
+            return getattr(self.instance, self.field.alt_field)
+        return None
+
+    @alt.setter
+    def alt(self, value):
+        setattr(self.instance, self.field.alt_field, value)
+
+    @property
+    def caption(self):
+        if self.field.caption_field:
+            return getattr(self.instance, self.field.caption_field)
+        return None
+
+    @caption.setter
+    def caption(self, value):
+        setattr(self.instance, self.field.caption_field, value)
+
     def __eq__(self, other):
         # Older code may be expecting FileField values to be simple strings.
         # By overriding the == operator, it can remain backwards compatibility.
@@ -163,6 +183,10 @@ class ImageField(Field):
         name, path, args, kwargs = super(ImageField, self).deconstruct()
         if self.storage is not default_storage:
             kwargs['storage'] = self.storage
+        if self.caption_field:
+            kwargs["caption_field"] = self.caption_field
+        if self.alt_field:
+            kwargs["alt_field"] = self.alt_field
         return name, path, args, kwargs
 
     def get_internal_type(self):

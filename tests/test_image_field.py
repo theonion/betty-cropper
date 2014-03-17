@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from six.moves.urllib.parse import urljoin
 
@@ -34,3 +35,21 @@ class ImageFieldTestCase(LiveServerTestCase):
 
         test = TestModel.objects.get(id=test.id)
         self.assertEqual(test.image.name, "Lenna.png")
+
+    def test_alt(self):
+        lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
+        with open(lenna_path, "rb") as lenna:
+            test = TestModel()
+            test.image.save("Lenna.png", File(lenna))
+
+        test.image.alt = "Just a cool chick"
+        test.image.caption = "Kind of sexist?"
+        test.save()
+
+        test = TestModel.objects.get(id=test.id)
+
+        self.assertEqual(test.image.alt, "Just a cool chick")
+        self.assertEqual(test.image.caption, "Kind of sexist?")
+
+    def tearDown(self):
+        shutil.rmtree(settings.BETTY_IMAGE_ROOT)
