@@ -6,7 +6,7 @@ from six.moves.urllib.parse import urljoin
 from betty.authtoken.models import ApiToken
 from betty.cropper.models import Image
 from betty.conf.app import settings
-from betty.client.storage import BettyCropperStorage
+from betty.storage import BettyCropperStorage
 
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'images')
 

@@ -14,7 +14,7 @@ from django.db.models.fields.files import FieldFile, FileDescriptor
 from django.utils.translation import ugettext_lazy as _
 
 
-from betty.client.storage import BettyCropperStorage
+from .storage import BettyCropperStorage
 
 default_storage = BettyCropperStorage()
 

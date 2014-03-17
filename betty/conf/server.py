@@ -103,7 +103,7 @@ INSTALLED_APPS = (
 
     'betty.cropper',
     'betty.authtoken',
-    'betty.client',
+    'betty.image_browser',
     'south',
 )
 
