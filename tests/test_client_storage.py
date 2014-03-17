@@ -3,7 +3,7 @@ import os
 from django.test import LiveServerTestCase
 from six.moves.urllib.parse import urljoin
 
-from betty.api.models import ApiToken
+from betty.authtoken.models import ApiToken
 from betty.cropper.models import Image
 from betty.conf.app import settings
 from betty.client.storage import BettyCropperStorage

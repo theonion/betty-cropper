@@ -1,10 +1,11 @@
 import json
 from functools import wraps
 
+from django.conf import settings
 from django.http import HttpResponseForbidden
 from django.utils.decorators import available_attrs
 
-from .models import ApiToken
+from betty.authtoken.models import ApiToken
 
 
 def forbidden():
@@ -26,21 +27,20 @@ def betty_token_auth(permissions):
     def decorator(func):
         @wraps(func, assigned=available_attrs(func))
         def inner(request, *args, **kwargs):
-            if request.user.is_anonymous():
-                if "HTTP_X_BETTY_API_KEY" not in request.META:
+            if "betty.authtoken" in settings.INSTALLED_APPS:
+                if request.user.is_anonymous():
+                    if "HTTP_X_BETTY_API_KEY" not in request.META:
+                        return forbidden()
+
+                    api_key = request.META["HTTP_X_BETTY_API_KEY"]
+                    try:
+                        token = ApiToken.objects.get(public_token=api_key)
+                    except ApiToken.DoesNotExist:
+                        return forbidden()
+
+                    request.user = token.get_user()
+                if not request.user.has_perms(permissions):
                     return forbidden()
-
-                api_key = request.META["HTTP_X_BETTY_API_KEY"]
-                try:
-                    token = ApiToken.objects.get(public_token=api_key)
-                except ApiToken.DoesNotExist:
-                    return forbidden()
-
-                request.user = token.get_user()
-            if not request.user.has_perms(permissions):
-                return forbidden()
-
-            # TODO: verify/transform signed json
 
             return func(request, *args, **kwargs)
         return inner

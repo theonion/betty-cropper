@@ -102,7 +102,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 
     'betty.cropper',
-    'betty.api',
+    'betty.authtoken',
     'betty.client',
     'south',
 )

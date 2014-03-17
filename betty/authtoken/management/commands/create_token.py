@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from betty.api.models import ApiToken
+from betty.authtoken.models import ApiToken
 
 
 class Command(BaseCommand):

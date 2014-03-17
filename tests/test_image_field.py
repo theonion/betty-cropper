@@ -6,7 +6,7 @@ from six.moves.urllib.parse import urljoin
 from django.core.files import File
 from django.test import LiveServerTestCase
 
-from betty.api.models import ApiToken
+from betty.authtoken.models import ApiToken
 from betty.cropper.models import Image
 from betty.conf.app import settings
 from tests.testapp.models import TestModel
