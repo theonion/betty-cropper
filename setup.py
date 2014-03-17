@@ -36,7 +36,8 @@ install_requires = [
     "wand==0.3.5",
     "South==0.8.4",
     "logan==0.5.9.1",
-    "jsonfield==0.9.20"
+    "jsonfield==0.9.20",
+    "six==1.6.1"
 ]
 
 
