@@ -2,7 +2,7 @@ import django
 from django.core import management
 from django.core.management.base import CommandError
 from django.test import TestCase
-from betty.server.auth import ApiToken
+from betty.api.models import ApiToken
 
 
 class CreateTokenTestCase(TestCase):

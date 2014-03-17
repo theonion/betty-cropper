@@ -5,7 +5,7 @@ from django.test import TestCase, Client
 from django.core.files import File
 
 from betty.conf.app import settings
-from betty.server.models import Image, Ratio
+from betty.cropper.models import Image, Ratio
 
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'images')
 

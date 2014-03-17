@@ -7,7 +7,7 @@ from django.test import TestCase, Client
 from django.contrib.auth.models import User
 
 from betty.conf.app import settings
-from betty.server.models import Image
+from betty.cropper.models import Image
 
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'images')
 

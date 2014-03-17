@@ -4,7 +4,7 @@ from functools import wraps
 from django.http import HttpResponseForbidden
 from django.utils.decorators import available_attrs
 
-from betty.server.auth import ApiToken
+from .models import ApiToken
 
 
 def forbidden():

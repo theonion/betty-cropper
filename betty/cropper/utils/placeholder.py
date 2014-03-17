@@ -4,7 +4,7 @@ from wand.color import Color
 from wand.drawing import Drawing
 from wand.image import Image
 
-from betty.server.models import Ratio
+from betty.cropper.models import Ratio
 from betty.conf.app import settings
 
 

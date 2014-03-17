@@ -2,7 +2,7 @@ import os
 
 from django.test import TestCase, Client
 
-from betty.server.auth import ApiToken
+from betty.api.models import ApiToken
 
 
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'images')

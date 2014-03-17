@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import render
 
-from betty.server.models import Image
+from betty.cropper.models import Image
 
 
 SIZE_MAP = {

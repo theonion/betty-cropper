@@ -97,7 +97,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "betty-cropper = betty.server.utils.runner:main",
+            "betty-cropper = betty.cropper.utils.runner:main",
         ],
     },
     cmdclass={'test': PyTest}

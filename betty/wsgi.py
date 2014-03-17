@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), os.pardir))
 sys.stdout = sys.stderr
 
 # Configure the application (Logan)
-from betty.server.utils.runner import configure
+from betty.cropper.utils.runner import configure
 configure()
 
 # Build the wsgi app

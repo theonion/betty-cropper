@@ -15,7 +15,7 @@ from wand.image import Image as WandImage
 
 from betty.conf.app import settings
 from .decorators import betty_token_auth
-from .models import Image, source_upload_to
+from betty.cropper.models import Image, source_upload_to
 
 ACC_HEADERS = {
     'Access-Control-Allow-Origin': '*',
