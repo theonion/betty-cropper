@@ -36,7 +36,7 @@ class ImageFieldTestCase(LiveServerTestCase):
         test = TestModel.objects.get(id=test.id)
         self.assertEqual(test.image.name, "Lenna.png")
 
-    def test_alt(self):
+    def test_alt_and_caption(self):
         lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
         with open(lenna_path, "rb") as lenna:
             test = TestModel()
