@@ -2,6 +2,7 @@ from betty.conf.app import settings
 
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse, HttpResponseServerError, HttpResponseRedirect
+from django.views.decorators.cache import cache_control
 
 from .models import Image, Ratio
 from .utils.placeholder import placeholder
@@ -18,6 +19,7 @@ EXTENSION_MAP = {
 }
 
 
+@cache_control(max_age=300)
 def crop(request, id, ratio_slug, width, extension):
     if ratio_slug != "original" and ratio_slug not in settings.BETTY_RATIOS:
         raise Http404

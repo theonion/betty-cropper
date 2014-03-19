@@ -10,6 +10,7 @@ from django.http import (
     HttpResponseNotFound
 )
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.cache import never_cache
 
 from wand.image import Image as WandImage
 
@@ -48,6 +49,7 @@ def crossdomain(origin="*", methods=[], headers=["X-Betty-Api-Key", "Content-Typ
     return _method_wrapper
 
 
+@never_cache
 @csrf_exempt
 @crossdomain(methods=['POST', 'OPTIONS'])
 @betty_token_auth(["server.image_add"])
@@ -78,6 +80,7 @@ def new(request):
     return HttpResponse(json.dumps(image.to_native()), content_type="application/json")
 
 
+@never_cache
 @csrf_exempt
 @crossdomain(methods=['POST', 'OPTIONS'])
 @betty_token_auth(["server.image_crop"])
@@ -128,6 +131,7 @@ def update_selection(request, image_id, ratio_slug):
     return HttpResponse(message, content_type="application/json")
 
 
+@never_cache
 @csrf_exempt
 @crossdomain(methods=['GET', 'OPTIONS'])
 @betty_token_auth(["server.image_read"])
@@ -141,6 +145,7 @@ def search(request):
     return HttpResponse(json.dumps(results), content_type="application/json")
 
 
+@never_cache
 @csrf_exempt
 @crossdomain(methods=["GET", "PATCH", "OPTIONS"])
 def detail(request, image_id):
