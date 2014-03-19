@@ -1,17 +1,29 @@
 language: python
 python:
   - "2.7"
-  - "2.6"
+  - "3.2"
+  - "3.3"
+env:
+  - DJANGO_VERSION=1.4
+  - DJANGO_VERSION=1.5
+  - DJANGO_VERSION=1.6
+matrix:
+  exclude:
+  - python: "3.3"
+    env: DJANGO_VERSION=1.4
+  - python: "3.2"
+    env: DJANGO_VERSION=1.4
 cache:
   directories:
     - $HOME/.pip-cache/
 install:
-  - pip install -r requirements.txt --download-cache $HOME/.pip-cache
-  - pip install coveralls
+  - pip install django==$DJANGO_VERSION
+  - pip install --download-cache $HOME/.pip-cache -r requirements-dev.txt
 script:
-  - coverage run --source=betty runtests.py
+  - py.test tests/ --cov betty --cov-report term-missing
 after_success:
   - coveralls
 notifications:
   email:
     - csinchok@theonion.com
+  on_failure: change

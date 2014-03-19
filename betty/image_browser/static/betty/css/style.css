@@ -1,0 +1,82 @@
+.hide-overflow { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+
+#results { padding: 10px 0 0 }
+
+    #results .popover { min-width: 150px }
+
+        #results .popover dt { margin-top: 5px }
+
+        #results .popover dt:first-child { margin-top: 0 }
+
+    #results li { text-align: center; margin-bottom: 10px; }
+
+        #results li img { max-width: 100% }
+
+.details { display: block }
+
+#size-select .dropdown-menu { min-width: 200px }
+
+#infscr-loading { clear: both; display: block; width: 100%; text-align: center; }
+
+#upload-modal .upload-well { font-size: 5em; text-align: center; cursor: pointer; }
+
+#upload-modal .upload-well:hover { background-color: #e3e3e3; border-color: #d1d1d1; }
+
+#upload-modal .image-form { display: none }
+
+#upload-modal input.image-picker { display: none }
+
+.spin {
+  -webkit-animation: spin 2s infinite linear;
+  -moz-animation: spin 2s infinite linear;
+  -o-animation: spin 2s infinite linear;
+  animation: spin 2s infinite linear;
+     -webkit-transform-origin: 50% 58%;
+         transform-origin:50% 58%;
+         -ms-transform-origin:50% 58%; /* IE 9 */
+}
+
+@-moz-keyframes spin {
+  from {
+    -moz-transform: rotate(0deg);
+  }
+  to {
+    -moz-transform: rotate(360deg);
+  }
+}
+
+@-webkit-keyframes spin {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 767px) { 
+
+  #search-images { padding: 0 10px 10px; clear: both; }
+
+  .visible-xs .btn-group { padding: 10px }
+
+  .popover { display: none !important } }
+
+@media (min-width: 768px) { 
+
+  .details { display: none }
+
+  #results .media, #results .media-body { overflow: visible }
+
+  .collapse { display: block }
+
+  #search-nav { padding: 10px 0 } }
