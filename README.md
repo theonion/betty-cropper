@@ -1,4 +1,4 @@
-## Betty Cropper (Flask Edition)
+## Betty Cropper
 
 [![Build Status](https://travis-ci.org/theonion/betty-cropper.png?branch=master)](https://travis-ci.org/theonion/betty-cropper)
 [![Coverage Status](https://coveralls.io/repos/theonion/betty-cropper/badge.png)](https://coveralls.io/r/theonion/betty-cropper)
