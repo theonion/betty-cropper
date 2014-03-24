@@ -35,7 +35,7 @@ class Ratio(object):
 
 class Image(models.Model):
 
-    source = models.FileField(upload_to=source_upload_to, storage=betty_storage)
+    source = models.FileField(upload_to=source_upload_to, storage=betty_storage, max_length=255)
     name = models.CharField(max_length=255)
     height = models.IntegerField(null=True, blank=True)
     width = models.IntegerField(null=True, blank=True)
