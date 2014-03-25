@@ -2,6 +2,7 @@
 *.egg-info
 lib
 bin
+dist
 include
 .Python
 .DS_Store
