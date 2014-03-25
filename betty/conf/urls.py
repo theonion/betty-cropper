@@ -16,7 +16,8 @@ except ImportError:
 image_path = urlparse(settings.BETTY_IMAGE_URL).path
 if image_path.startswith("/"):
     image_path = image_path[1:]
-
+if not image_path.endswith("/"):
+    image_path += "/"
 
 urlpatterns = patterns('',
     url(r'^{0}'.format(image_path), include("betty.cropper.urls")),  # noqa
