@@ -27,3 +27,4 @@ notifications:
   email:
     - csinchok@theonion.com
   on_failure: change
+  on_success: change
