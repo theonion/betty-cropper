@@ -169,7 +169,7 @@ class Image(models.Model):
 
                 ratio_dir = os.path.join(self.path(), ratio.string)
 
-                if width in settings.BETTY_WIDTHS:
+                if width in settings.BETTY_WIDTHS or len(settings.BETTY_WIDTHS) == 0:
                     # We only want to save this to the filesystem if it's one of our usual widths.
                     try:
                         os.makedirs(ratio_dir)
