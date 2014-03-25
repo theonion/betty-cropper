@@ -107,8 +107,8 @@ class ImageSavingTestCase(TestCase):
         self.assertEqual(res.status_code, 500)
 
     def test_image_redirect(self):
-        res = self.client.get('/images/66666/1x1/100.jpg')
-        self.assertRedirects(res, "/images/6666/6/1x1/100.jpg", target_status_code=404)
+        res = self.client.get('/images/666666/1x1/100.jpg')
+        self.assertRedirects(res, "/images/6666/66/1x1/100.jpg", target_status_code=404)
 
     def test_placeholder(self):
         settings.BETTY_PLACEHOLDER = True

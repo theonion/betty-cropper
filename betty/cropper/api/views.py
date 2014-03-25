@@ -120,11 +120,10 @@ def update_selection(request, image_id, ratio_slug):
     image.selections = selections
     image.save()
 
-    # TODO: Use a celery task for this?
     ratio_path = os.path.join(image.path(), ratio_slug)
     if os.path.exists(ratio_path):
-        # crops = os.listdir(ratio_path)
-        # TODO: flush cache on crops
+        for crop in os.listdir(ratio_path):
+            pass
         shutil.rmtree(ratio_path)
 
     message = json.dumps({"message": "Update sucessful"})

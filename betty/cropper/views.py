@@ -20,6 +20,21 @@ EXTENSION_MAP = {
 
 
 @cache_control(max_age=300)
+def redirect_crop(request, id, ratio_slug, width, extension):
+    id_string = ""
+    for index, char in enumerate(id):
+        if index % 4 == 0 and index != 0:
+            id_string += "/"
+        id_string += char
+
+    redirect_url = reverse(
+        'betty.cropper.views.crop',
+        args=(id_string, ratio_slug, width, extension)
+    )
+    return HttpResponseRedirect(redirect_url)
+
+
+@cache_control(max_age=300)
 def crop(request, id, ratio_slug, width, extension):
     if ratio_slug != "original" and ratio_slug not in settings.BETTY_RATIOS:
         raise Http404
@@ -36,19 +51,6 @@ def crop(request, id, ratio_slug, width, extension):
 
     if width > 2000:
         return HttpResponseServerError("Invalid width")
-
-    if len(id) > 4 and "/" not in id:
-        id_string = ""
-        for index, char in enumerate(id):
-            if index % 4 == 0 and index != 0:
-                id_string += "/"
-            id_string += char
-
-        redirect_url = reverse(
-            'betty.cropper.views.crop',
-            args=(id_string, ratio_slug, width, extension)
-        )
-        return HttpResponseRedirect(redirect_url)
 
     try:
         image_id = int(id.replace("/", ""))
