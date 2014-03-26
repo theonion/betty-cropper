@@ -2,6 +2,7 @@ import os
 
 from django.db import models
 from django.core.files.storage import FileSystemStorage
+from django.core.urlresolvers import reverse
 
 from wand.image import Image as WandImage
 
@@ -47,6 +48,15 @@ class Image(models.Model):
             ("read", "Can search images, and see the detail data"),
             ("crop", "Can crop images")
         )
+
+    @property
+    def id_string(self):
+        id_string = ""
+        for index, char in enumerate(str(self.id)):
+            if index % 4 == 0 and index != 0:
+                id_string += "/"
+            id_string += char
+        return id_string
 
     def get_height(self):
         """Lazily returns the height of the image
@@ -180,6 +190,14 @@ class Image(models.Model):
                     with open(os.path.join(ratio_dir, "%d.%s" % (width, extension)), 'wb+') as out:
                         out.write(img_blob)
                 return img_blob
+
+    def get_absolute_url(self, ratio="original", width=600, format="jpg"):
+        return reverse("betty.cropper.views.crop", kwargs={
+            "id": self.id_string,
+            "ratio_slug": ratio,
+            "width": width,
+            "extension": format
+        })
 
     def to_native(self):
         """Returns a Python dictionary, sutiable for Serialization"""

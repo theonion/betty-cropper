@@ -25,7 +25,8 @@ DEFAULTS = {
         "rgb(153,51,153)",
     ),
     "BETTY_PUBLIC_TOKEN": None,
-    "BETTY_PRIVATE_TOKEN": None
+    "BETTY_PRIVATE_TOKEN": None,
+    "BETTY_CACHE_FLUSHER": None
 }
 
 

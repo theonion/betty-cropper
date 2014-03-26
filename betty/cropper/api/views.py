@@ -3,6 +3,8 @@ import os
 import copy
 import shutil
 
+from six.moves.urllib.parse import urljoin
+
 from django.http import (
     HttpResponse,
     HttpResponseNotAllowed,
@@ -122,8 +124,13 @@ def update_selection(request, image_id, ratio_slug):
 
     ratio_path = os.path.join(image.path(), ratio_slug)
     if os.path.exists(ratio_path):
-        for crop in os.listdir(ratio_path):
-            pass
+        if settings.BETTY_CACHE_FLUSHER:
+            for crop in os.listdir(ratio_path):
+                width, format = crop.split(".")
+                ratio = os.path.basename(ratio_path)
+                full_url = image.get_absolute_url(ratio=ratio, width=width, format=format)
+                settings.BETTY_CACHE_FLUSHER(full_url)
+            
         shutil.rmtree(ratio_path)
 
     message = json.dumps({"message": "Update sucessful"})

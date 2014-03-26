@@ -67,12 +67,6 @@ class APITestCase(TestCase):
         self.assertEqual(image.name, "LENNA DOT PNG")
         self.assertEqual(image.credit, "Playboy")
 
-        # Now let's test that a JPEG crop will return properly.
-        res = self.client.get("/images/{}/1x1/240.jpg".format(image.id))
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(res["Content-Type"], "image/jpeg")
-        self.assertTrue(os.path.exists(os.path.join(image.path(), '1x1', '240.jpg')))
-
     def test_update_selection(self):
         assert self.client.login(username="admin", password=self.password)
 
@@ -119,6 +113,37 @@ class APITestCase(TestCase):
             content_type="application/json",
         )
         self.assertEqual(res.status_code, 404)
+
+    def test_crop_clearing(self):
+        assert self.client.login(username="admin", password=self.password)
+        
+        lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
+        with open(lenna_path, "rb") as lenna:
+            data = {"image": lenna, "name": "LENNA DOT PNG", "credit": "Playboy"}
+            res = self.client.post('/images/api/new', data)
+        self.assertEqual(res.status_code, 200)
+
+        response_json = json.loads(res.content.decode("utf-8"))
+        image_id = response_json['id']
+
+        # Now let's generate a couple crops
+        self.client.get("/images/{}/1x1/240.jpg".format(image_id))
+        self.client.get("/images/{}/16x9/666.png".format(image_id))
+
+        # Now we update the selection
+        new_selection = {
+            "x0": 1,
+            "y0": 1,
+            "x1": 510,
+            "y1": 510
+        }
+
+        res = self.client.post(
+            "/images/api/{0}/1x1".format(image_id),
+            data=json.dumps(new_selection),
+            content_type="application/json",
+        )
+        self.assertEqual(res.status_code, 200)
 
     def test_image_detail(self):
         assert self.client.login(username="admin", password=self.password)
