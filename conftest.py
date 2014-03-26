@@ -8,10 +8,6 @@ from betty.conf import server
 MODULE_ROOT = os.path.dirname(os.path.realpath(__file__))
 
 
-def flush(url):
-    print(url)
-
-
 def pytest_configure():
     settings.configure(
         server,
@@ -19,5 +15,4 @@ def pytest_configure():
         TEMPLATE_DIRS=(os.path.join(MODULE_ROOT, 'tests', 'templates'),),
         INSTALLED_APPS=server.INSTALLED_APPS + ("tests.testapp",),
         BETTY_WIDTHS=(80, 150, 240, 300, 320, 400, 480, 620, 640, 820, 960, 1200, 1600),
-        BETTY_CACHE_FLUSHER=flush
     )
