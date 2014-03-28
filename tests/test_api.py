@@ -170,7 +170,7 @@ class APITestCase(TestCase):
         self.assertEqual(res.status_code, 200)
         results = json.loads(res.content.decode("utf-8"))
         self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]["id"], image.id)
+        self.assertEqual(results["results"][0]["id"], image.id)
 
     def test_bad_image_data(self):
         assert self.client.login(username="admin", password=self.password)

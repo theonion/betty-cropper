@@ -16,6 +16,7 @@ except ImportError:
 image_path = urlparse(settings.BETTY_IMAGE_URL).path
 if image_path.startswith("/"):
     image_path = image_path[1:]
+
 if not image_path.endswith("/"):
     image_path += "/"
 

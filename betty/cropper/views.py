@@ -21,17 +21,18 @@ EXTENSION_MAP = {
 
 @cache_control(max_age=300)
 def redirect_crop(request, id, ratio_slug, width, extension):
-    id_string = ""
-    for index, char in enumerate(id):
-        if index % 4 == 0 and index != 0:
-            id_string += "/"
-        id_string += char
+    try:
+        image_id = int(id.replace("/", ""))
+    except ValueError:
+        raise Http404
 
-    redirect_url = reverse(
-        'betty.cropper.views.crop',
-        args=(id_string, ratio_slug, width, extension)
-    )
-    return HttpResponseRedirect(redirect_url)
+    """
+    This is a little bit of a hack, but basically, we just make a disposable image object,
+    so that we can use it to generate a full URL.
+    """
+    image = Image(id=image_id)
+
+    return HttpResponseRedirect(image.get_absolute_url(ratio=ratio_slug, width=width, format=extension))
 
 
 @cache_control(max_age=300)

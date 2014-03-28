@@ -110,16 +110,14 @@ def update_selection(request, image_id, ratio_slug):
         message = json.dumps({"message": "Bad selection"})
         return HttpResponseBadRequest(message, content_type="application/json")
 
-    selections = copy.copy(image.selections)
-    if selections is None:
-        selections = {}
-
     if ratio_slug not in settings.BETTY_RATIOS:
         message = json.dumps({"message": "No such ratio"})
         return HttpResponseBadRequest(message, content_type="application/json")
 
-    selections[ratio_slug] = selection
-    image.selections = selections
+    if image.selections is None:
+        image.selections = {}
+
+    image.selections[ratio_slug] = selection
     image.save()
 
     ratio_path = os.path.join(image.path(), ratio_slug)
@@ -133,8 +131,7 @@ def update_selection(request, image_id, ratio_slug):
             
         shutil.rmtree(ratio_path)
 
-    message = json.dumps({"message": "Update sucessful"})
-    return HttpResponse(message, content_type="application/json")
+    return HttpResponse(json.dumps(image.to_native()), content_type="application/json")
 
 
 @never_cache
@@ -148,7 +145,11 @@ def search(request):
     if query:
         for image in Image.objects.filter(name__icontains=query)[:20]:
             results.append(image.to_native())
-    return HttpResponse(json.dumps(results), content_type="application/json")
+    else:
+        for image in Image.objects.all()[:20]:
+            results.append(image.to_native())
+
+    return HttpResponse(json.dumps({"results": results}), content_type="application/json")
 
 
 @never_cache
