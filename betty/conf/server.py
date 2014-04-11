@@ -101,7 +101,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.staticfiles',
 
-    'betty.client',
+    'betty.cropped',
     'betty.cropper',
     'betty.authtoken',
     'betty.image_browser',

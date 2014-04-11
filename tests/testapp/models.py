@@ -1,6 +1,6 @@
 from django.db import models
 
-from betty.client.fields import ImageField
+from betty.cropped.fields import ImageField
 
 
 class TestModel(models.Model):
