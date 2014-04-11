@@ -22,6 +22,7 @@ class ImageFieldTestCase(LiveServerTestCase):
         self.base_url = urljoin("http://localhost:8081", settings.BETTY_IMAGE_URL)
         if self.base_url[-1] == "/":
             self.base_url = self.base_url[:-1]
+        self._old_betty_image_url = settings.BETTY_IMAGE_URL
         settings.BETTY_IMAGE_URL = self.base_url
 
     def test_save(self):
@@ -63,3 +64,4 @@ class ImageFieldTestCase(LiveServerTestCase):
 
     def tearDown(self):
         shutil.rmtree(settings.BETTY_IMAGE_ROOT)
+        settings.BETTY_IMAGE_URL = self._old_betty_image_url

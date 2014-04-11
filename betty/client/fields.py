@@ -14,16 +14,16 @@ from django.db.models.fields.files import FieldFile, FileDescriptor
 from django.utils.translation import ugettext_lazy as _
 
 
-from .storage import BettyCropperStorage
+from betty.storage import BettyCropperStorage
 
 default_storage = BettyCropperStorage()
 
 
 class ImageFieldFile(FieldFile):
     
-    def __init__(self, instance, field, name):
+    def __init__(self, instance, field, id):
         super(ImageFieldFile, self).__init__(instance, field, None)
-        self.id = name
+        self.id = id
         self._name = None
 
     @property
@@ -92,8 +92,8 @@ class ImageFieldFile(FieldFile):
     def delete(self, save=True):
         raise NotImplemented("You can't delete a remote image this way")
 
-    def get_crop_url(self, ratio="original", width=600, format="jpeg"):
-        return self.storage.url(self.name, ratio="original", width=600, format="jpeg")
+    def get_crop_url(self, ratio="original", width=600, format="jpg"):
+        return self.storage.url(self.id, ratio=ratio, width=width, format=format)
 
 
 class ImageDescriptor(FileDescriptor):
