@@ -29,6 +29,9 @@ class ImageFieldFile(FieldFile):
     def __bool__(self):
         return bool(self.id)
 
+    def __nonzero__(self):
+        return bool(self.id)
+
     @property
     def name(self):
         if not self.id:
