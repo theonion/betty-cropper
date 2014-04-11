@@ -63,6 +63,7 @@ class BettyCropperStorage(Storage):
 
         r = requests.post(endpoint, data=data, files=files, headers=self.auth_headers)
         if r.status_code != 200:
+            print(r.content)
             raise IOError("Save failed")
 
         return str(r.json()["id"])

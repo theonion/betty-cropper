@@ -25,6 +25,11 @@ class ImageFieldTestCase(LiveServerTestCase):
         self._old_betty_image_url = settings.BETTY_IMAGE_URL
         settings.BETTY_IMAGE_URL = self.base_url
 
+    def test_fileless_save(self):
+        test_object = TestModel()
+        test_object.listing_image.id = 12345
+        test_object.save()
+
     def test_save(self):
         lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
         with open(lenna_path, "rb") as lenna:
@@ -63,5 +68,5 @@ class ImageFieldTestCase(LiveServerTestCase):
         self.assertEqual(test.image.caption, "Kind of sexist?")
 
     def tearDown(self):
-        shutil.rmtree(settings.BETTY_IMAGE_ROOT)
+        shutil.rmtree(settings.BETTY_IMAGE_ROOT, ignore_errors=True)
         settings.BETTY_IMAGE_URL = self._old_betty_image_url

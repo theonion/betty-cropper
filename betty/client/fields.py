@@ -26,6 +26,9 @@ class ImageFieldFile(FieldFile):
         self.id = id
         self._name = None
 
+    def __bool__(self):
+        return bool(self.id)
+
     @property
     def name(self):
         if not self.id:
@@ -204,6 +207,7 @@ class ImageField(Field):
         "Returns field's value just before saving."
         image_file = super(ImageField, self).pre_save(model_instance, add)
         if image_file and not image_file._committed:
+            print(image_file.id)
             # Commit the file to storage prior to saving the model
             image_file.save(image_file.name, image_file, save=False)
         return image_file.id
