@@ -18,29 +18,30 @@ import requests  # noqa
 
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'images')
 
+TEST_IMAGE_DATA = json.dumps({
+    "id": 12345,
+    "name": "Lenna.png",
+    "width": 512,
+    "height": 512,
+    "credit": "Lena Soderberg",
+    "selections": {}
+}).encode("UTF-8")
+
 
 @urlmatch(path=r'.*api/new$')
 def betty_new_mock(url, request):
-    return json.dumps({
-        "id": 12345,
-        "name": "Lenna.png",
-        "width": 512,
-        "height": 512,
-        "credit": "Lena Soderberg",
-        "selections": {}
-    })
+    return {
+        "status_code": 200,
+        "content": TEST_IMAGE_DATA
+    }
 
 
 @urlmatch(path=r'.*api/12345.*$')
 def betty_detail_mock(url, request):
-    return json.dumps({
-        "id": 12345,
-        "name": "Lenna.png",
-        "width": 512,
-        "height": 512,
-        "credit": "Lena Soderberg",
-        "selections": {}
-    })
+    return {
+        "status_code": 200,
+        "content": TEST_IMAGE_DATA
+    }
 
 
 class ImageFieldTestCase(TestCase):
