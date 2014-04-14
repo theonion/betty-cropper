@@ -12,20 +12,20 @@ def placeholder(ratio, width, extension):
         ratio = Ratio(random.choice((settings.BETTY_RATIOS)))
     height = int(round((width * ratio.height / float(ratio.width))))
 
-    img = Image.new("RGB", (width, height))
+    bg_fill = random.choice(settings.BETTY_PLACEHOLDER_COLORS)
+    img = Image.new("RGB", (width, height), bg_fill)
 
     draw = ImageDraw.Draw(img)
-    bg_fill = random.choice(settings.BETTY_PLACEHOLDER_COLORS)
-    draw.rectangle((0, 0, width, height), fill=bg_fill)
 
-    print(settings.BETTY_PLACEHOLDER_FONT)
     font = ImageFont.truetype(filename=settings.BETTY_PLACEHOLDER_FONT, size=45)
     text_size = draw.textsize(ratio.string, font=font)
+    print(text_size)
     text_coords = (
-        int(round((width / 2.0) - (text_size[0] / 2.0))),
-        int(round((height / 2.0) - (text_size[1] / 2.0))),
+        int(round((width - text_size[0]) / 2.0)),
+        int(round((height - text_size[1]) / 2) - 15),
     )
-    draw.text(text_coords, ratio.string, font=font)
+    print(text_coords)
+    draw.text(text_coords, ratio.string, font=font, fill=(256, 256, 256))
     if extension == 'jpg':
         pillow_kwargs = {"format": "jpeg", "quality": 80}
     if extension == 'png':
