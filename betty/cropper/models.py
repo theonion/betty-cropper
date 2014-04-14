@@ -1,10 +1,11 @@
+import io
 import os
 
 from django.db import models
 from django.core.files.storage import FileSystemStorage
 from django.core.urlresolvers import reverse
 
-from wand.image import Image as WandImage
+from PIL import Image as PILImage
 
 from betty.conf.app import settings
 
@@ -64,9 +65,9 @@ class Image(models.Model):
         If the width exists in the database, that value will be returned,
         otherwise the width will be read from the filesystem."""
         if self.height in (None, 0):
-            with WandImage(filename=self.src_path()) as img:
-                self.height = img.size[1]
-                self.width = img.size[0]
+            img = PILImage.open(self.src_path())
+            self.height = img.size[1]
+            self.width = img.size[0]
         return self.height
 
     def get_width(self):
@@ -75,9 +76,9 @@ class Image(models.Model):
         If the width exists in the database, that value will be returned,
         otherwise the width will be read from the filesystem."""
         if self.width in (None, 0):
-            with WandImage(filename=self.src_path()) as img:
-                self.height = img.size[1]
-                self.width = img.size[0]
+            img = PILImage.open(self.src_path())
+            self.height = img.size[1]
+            self.width = img.size[0]
         return self.width
 
     def get_selection(self, ratio):
@@ -148,48 +149,52 @@ class Image(models.Model):
             id_string += char
         return os.path.join(settings.BETTY_IMAGE_ROOT, id_string[1:])
 
-    def crop(self, ratio, width, extension):
-        with open(self.src_path(), 'rb') as source_file:
-            with WandImage(file=source_file) as img:
-                if ratio.string == 'original':
-                    ratio.width = img.size[0]
-                    ratio.height = img.size[1]
+    def crop(self, ratio, width, extension, fp=None):
+        img = PILImage.open(self.src_path())
+        icc_profile = img.info.get("icc_profile")
+        if ratio.string == 'original':
+            ratio.width = img.size[0]
+            ratio.height = img.size[1]
 
-                selection = self.get_selection(ratio)
-                try:
-                    img.crop(selection['x0'], selection['y0'], selection['x1'], selection['y1'])
-                except ValueError:
-                    # Looks like we have bad height and width data. Let's reload that and try again.
-                    self.width = img.size[0]
-                    self.height = img.size[1]
-                    self.save()
+        selection = self.get_selection(ratio)
+        try:
+            img.crop((selection['x0'], selection['y0'], selection['x1'], selection['y1']))
+        except ValueError:
+            # Looks like we have bad height and width data. Let's reload that and try again.
+            self.width = img.size[0]
+            self.height = img.size[1]
+            self.save()
 
-                    selection = self.get_selection(ratio)
-                    img.crop(selection['x0'], selection['y0'], selection['x1'], selection['y1'])
+            selection = self.get_selection(ratio)
+            img.crop((selection['x0'], selection['y0'], selection['x1'], selection['y1']))
 
-                img.transform(resize='%dx' % width)
+        height = int(round(width * float(ratio.height) / float(ratio.width)))
+        img = img.resize((width, height), PILImage.ANTIALIAS)
 
-                if extension == 'jpg':
-                    img.format = 'jpeg'
-                    img.compression_quality = 80
-                if extension == 'png':
-                    img.format = 'png'
+        if extension == 'jpg':
+            pillow_kwargs = {"format": "jpeg", "quality": 80}
+        if extension == 'png':
+            pillow_kwargs = {"format": "png"}
 
-                img_blob = img.make_blob()
+        if icc_profile:
+            pillow_kwargs["icc_profile"] = icc_profile
 
-                ratio_dir = os.path.join(self.path(), ratio.string)
+        if width in settings.BETTY_WIDTHS or len(settings.BETTY_WIDTHS) == 0:
+            ratio_dir = os.path.join(self.path(), ratio.string)
+            # We only want to save this to the filesystem if it's one of our usual widths.
+            try:
+                os.makedirs(ratio_dir)
+            except OSError as e:
+                if e.errno != 17:
+                    raise e
 
-                if width in settings.BETTY_WIDTHS or len(settings.BETTY_WIDTHS) == 0:
-                    # We only want to save this to the filesystem if it's one of our usual widths.
-                    try:
-                        os.makedirs(ratio_dir)
-                    except OSError as e:
-                        if e.errno != 17:
-                            raise e
+            with open(os.path.join(ratio_dir, "%d.%s" % (width, extension)), 'wb+') as out:
+                img.save(out, **pillow_kwargs)
 
-                    with open(os.path.join(ratio_dir, "%d.%s" % (width, extension)), 'wb+') as out:
-                        out.write(img_blob)
-                return img_blob
+        tmp = io.BytesIO()
+        img.save(tmp, **pillow_kwargs)
+
+        return tmp.getvalue()
 
     def get_absolute_url(self, ratio="original", width=600, format="jpg"):
         return reverse("betty.cropper.views.crop", kwargs={

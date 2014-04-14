@@ -1,9 +1,6 @@
 import json
 import os
-import copy
 import shutil
-
-from six.moves.urllib.parse import urljoin
 
 from django.http import (
     HttpResponse,
@@ -14,7 +11,7 @@ from django.http import (
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.cache import never_cache
 
-from wand.image import Image as WandImage
+from PIL import Image as PILImage
 
 from betty.conf.app import settings
 from .decorators import betty_token_auth
@@ -72,9 +69,9 @@ def new(request):
         for chunk in image_file.chunks():
             f.write(chunk)
         f.seek(0)
-        with WandImage(file=f) as img:
-            image.width = img.size[0]
-            image.height = img.size[1]
+        img = PILImage.open(f)
+        image.width = img.size[0]
+        image.height = img.size[1]
 
         image.source.name = source_path
         image.save()
