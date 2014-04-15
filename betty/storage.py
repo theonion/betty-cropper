@@ -1,8 +1,8 @@
+import requests
+
 from django.core.files.storage import Storage
 
 from betty.conf.app import settings
-
-import requests
 
 
 class BettyCropperStorage(Storage):
@@ -21,8 +21,9 @@ class BettyCropperStorage(Storage):
         base_url = self._base_url
         if not base_url:
             base_url = settings.BETTY_IMAGE_URL
-        if base_url[-1] == "/":
+        if base_url.endswith("/"):
             base_url = base_url[:-1]
+
         return base_url
 
     @property
@@ -37,45 +38,46 @@ class BettyCropperStorage(Storage):
             return self._private_token
         return settings.BETTY_PRIVATE_TOKEN
 
-    def delete(self, name):
+    def delete(self, image_id):
         raise NotImplementedError()
 
-    def exists(self, name):
-
-        detail_url = "{base_url}/api/{id}".format(base_url=self.base_url, id=name)
+    def exists(self, image_id):
+        detail_url = "{base_url}/api/{id}".format(base_url=self.base_url, id=image_id)
         r = requests.get(detail_url, headers=self.auth_headers)
-        print(r.content)
         return r.status_code == 200
 
     def listdir(self, path):
         raise NotImplementedError()
 
-    def size(self, name):
+    def size(self, image_id):
         return 0
 
-    def get_available_name(self, name):
-        return name
+    def get_available_name(self, image_id):
+        return image_id
 
-    def _save(self, name, content):
+    def _save(self, image_id, content):
         endpoint = "{base_url}/api/new".format(base_url=self.base_url)
 
-        data = {"name": name}
+        data = {"name": image_id}
         files = {"image": content}
 
         r = requests.post(endpoint, data=data, files=files, headers=self.auth_headers)
         if r.status_code != 200:
-            print(r.content)
             raise IOError("Save failed")
 
         return str(r.json()["id"])
 
     def url(self, name, ratio="original", width=600, format="jpg"):
 
-        # TODO: id string bullshit
+        id_string = ""
+        for index, char in enumerate(str(name)):
+            if index % 4 == 0 and index != 0:
+                id_string += "/"
+            id_string += char
 
         return "{base_url}/{id_string}/{ratio}/{width}.{format}".format(
             base_url=self.base_url,
-            id_string=name,
+            id_string=id_string,
             ratio=ratio,
             width=width,
             format=format)
