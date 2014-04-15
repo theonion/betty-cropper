@@ -158,7 +158,7 @@ class Image(models.Model):
 
         selection = self.get_selection(ratio)
         try:
-            img.crop((selection['x0'], selection['y0'], selection['x1'], selection['y1']))
+            img = img.crop((selection['x0'], selection['y0'], selection['x1'], selection['y1']))
         except ValueError:
             # Looks like we have bad height and width data. Let's reload that and try again.
             self.width = img.size[0]
@@ -166,7 +166,7 @@ class Image(models.Model):
             self.save()
 
             selection = self.get_selection(ratio)
-            img.crop((selection['x0'], selection['y0'], selection['x1'], selection['y1']))
+            img = img.crop((selection['x0'], selection['y0'], selection['x1'], selection['y1']))
 
         height = int(round(width * float(ratio.height) / float(ratio.width)))
         img = img.resize((width, height), PILImage.ANTIALIAS)
