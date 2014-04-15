@@ -17,28 +17,31 @@ license = 'MIT'
 
 setup_requires = []
 
-if 'test' in sys.argv:
-    setup_requires.append('pytest')
-
-
-tests_require = [
+dev_requires = [
+    "httmock==1.2.2",
+    "django-discover-runner",
     "flake8>=2.0,<2.1",
     "pytest",
     "pytest-django",
     "pytest-cov>=1.4",
-    "python-coveralls"
+    "coveralls==0.4.1",
 ]
-
 
 install_requires = [
     "Django>=1.4",
-    "slimit==0.8.1",
-    "Pillow==2.4.0",
-    "South==0.8.4",
-    "logan==0.5.9.1",
-    "jsonfield==0.9.20",
     "six==1.6.1"
 ]
+
+server_requires = [
+    "slimit==0.8.1",
+    "jsonfield==0.9.20",
+    "Pillow==2.4.0",
+    "South==0.8.4",
+    "logan==0.5.9.1"
+]
+
+if 'test' in sys.argv:
+    setup_requires.extend(dev_requires)
 
 
 def get_packages(package):
@@ -81,7 +84,7 @@ class PyTest(TestCommand):
 
 setup(
     name=name,
-    version="0.1.4",
+    version="0.1.5",
     url=url,
     license=license,
     description=description,
@@ -92,9 +95,10 @@ setup(
         "betty": ["templates/image.js.j2", "cropper/font/OpenSans-Semibold.ttf"]
     },
     install_requires=install_requires,
-    tests_require=tests_require,
+    tests_require=dev_requires,
     extras_require={
-        'tests': tests_require,
+        'dev': dev_requires,
+        'server': server_requires
     },
     entry_points={
         "console_scripts": [
