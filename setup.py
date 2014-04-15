@@ -33,7 +33,7 @@ tests_require = [
 install_requires = [
     "Django>=1.4",
     "slimit==0.8.1",
-    "wand==0.3.5",
+    "Pillow==2.4.0",
     "South==0.8.4",
     "logan==0.5.9.1",
     "jsonfield==0.9.20",
@@ -89,7 +89,7 @@ setup(
     author_email=author_email,
     packages=get_packages(package),
     package_data={
-        "betty/templates": ["betty/templates/image.js.j2"]
+        "betty": ["templates/image.js.j2", "cropper/font/OpenSans-Semibold.ttf"]
     },
     install_requires=install_requires,
     tests_require=tests_require,

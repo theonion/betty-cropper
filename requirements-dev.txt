@@ -5,4 +5,4 @@ flake8>=2.0,<2.1
 pytest
 pytest-django
 pytest-cov>=1.4
-python-coveralls
+coveralls==0.4.1

@@ -14,17 +14,27 @@ from django.db.models.fields.files import FieldFile, FileDescriptor
 from django.utils.translation import ugettext_lazy as _
 
 
-from .storage import BettyCropperStorage
+from betty.storage import BettyCropperStorage
 
 default_storage = BettyCropperStorage()
 
 
+from south.modelsinspector import add_introspection_rules
+add_introspection_rules([], ["^betty\.cropped\.fields\.ImageField"])
+
+
 class ImageFieldFile(FieldFile):
     
-    def __init__(self, instance, field, name):
+    def __init__(self, instance, field, id):
         super(ImageFieldFile, self).__init__(instance, field, None)
-        self.id = name
+        self.id = id
         self._name = None
+
+    def __bool__(self):
+        return bool(self.id)
+
+    def __nonzero__(self):
+        return bool(self.id)
 
     @property
     def name(self):
@@ -92,8 +102,8 @@ class ImageFieldFile(FieldFile):
     def delete(self, save=True):
         raise NotImplemented("You can't delete a remote image this way")
 
-    def get_crop_url(self, ratio="original", width=600, format="jpeg"):
-        return self.storage.url(self.name, ratio="original", width=600, format="jpeg")
+    def get_crop_url(self, ratio="original", width=600, format="jpg"):
+        return self.storage.url(self.id, ratio=ratio, width=width, format=format)
 
 
 class ImageDescriptor(FileDescriptor):
@@ -204,6 +214,7 @@ class ImageField(Field):
         "Returns field's value just before saving."
         image_file = super(ImageField, self).pre_save(model_instance, add)
         if image_file and not image_file._committed:
+            print(image_file.id)
             # Commit the file to storage prior to saving the model
             image_file.save(image_file.name, image_file, save=False)
         return image_file.id

@@ -6,6 +6,8 @@ from six.moves.urllib.parse import urljoin
 
 from django.conf import settings as _settings
 
+PACKAGE_DIR = os.path.dirname(os.path.dirname(__file__))
+
 DEFAULTS = {
     "BETTY_IMAGE_ROOT": os.path.join(_settings.MEDIA_ROOT, "images"),
     "BETTY_IMAGE_URL": urljoin(_settings.MEDIA_URL, "images/"),
@@ -13,17 +15,18 @@ DEFAULTS = {
     "BETTY_WIDTHS": [],
     "BETTY_PLACEHOLDER": _settings.DEBUG,
     "BETTY_PLACEHOLDER_COLORS": (
-        "rgb(153,153,51)",
-        "rgb(102,153,51)",
-        "rgb(51,153,51)",
-        "rgb(153,51,51)",
-        "rgb(194,133,71)",
-        "rgb(51,153,102)",
-        "rgb(153,51,102)",
-        "rgb(71,133,194)",
-        "rgb(51,153,153)",
-        "rgb(153,51,153)",
+        (153, 153, 51),
+        (102, 153, 51),
+        (51, 153, 51),
+        (153, 51, 51),
+        (194, 133, 71),
+        (51, 153, 102),
+        (153, 51, 102),
+        (71, 133, 194),
+        (51, 153, 153),
+        (153, 51, 153)
     ),
+    "BETTY_PLACEHOLDER_FONT": os.path.join(PACKAGE_DIR, "cropper/font/OpenSans-Semibold.ttf"),
     "BETTY_PUBLIC_TOKEN": None,
     "BETTY_PRIVATE_TOKEN": None,
     "BETTY_CACHE_FLUSHER": None
