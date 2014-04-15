@@ -6,6 +6,8 @@ from six.moves.urllib.parse import urljoin
 
 from django.conf import settings as _settings
 
+PACKAGE_DIR = os.path.dirname(os.path.dirname(__file__))
+
 DEFAULTS = {
     "BETTY_IMAGE_ROOT": os.path.join(_settings.MEDIA_ROOT, "images"),
     "BETTY_IMAGE_URL": urljoin(_settings.MEDIA_URL, "images/"),
@@ -24,7 +26,7 @@ DEFAULTS = {
         (51, 153, 153),
         (153, 51, 153)
     ),
-    "BETTY_PLACEHOLDER_FONT": os.path.join(_settings.PROJECT_ROOT, "cropper/font/OpenSans-Semibold.ttf"),
+    "BETTY_PLACEHOLDER_FONT": os.path.join(PACKAGE_DIR, "cropper/font/OpenSans-Semibold.ttf"),
     "BETTY_PUBLIC_TOKEN": None,
     "BETTY_PRIVATE_TOKEN": None,
     "BETTY_CACHE_FLUSHER": None
