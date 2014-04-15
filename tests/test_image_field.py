@@ -57,8 +57,10 @@ class ImageFieldTestCase(TestCase):
 
     def test_fileless_save(self):
         test_object = TestModel()
-        test_object.listing_image.id = 12345
+        test_object.listing_image = 12345
         test_object.save()
+
+        self.assertEqual(test_object.listing_image.id, 12345)
 
     def test_save(self):
         lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
