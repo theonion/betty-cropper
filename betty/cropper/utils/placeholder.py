@@ -19,12 +19,10 @@ def placeholder(ratio, width, extension):
 
     font = ImageFont.truetype(filename=settings.BETTY_PLACEHOLDER_FONT, size=45)
     text_size = draw.textsize(ratio.string, font=font)
-    print(text_size)
     text_coords = (
         int(round((width - text_size[0]) / 2.0)),
         int(round((height - text_size[1]) / 2) - 15),
     )
-    print(text_coords)
     draw.text(text_coords, ratio.string, font=font, fill=(256, 256, 256))
     if extension == 'jpg':
         pillow_kwargs = {"format": "jpeg", "quality": 80}

@@ -87,10 +87,9 @@ setup(
     description=description,
     author=author,
     author_email=author_email,
-    packages=get_packages(package),
+    packages=["betty"],
     package_data={
-        "betty/templates": ["betty/templates/image.js.j2"],
-        "betty/cropper/font": ["betty/cropper/font/OpenSans-Semibold.ttf"]
+        "betty": ["templates/image.js.j2", "cropper/font/OpenSans-Semibold.ttf"]
     },
     install_requires=install_requires,
     tests_require=tests_require,
