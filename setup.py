@@ -87,7 +87,7 @@ setup(
     description=description,
     author=author,
     author_email=author_email,
-    packages=["betty"],
+    packages=get_packages(package),
     package_data={
         "betty": ["templates/image.js.j2", "cropper/font/OpenSans-Semibold.ttf"]
     },
