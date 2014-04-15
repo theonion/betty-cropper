@@ -19,6 +19,10 @@ from betty.storage import BettyCropperStorage
 default_storage = BettyCropperStorage()
 
 
+from south.modelsinspector import add_introspection_rules
+add_introspection_rules([], ["^betty\.cropped\.fields\.ImageField"])
+
+
 class ImageFieldFile(FieldFile):
     
     def __init__(self, instance, field, id):
