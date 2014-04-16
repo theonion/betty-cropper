@@ -155,7 +155,9 @@ class ImageField(Field):
         self.caption_field, self.alt_field = caption_field, alt_field
 
         self.storage = storage or default_storage
-        super(ImageField, self).__init__(verbose_name, name, default=None, **kwargs)
+        if "default" not in kwargs:
+            kwargs["default"] = None
+        super(ImageField, self).__init__(verbose_name, name, **kwargs)
 
     def check(self, **kwargs):
         errors = super(ImageField, self).check(**kwargs)
