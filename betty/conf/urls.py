@@ -12,12 +12,12 @@ except ImportError:
     # django < 1.5 compat
     from django.conf.urls.defaults import include, patterns, url  # noqa
 
-
+# TODO: fix up this awful, awful shit.
 image_path = urlparse(settings.BETTY_IMAGE_URL).path
 if image_path.startswith("/"):
     image_path = image_path[1:]
 
-if not image_path.endswith("/"):
+if image_path != "" and not image_path.endswith("/"):
     image_path += "/"
 
 urlpatterns = patterns('',

@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import os
+import six.moves.urllib
 from six.moves.urllib.parse import urljoin
 
 from django.conf import settings as _settings
