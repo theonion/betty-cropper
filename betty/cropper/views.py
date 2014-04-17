@@ -1,7 +1,8 @@
+import json
 from betty.conf.app import settings
 
-from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse, HttpResponseServerError, HttpResponseRedirect
+from django.shortcuts import render
 from django.views.decorators.cache import cache_control
 
 from .models import Image, Ratio
@@ -17,6 +18,22 @@ EXTENSION_MAP = {
         "mime_type": "image/png"
     },
 }
+
+
+@cache_control(max_age=300)
+def image_js(request):
+    context = {
+        "BETTY_IMAGE_URL": settings.BETTY_IMAGE_URL,
+        "BETTY_WIDTHS": settings.BETTY_WIDTHS,
+    }
+    BETTY_RATIOS = []
+    ratios_sorted = sorted(settings.BETTY_RATIOS, key=lambda r: Ratio(r).width / float(Ratio(r).height))
+    for ratio_string in ratios_sorted:
+        ratio = Ratio(ratio_string)
+        BETTY_RATIOS.append((ratio_string, ratio.width / float(ratio.height)))
+    context["BETTY_RATIOS"] = json.dumps(BETTY_RATIOS)
+
+    return render(request, "image.js", context, content_type="application/javascript")
 
 
 @cache_control(max_age=300)

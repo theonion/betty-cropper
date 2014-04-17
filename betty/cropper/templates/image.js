@@ -3,8 +3,8 @@
        We can set these so they correspond to our more common sizes.
     */
     
-    var IMAGE_URL = "{{ PUBLIC_URL }}/{id}/{crop}/{width}.jpg";
-    var breakpoints = [0, {% for width in WIDTHS %}{{width}},{% endfor %}];
+    var RATIOS = {{ BETTY_RATIOS|safe }};
+    var breakpoints = [0,{{ BETTY_WIDTHS|join:","}}];
     function tmpl(text, dict) {
         for (var k in dict) {
             text = text.replace("{" + k + "}", dict[k]);
@@ -44,11 +44,10 @@
                         break;
                     }
                 }
-                // TODO: do something for retina
-                if (w.devicePixelRatio) {
-                    if (w.devicePixelRatio > 1) {
 
-                    }
+                // Scale the image up to the pixel ratio
+                if (w.devicePixelRatio) {
+                  width = Math.round(w.devicePixelRatio * width);
                 }
 
                 // Find any existing img element in the picture element
@@ -78,7 +77,7 @@
                             }
                             id_str += id.charAt(ii);
                         }
-                        var url = tmpl(w.IMAGE_URL, {id: id_str, crop: crop, width: width, format:format});
+                        var url = tmpl(IMAGE_URL, {id: id_str, crop: crop, width: width, format:format});
                         imageData.push({
                             'div': div,
                             'img': picImg,
@@ -100,32 +99,15 @@
 
     function computeAspectRatio(_w, _h) {
         if (_w !== 0 && _h !== 0) {
-            var aspectRatio = Math.ceil(_w/_h * 10);
-            //smooth out rounding issues.
-            switch (aspectRatio) {
-                case 30:
-                case 31:
-                    crop = "3x1";
-                    break;
-                case 20:
-                    crop = "2x1";
-                    break;
-                case 14:
-                    crop = "4x3";
-                    break;
-                case 18:
-                    crop = "16x9";
-                    break;
-                case 8:
-                    crop = "3x4";
-                    break;
-                case 10:
-                    crop = "1x1";
-                    break;
-                default:
-                    crop = "original";
+            var aspectRatio = _w/_h;
+            var difference = 10;
+            for (var i in RATIOS) {
+              if (difference > Math.abs(aspectRatio - RATIOS[i][1])) {
+                difference = Math.abs(aspectRatio - RATIOS[i][1]);
+              } else {
+                return RATIOS[i][0];
+              }
             }
-            return crop;
         }
         else {
             return "16x9"
@@ -197,7 +179,7 @@
                         }
                         id_str += id.charAt(i);
                     }
-                    var url = tmpl(w.IMAGE_URL, {id: id_str, crop: crop, width: width, format:format});
+                    var url = "{{ BETTY_IMAGE_URL }}" + "/" + id_str + "/" + crop + "/" + width + "." + format;
                     picImg.src = url;
                 }
             }
