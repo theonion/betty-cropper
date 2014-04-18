@@ -36,3 +36,4 @@ deploy:
   on:
     tags: true
     repo: theonion/betty-cropper
+    python: 2.7
