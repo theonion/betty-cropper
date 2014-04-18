@@ -77,7 +77,8 @@
                             }
                             id_str += id.charAt(ii);
                         }
-                        var url = tmpl(IMAGE_URL, {id: id_str, crop: crop, width: width, format:format});
+                        var url = "{{ BETTY_IMAGE_URL }}" + "/" + id_str + "/" + crop + "/" + width + "." + format;
+
                         imageData.push({
                             'div': div,
                             'img': picImg,
