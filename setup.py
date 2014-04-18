@@ -84,7 +84,7 @@ class PyTest(TestCommand):
 
 setup(
     name=name,
-    version="0.1.8",
+    version="0.1.9",
     url=url,
     license=license,
     description=description,
@@ -92,7 +92,7 @@ setup(
     author_email=author_email,
     packages=get_packages(package),
     package_data={
-        "betty": ["templates/image.js.j2", "cropper/font/OpenSans-Semibold.ttf"]
+        "betty": ["cropper/templates/image.js", "cropper/font/OpenSans-Semibold.ttf"]
     },
     install_requires=install_requires,
     tests_require=dev_requires,
