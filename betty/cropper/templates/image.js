@@ -37,12 +37,15 @@
                     format = "jpg";
                 }
 
-                var width = 50;
+                var width = null;
                 for (var j = 0; j < breakpoints.length; j++) {
                     if (_w <= breakpoints[j]) {
                         width = breakpoints[j];
                         break;
                     }
+                }
+                if (width === null) {
+                  width = _w;
                 }
 
                 // Scale the image up to the pixel ratio
@@ -136,19 +139,19 @@
                 format = "jpg";
             }
 
-
-            var width = 50;
+            var width = null;
             for (var j = 0; j < breakpoints.length; j++) {
                 if (_w <= breakpoints[j]) {
                     width = breakpoints[j];
                     break;
                 }
             }
-            // TODO: do something for retina
+            if (width === null) {
+              width = _w;
+            }
+
             if (w.devicePixelRatio) {
-                if (w.devicePixelRatio > 1) {
-                    width *= w.devicePixelRatio;
-                }
+                width = Math.round(w.devicePixelRatio * width);
             }
 
             // Find any existing img element in the picture element

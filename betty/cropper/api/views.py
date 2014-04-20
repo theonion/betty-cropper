@@ -25,7 +25,7 @@ ACC_HEADERS = {
 }
 
 
-def crossdomain(origin="*", methods=[], headers=["X-Betty-Api-Key", "Content-Type"]):
+def crossdomain(origin="*", methods=[], headers=["X-Betty-Api-Key", "Content-Type", "X-CSRFToken"]):
 
     def _method_wrapper(func):
 
