@@ -11,9 +11,17 @@
         }
         return text;
     }
-    w.picturefill = function() {
+    w.picturefill = function(elements) {
         //don't need to do them all at once. can decide to do lazy load if needed
-        var ps = w.document.getElementsByTagName( "div" );
+        if (elements instanceof Array) {
+            var ps = elements;
+        }
+        else if (elements instanceof HTMLElement) {
+            var ps = [ elements ];
+        }
+        else 
+            var ps = w.document.getElementsByTagName( "div" );
+        }
         var imageData = [];
         for( var i = 0, il = ps.length; i < il; i++ ){
             var el = ps[i];
@@ -117,78 +125,6 @@
             return "16x9"
         }
     }
-
-    // NOTE: this is used elsewhere so I'm putting it back in for now.
-    w.pictureFillElement = function(el) {
-        var div = el.getElementsByTagName( "div" )[0];
-
-        if( el.getAttribute( "data-image-id" ) !== null ){
-            var id = el.getAttribute( "data-image-id" ),
-                crop = el.getAttribute( "data-crop" );
-            var _w = div.offsetWidth,
-                _h = div.offsetHeight;
-
-
-            if (!crop || crop === "" || crop === "auto") {
-                crop = computeAspectRatio(_w, _h);
-            }
-            if (el.getAttribute("data-format")) {
-                format = el.getAttribute("data-format");
-            }
-            else {
-                format = "jpg";
-            }
-
-            var width = null;
-            for (var j = 0; j < breakpoints.length; j++) {
-                if (_w <= breakpoints[j]) {
-                    width = breakpoints[j];
-                    break;
-                }
-            }
-            if (width === null) {
-              width = _w;
-            }
-
-            if (w.devicePixelRatio) {
-                width = Math.round(w.devicePixelRatio * width);
-            }
-
-            // Find any existing img element in the picture element
-            var picImg = div.getElementsByTagName( "img" )[ 0 ];
-
-
-            if(!picImg){
-                picImg = w.document.createElement( "img" );
-                picImg.alt = el.getAttribute( "data-alt" );
-
-                div.appendChild( picImg );
-            }
-
-            //picImg.className = "loading";
-            picImg.onload = function() {
-                //this.className = "";
-            };
-            // if the existing image is larger (or the same) than the one we're about to load, do not update.
-            //however if the crop changes, we need to reload.
-            if (width > 0) {
-
-                //ie8 doesn't support natuarl width, always load.
-                if (typeof picImg.naturalWidth === "undefined" || picImg.naturalWidth < width ||
-                    crop !== computeAspectRatio(picImg.naturalWidth, picImg.naturalHeight)) {
-                    var id_str = "";
-                    for(var i=0;i < id.length;i++) {
-                        if ((i % 4) === 0) {
-                            id_str += "/";
-                        }
-                        id_str += id.charAt(i);
-                    }
-                    var url = "{{ BETTY_IMAGE_URL }}" + "/" + id_str + "/" + crop + "/" + width + "." + format;
-                    picImg.src = url;
-                }
-            }
-        }
-    };
 
     // Run on resize and domready (w.load as a fallback)
     if (!w.IMAGE_LISTENERS_DISABLED) {
