@@ -19,7 +19,7 @@
         else if (elements instanceof HTMLElement) {
             var ps = [ elements ];
         }
-        else 
+        else {
             var ps = w.document.getElementsByTagName( "div" );
         }
         var imageData = [];
