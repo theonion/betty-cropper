@@ -22,12 +22,12 @@ EXTENSION_MAP = {
 
 @cache_control(max_age=300)
 def image_js(request):
-    widths = sorted(settings.BETTY_WIDTHS, reverse=True)
-    if widths[-1] != 0:
+    widths = settings.BETTY_WIDTHS
+    if 0 not in widths:
         widths.append(0)
     context = {
         "BETTY_IMAGE_URL": settings.BETTY_IMAGE_URL,
-        "BETTY_WIDTHS": widths
+        "BETTY_WIDTHS": sorted(widths)
     }
     BETTY_RATIOS = []
     ratios_sorted = sorted(settings.BETTY_RATIOS, key=lambda r: Ratio(r).width / float(Ratio(r).height))
