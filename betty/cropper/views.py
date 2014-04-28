@@ -27,7 +27,7 @@ def image_js(request):
         widths.append(0)
     context = {
         "BETTY_IMAGE_URL": settings.BETTY_IMAGE_URL,
-        "BETTY_WIDTHS": sorted(widths, reverse=True)
+        "BETTY_WIDTHS": sorted(widths)
     }
     BETTY_RATIOS = []
     ratios_sorted = sorted(settings.BETTY_RATIOS, key=lambda r: Ratio(r).width / float(Ratio(r).height))
