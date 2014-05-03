@@ -7,6 +7,7 @@ try:  # Django < 1.5 doesn't have checks, so we'll just ignore that.
 except ImportError:
     pass
 
+from django.core import exceptions
 from django.core.cache import cache
 from django.db.models.fields import Field
 from django.core.files.base import File
@@ -207,7 +208,7 @@ class ImageField(Field):
     def get_prep_value(self, value):
         if value is None:
             return None
-        return value
+        return int(value)
 
     def get_prep_lookup(self, lookup_type, value):
         return super(ImageField, self).get_prep_lookup(lookup_type, value.id)
@@ -215,11 +216,23 @@ class ImageField(Field):
     def pre_save(self, model_instance, add):
         "Returns field's value just before saving."
         image_file = super(ImageField, self).pre_save(model_instance, add)
+
+        if isinstance(image_file, basestring):
+            if image_file == "":
+                return None
+            raise exceptions.ValidationError("This field cannot be a string")
+
         if image_file and not image_file._committed:
-            print(image_file.id)
             # Commit the file to storage prior to saving the model
             image_file.save(image_file.name, image_file, save=False)
         return image_file.id
+
+    def validate(self, value, model_instance):
+        super(ImageField, self).validate(self, value, model_instance)
+        try:
+            int(value)
+        except ValueError:
+            exceptions.ValidationError("This field cannot be a string")
 
     def contribute_to_class(self, cls, name):
         super(ImageField, self).contribute_to_class(cls, name)
