@@ -28,7 +28,7 @@ dev_requires = [
 ]
 
 install_requires = [
-    "Django>=1.4",
+    "Django>=1.5",
     "six==1.6.1"
 ]
 
