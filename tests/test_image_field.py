@@ -66,7 +66,7 @@ class ImageFieldTestCase(TestCase):
         """DRF seems to want to save fields it doesn't know about as CharFields,
         so if a string is passed in, let's handle it right."""
         test = TestModel()
-        test.image = u""
+        test.image = ""
         test.save()
         test = TestModel.objects.get(id=test.id)
         self.assertEqual(test.image, None)
