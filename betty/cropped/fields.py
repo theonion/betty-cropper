@@ -7,6 +7,7 @@ try:  # Django < 1.5 doesn't have checks, so we'll just ignore that.
 except ImportError:
     pass
 
+from django.utils import six
 from django.core import exceptions
 from django.core.cache import cache
 from django.db.models.fields import Field
@@ -217,7 +218,7 @@ class ImageField(Field):
         "Returns field's value just before saving."
         image_file = super(ImageField, self).pre_save(model_instance, add)
 
-        if isinstance(image_file, basestring):
+        if isinstance(image_file, six.string_types):
             if image_file == "":
                 return None
             raise exceptions.ValidationError("This field cannot be a string")
