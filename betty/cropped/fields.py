@@ -8,6 +8,7 @@ except ImportError:
     pass
 
 from django.utils import six
+from django.utils.encoding import smart_text
 from django.core import exceptions
 from django.core.cache import cache
 from django.db.models.fields import Field
@@ -77,6 +78,9 @@ class ImageFieldFile(FieldFile):
     @caption.setter
     def caption(self, value):
         setattr(self.instance, self.field.caption_field, value)
+
+    def __unicode__(self):
+        return smart_text(self.id)
 
     def __eq__(self, other):
         # Older code may be expecting FileField values to be simple strings.
