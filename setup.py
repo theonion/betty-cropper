@@ -84,7 +84,7 @@ class PyTest(TestCommand):
 
 setup(
     name=name,
-    version="0.1.19",
+    version="0.1.20",
     url=url,
     license=license,
     description=description,

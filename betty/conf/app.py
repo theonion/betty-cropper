@@ -32,7 +32,8 @@ DEFAULTS = {
     "BETTY_PLACEHOLDER_FONT": os.path.join(PACKAGE_DIR, "cropper/font/OpenSans-Semibold.ttf"),
     "BETTY_PUBLIC_TOKEN": None,
     "BETTY_PRIVATE_TOKEN": None,
-    "BETTY_CACHE_FLUSHER": None
+    "BETTY_CACHE_FLUSHER": None,
+    "BETTY_DEFAULT_IMAGE": None
 }
 
 

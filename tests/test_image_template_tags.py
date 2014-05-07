@@ -34,3 +34,6 @@ class TemplateTagTestCase(TestCase):
 
         c = Context({"image": "12345"})
         self.assertEquals(t.render(c), '<img src="http://localhost:8081/images/1234/5/original/600.jpg" />')
+
+        c = Context({"image": None})
+        self.assertEquals(t.render(c), '<img src="http://localhost:8081/images/666/original/600.jpg" />')

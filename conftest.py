@@ -11,6 +11,7 @@ MODULE_ROOT = os.path.dirname(os.path.realpath(__file__))
 def pytest_configure():
     settings.configure(
         server,
+        BETTY_DEFAULT_IMAGE=666,
         BETTY_IMAGE_URL="http://localhost:8081/images/",
         MEDIA_ROOT=tempfile.mkdtemp("bettycropper"),
         TEMPLATE_DIRS=(os.path.join(MODULE_ROOT, 'tests', 'templates'),),
