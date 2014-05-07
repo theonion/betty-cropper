@@ -31,8 +31,8 @@ def cropped_url(image, ratio="original", width=600, format="jpg"):
     return image.get_crop_url(ratio=ratio, width=width, format=format)
 
 
-@register.simple_tag
-def cropped(image, ratio="original", width=600, format="jpg"):
+@register.simple_tag(takes_context=True)
+def cropped(context, image, ratio="original", width=600, format="jpg"):
     if not isinstance(image, ImageFieldFile):
         try:
             image_id = int(image)
