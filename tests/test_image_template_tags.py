@@ -26,3 +26,11 @@ class TemplateTagTestCase(TestCase):
 
         t = Template('{% load betty %}<img src="{% cropped_url image width=900 ratio="16x9" format="png" %}" />')
         self.assertEquals(t.render(c), '<img src="http://localhost:8081/images/1234/5/16x9/900.png" />')
+
+    def test_image_id(self):
+        t = Template('{% load betty %}<img src="{% cropped_url image %}" />')
+        c = Context({"image": 12345})
+        self.assertEquals(t.render(c), '<img src="http://localhost:8081/images/1234/5/original/600.jpg" />')
+
+        c = Context({"image": "12345"})
+        self.assertEquals(t.render(c), '<img src="http://localhost:8081/images/1234/5/original/600.jpg" />')
