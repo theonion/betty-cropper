@@ -41,12 +41,11 @@ def cropped(context, image, ratio="original", width=600, format="jpg"):
             raise template.TemplateSyntaxError("\"{}\" is not a valid ImageField or image id".format(image))
         image = AnonymousImageField(image_id)
 
+    context["image"] = image
+    context["image_url"] = image.get_crop_url(ratio=ratio, width=width, format=format)
+    context["ratio"] = ratio
+    context["width"] = width
+    context["format"] = format
+
     t = select_template(["betty/cropped.html", "betty/cropped_default.html"])
-    context = template.Context({
-        "image": image,
-        "image_url": image.get_crop_url(ratio=ratio, width=width, format=format),
-        "ratio": ratio,
-        "width": width,
-        "format": format
-    })
     return t.render(context)
