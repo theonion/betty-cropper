@@ -35,8 +35,8 @@ def coerce_image(image):
         try:
             image_id = int(image)
         except:
-            raise
-            raise template.TemplateSyntaxError("\"{}\" is not a valid ImageField or image id".format(image))
+            if settings.BETTY_DEFAULT_IMAGE:
+                image_id = settings.BETTY_DEFAULT_IMAGE
         image = AnonymousImageField(image_id)
 
     return image
