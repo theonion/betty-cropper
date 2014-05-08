@@ -4,6 +4,8 @@
     */
     
     var RATIOS = {{ BETTY_RATIOS|safe }};
+    var ASPECT_RATIO_TOLERANCE = .1; // 10% tolerance. 
+
     var breakpoints = [0,{{ BETTY_WIDTHS|join:","}}];
     function tmpl(text, dict) {
         for (var k in dict) {
@@ -112,11 +114,9 @@
     function computeAspectRatio(_w, _h) {
         if (_w !== 0 && _h !== 0) {
             var aspectRatio = _w/_h;
-            var difference = 10;
+            var ASPECT_RATIO_TOLERANCE = .1; // 10% tolerance. 
             for (var i in RATIOS) {
-              if (difference > Math.abs(aspectRatio - RATIOS[i][1])) {
-                difference = Math.abs(aspectRatio - RATIOS[i][1]);
-              } else {
+              if (Math.abs(aspectRatio - RATIOS[i][1]) / RATIOS[i][1] < ASPECT_RATIO_TOLERANCE) {
                 return RATIOS[i][0];
               }
             }
