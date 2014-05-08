@@ -113,7 +113,6 @@
     function computeAspectRatio(_w, _h) {
         if (_w !== 0 && _h !== 0) {
             var aspectRatio = _w/_h;
-            var ASPECT_RATIO_TOLERANCE = .1; // 10% tolerance. 
             for (var i in RATIOS) {
               if (Math.abs(aspectRatio - RATIOS[i][1]) / RATIOS[i][1] < ASPECT_RATIO_TOLERANCE) {
                 return RATIOS[i][0];
