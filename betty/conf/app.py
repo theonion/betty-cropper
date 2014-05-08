@@ -2,8 +2,10 @@
 from __future__ import unicode_literals
 
 import os
-import six.moves.urllib
-from six.moves.urllib.parse import urljoin
+try:
+    from urlparse import urljoin
+except ImportError:
+    from urllib.parse import urljoin
 
 from django.conf import settings as _settings
 
@@ -30,7 +32,8 @@ DEFAULTS = {
     "BETTY_PLACEHOLDER_FONT": os.path.join(PACKAGE_DIR, "cropper/font/OpenSans-Semibold.ttf"),
     "BETTY_PUBLIC_TOKEN": None,
     "BETTY_PRIVATE_TOKEN": None,
-    "BETTY_CACHE_FLUSHER": None
+    "BETTY_CACHE_FLUSHER": None,
+    "BETTY_DEFAULT_IMAGE": None
 }
 
 

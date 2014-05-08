@@ -5,8 +5,7 @@
     
     var RATIOS = {{ BETTY_RATIOS|safe }};
     var ASPECT_RATIO_TOLERANCE = .1; // 10% tolerance. 
-
-    var breakpoints = [0,{{ BETTY_WIDTHS|join:","}}];
+    var breakpoints = [{{ BETTY_WIDTHS|join:","}}];
     function tmpl(text, dict) {
         for (var k in dict) {
             text = text.replace("{" + k + "}", dict[k]);

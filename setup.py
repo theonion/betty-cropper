@@ -28,7 +28,7 @@ dev_requires = [
 ]
 
 install_requires = [
-    "Django>=1.4",
+    "Django>=1.5",
     "six==1.6.1"
 ]
 
@@ -84,7 +84,7 @@ class PyTest(TestCommand):
 
 setup(
     name=name,
-    version="0.1.12",
+    version="0.1.21",
     url=url,
     license=license,
     description=description,

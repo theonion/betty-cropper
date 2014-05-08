@@ -62,6 +62,15 @@ class ImageFieldTestCase(TestCase):
 
         self.assertEqual(test_object.listing_image.id, 12345)
 
+    def test_charfield_save(self):
+        """DRF seems to want to save fields it doesn't know about as CharFields,
+        so if a string is passed in, let's handle it right."""
+        test = TestModel()
+        test.image = ""
+        test.save()
+        test = TestModel.objects.get(id=test.id)
+        self.assertEqual(test.image, None)
+
     def test_save(self):
         lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
         with open(lenna_path, "rb") as lenna:
