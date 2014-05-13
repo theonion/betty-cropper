@@ -1,7 +1,8 @@
 ## Betty Cropper
 
-[![Build Status](https://travis-ci.org/theonion/betty-cropper.png?branch=master)](https://travis-ci.org/theonion/betty-cropper)
+[![Build Status](https://travis-ci.org/theonion/betty-cropper.svg?branch=master)](https://travis-ci.org/theonion/betty-cropper)
 [![Coverage Status](https://coveralls.io/repos/theonion/betty-cropper/badge.png)](https://coveralls.io/r/theonion/betty-cropper)
+[![Latest Version](https://pypip.in/version/betty-cropper/badge.svg)](https://pypi.python.org/pypi/betty-cropper/)
 
 ### Get started:
 
