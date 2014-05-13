@@ -108,6 +108,9 @@ INSTALLED_APPS = (
     'south',
 )
 
+CELERY_ALWAYS_EAGER = True
+BROKER_URL = 'redis://localhost:6379'
+
 BETTY_STANDALONE_SERVER = True
 
 LOGIN_URL = "/login/"

@@ -43,6 +43,7 @@ class Image(models.Model):
     width = models.IntegerField(null=True, blank=True)
     credit = models.CharField(max_length=120, null=True, blank=True)
     selections = JSONField(null=True, blank=True)
+    # jpeg_quality = models.IntegerField(default=80)
 
     class Meta:
         permissions = (
