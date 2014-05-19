@@ -122,7 +122,7 @@ class APITestCase(TestCase):
         assert self.client.login(username="admin", password=self.password)
         res = self.client.get("/images/api/{0}".format(image.id))
         self.assertEqual(res.status_code, 200)
-        data = json.loads(res.content)
+        data = json.loads(res.content.decode("utf-8"))
         self.assertEqual(data["selections"]["1x1"]["source"], "user")
         self.assertEqual(data["selections"]["16x9"]["source"], "auto")
 
