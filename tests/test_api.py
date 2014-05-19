@@ -114,6 +114,18 @@ class APITestCase(TestCase):
         )
         self.assertEqual(res.status_code, 404)
 
+    def test_image_selection_source(self):
+        image = Image.objects.create(name="Testing", width=512, height=512)
+        image.selections = {"1x1": {"x0": 1, "y0": 1, "x1": 510, "y1": 510}}
+        image.save()
+
+        assert self.client.login(username="admin", password=self.password)
+        res = self.client.get("/images/api/{0}".format(image.id))
+        self.assertEqual(res.status_code, 200)
+        data = json.loads(res.content)
+        self.assertEqual(data["selections"]["1x1"]["source"], "user")
+        self.assertEqual(data["selections"]["16x9"]["source"], "auto")
+
     def test_crop_clearing(self):
         assert self.client.login(username="admin", password=self.password)
         

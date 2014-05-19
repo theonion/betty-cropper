@@ -217,6 +217,9 @@ class Image(models.Model):
         }
         for ratio in settings.BETTY_RATIOS:
             data['selections'][ratio] = self.get_selection(Ratio(ratio))
+            data['selections'][ratio]["source"] = "auto"
+            if self.selections and data['selections'][ratio] == self.selections.get(ratio):
+                data['selections'][ratio]["source"] = "user"
         return data
 
     def src_path(self):

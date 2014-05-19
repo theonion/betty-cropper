@@ -26,6 +26,9 @@ from south.modelsinspector import add_introspection_rules
 add_introspection_rules([], ["^betty\.cropped\.fields\.ImageField"])
 
 
+raise DeprecationWarning("betty.cropped is deprecated. Please use betty-cropper-django instead.")  # noqa
+
+
 class ImageFieldFile(FieldFile):
     
     def __init__(self, instance, field, id):

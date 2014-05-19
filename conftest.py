@@ -15,6 +15,5 @@ def pytest_configure():
         BETTY_IMAGE_URL="http://localhost:8081/images/",
         MEDIA_ROOT=tempfile.mkdtemp("bettycropper"),
         TEMPLATE_DIRS=(os.path.join(MODULE_ROOT, 'tests', 'templates'),),
-        INSTALLED_APPS=server.INSTALLED_APPS + ("tests.testapp",),
         BETTY_WIDTHS=(80, 150, 240, 300, 320, 400, 480, 620, 640, 820, 960, 1200, 1600),
     )

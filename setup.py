@@ -4,6 +4,7 @@
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
 import os
+import re
 import sys
 
 
@@ -42,6 +43,14 @@ server_requires = [
 
 if 'test' in sys.argv:
     setup_requires.extend(dev_requires)
+
+
+def get_version(package):
+    """
+    Return package version as listed in `__version__` in `init.py`.
+    """
+    init_py = open(os.path.join(package, "__init__.py")).read()
+    return re.search("^__version__ = ['\"]([^'\"]+)['\"]", init_py, re.MULTILINE).group(1)
 
 
 def get_packages(package):
@@ -84,7 +93,7 @@ class PyTest(TestCommand):
 
 setup(
     name=name,
-    version="0.1.22",
+    version=get_version(package),
     url=url,
     license=license,
     description=description,
