@@ -22,6 +22,10 @@ def source_upload_to(instance, filename):
     return os.path.join(instance.path(), filename)
 
 
+def optimized_upload_to(instance, filename):
+    return os.path.join(instance.path(), "optimized.png")
+
+
 class Ratio(object):
     def __init__(self, ratio):
         self.string = ratio
@@ -38,12 +42,14 @@ class Ratio(object):
 class Image(models.Model):
 
     source = models.FileField(upload_to=source_upload_to, storage=betty_storage, max_length=255)
+    optimized = models.FileField(upload_to=optimized_upload_to, storage=betty_storage, max_length=255)
     name = models.CharField(max_length=255)
     height = models.IntegerField(null=True, blank=True)
     width = models.IntegerField(null=True, blank=True)
     credit = models.CharField(max_length=120, null=True, blank=True)
     selections = JSONField(null=True, blank=True)
-    # jpeg_quality = models.IntegerField(default=80)
+    jpeg_quality = models.IntegerField(default=80)
+    animated = models.BooleanField(default=False)
 
     class Meta:
         permissions = (
@@ -151,7 +157,7 @@ class Image(models.Model):
         return os.path.join(settings.BETTY_IMAGE_ROOT, id_string[1:])
 
     def crop(self, ratio, width, extension, fp=None):
-        img = PILImage.open(self.src_path())
+        img = PILImage.open(self.optimized.path)
         icc_profile = img.info.get("icc_profile")
         if ratio.string == 'original':
             ratio.width = img.size[0]

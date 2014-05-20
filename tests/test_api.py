@@ -63,9 +63,45 @@ class APITestCase(TestCase):
         image = Image.objects.get(id=response_json['id'])
         self.assertTrue(os.path.exists(image.path()))
         self.assertTrue(os.path.exists(image.src_path()))
+        self.assertTrue(os.path.exists(image.optimized.path))
         self.assertEqual(os.path.basename(image.src_path()), "Lenna.png")
         self.assertEqual(image.name, "LENNA DOT PNG")
         self.assertEqual(image.credit, "Playboy")
+
+    def test_large_image_upload(self):
+        assert self.client.login(username="admin", password=self.password)
+        image_path = os.path.join(TEST_DATA_PATH, 'huge.jpg')
+        with open(image_path, "rb") as huge:
+            data = {"image": huge, "name": "A COOL TRAIN"}
+            res = self.client.post('/images/api/new', data)
+        self.assertEqual(res.status_code, 200)
+        response_json = json.loads(res.content.decode("utf-8"))
+        self.assertEqual(response_json.get('name'), 'A COOL TRAIN')
+        self.assertEqual(response_json.get('width'), settings.BETTY_MAX_WIDTH)
+
+        image = Image.objects.get(id=response_json['id'])
+        self.assertTrue(os.path.exists(image.path()))
+        self.assertTrue(os.path.exists(image.src_path()))
+        self.assertEqual(os.path.basename(image.src_path()), "huge.jpg")
+        self.assertEqual(image.name, "A COOL TRAIN")
+
+    def test_gif_upload(self):
+        assert self.client.login(username="admin", password=self.password)
+        image_path = os.path.join(TEST_DATA_PATH, 'animated.gif')
+        with open(image_path, "rb") as gif:
+            data = {"image": gif, "name": "Some science shit"}
+            res = self.client.post('/images/api/new', data)
+        self.assertEqual(res.status_code, 200)
+        response_json = json.loads(res.content.decode("utf-8"))
+        self.assertEqual(response_json.get('name'), 'Some science shit')
+        self.assertEqual(response_json.get('width'), 256)
+        self.assertEqual(response_json.get('height'), 256)
+
+        image = Image.objects.get(id=response_json['id'])
+        self.assertTrue(os.path.exists(image.path()))
+        self.assertTrue(os.path.exists(image.src_path()))
+        self.assertEqual(os.path.basename(image.src_path()), "animated.png")
+        self.assertEqual(image.name, "Some science shit")
 
     def test_update_selection(self):
         assert self.client.login(username="admin", password=self.password)

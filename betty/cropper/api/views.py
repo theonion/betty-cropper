@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+import zlib
 
 from django.http import (
     HttpResponse,
@@ -12,10 +13,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.cache import never_cache
 
 from PIL import Image as PILImage
+from PIL import ImageFile
 
 from betty.conf.app import settings
 from .decorators import betty_token_auth
-from betty.cropper.models import Image, source_upload_to
+from betty.cropper.models import Image, source_upload_to, optimized_upload_to
 
 ACC_HEADERS = {
     'Access-Control-Allow-Origin': '*',
@@ -56,25 +58,63 @@ def new(request):
 
     image_file = request.FILES.get("image")
     if image_file is None:
-        return HttpResponseBadRequest(json.dumps({'message': 'No image!'}))
+        return HttpResponseBadRequest(json.dumps({'message': 'No image'}))
+    filename = image_file.name
 
     image = Image.objects.create(
-        name=request.POST.get("name") or image_file.name,
+        name=request.POST.get("name") or filename,
         credit=request.POST.get("credit")
     )
     os.makedirs(image.path())
-    source_path = source_upload_to(image, image_file.name)
+    source_path = source_upload_to(image, filename)
+    original = open(source_path, "wb+")
 
-    with open(source_path, 'wb+') as f:
+    parser = ImageFile.Parser()
+    try:
         for chunk in image_file.chunks():
-            f.write(chunk)
-        f.seek(0)
-        img = PILImage.open(f)
-        image.width = img.size[0]
-        image.height = img.size[1]
+            try:
+                parser.feed(chunk)
+                original.write(chunk)
+            except zlib.error as e:
+                if e.args[0].startswith("Error -5"):
+                    pass
+                else:
+                    raise
+    except:
+        pass
 
-        image.source.name = source_path
-        image.save()
+    try:
+        img = parser.close()
+    except IOError:
+        return HttpResponseBadRequest(json.dumps({'message': 'Bad image'}))
+    original.close()
+
+    # Cache the icc_profile, in case we need to resize this on save.
+    icc_profile = img.info.get("icc_profile")
+
+    # If the image is a GIF, we need to do some special stuff
+    if img.format == "GIF":
+        image.animated = True
+
+        os.makedirs(os.path.join(image.path(), "animated"))
+
+        # First, let's move the original
+        animated_path = os.path.join(image.path(), "animated/original.gif")
+        shutil.copy(source_path, animated_path)
+
+    # If the image is really large, we'll save a more reasonable version as the "original"
+    if img.size[0] > (settings.BETTY_MAX_WIDTH * 2):
+        height = settings.BETTY_MAX_WIDTH * float(img.size[1]) / float(img.size[0])
+        img = img.resize((settings.BETTY_MAX_WIDTH, int(round(height))), PILImage.ANTIALIAS)
+    
+    optimized_path = os.path.join(image.path(), "optimized.png")
+    img.save(optimized_path, "PNG", icc_profile=icc_profile)
+    
+    img.width = img.size[0]
+    img.height = img.size[1]
+    image.source.name = source_path
+    image.optimized.name = optimized_path
+    image.save()
 
     return HttpResponse(json.dumps(image.to_native()), content_type="application/json")
 
