@@ -182,7 +182,12 @@ class ImageSavingTestCase(TestCase):
         res = self.client.get('/images/{}/1x1/240.jpg'.format(image.id))
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res['Content-Type'], 'image/jpeg')
-        self.assertTrue(os.path.exists(os.path.join(image.path(), '1x1', '240.jpg')))
+        self.assertTrue(os.path.exists(os.path.join(image.path(), '1x1/240.jpg')))
+
+        res = self.client.get('/images/{}/original/1200.jpg'.format(image.id))
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res['Content-Type'], 'image/jpeg')
+        self.assertTrue(os.path.exists(os.path.join(image.path(), 'original/1200.jpg')))
 
     def tearDown(self):
         shutil.rmtree(settings.BETTY_IMAGE_ROOT, ignore_errors=True)

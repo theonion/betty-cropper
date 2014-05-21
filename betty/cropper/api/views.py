@@ -3,6 +3,7 @@ import os
 import shutil
 import zlib
 
+from django.core.cache import cache
 from django.http import (
     HttpResponse,
     HttpResponseNotAllowed,
@@ -164,6 +165,7 @@ def update_selection(request, image_id, ratio_slug):
         image.selections = {}
 
     image.selections[ratio_slug] = selection
+    cache.delete("image-{}".format(image.id))
     image.save()
 
     ratio_path = os.path.join(image.path(), ratio_slug)
@@ -221,19 +223,25 @@ def detail(request, image_id):
         for field in ("name", "credit", "selections"):
             if field in request_json:
                 setattr(image, field, request_json[field])
+        cache.delete("image-{}".format(image.id))
         image.save()
 
         return HttpResponse(json.dumps(image.to_native()), content_type="application/json")
 
     @betty_token_auth(["server.image_read"])
     def get(request, image_id):
-        try:
-            image = Image.objects.get(id=image_id)
-        except Image.DoesNotExist:
-            message = json.dumps({"message": "No such image!"})
-            return HttpResponseNotFound(message, content_type="application/json")
+        cache_key = "image-{}".format(image_id)
+        data = cache.get(cache_key)
+        if data is None:
+            try:
+                image = Image.objects.get(id=image_id)
+            except Image.DoesNotExist:
+                message = json.dumps({"message": "No such image!"})
+                return HttpResponseNotFound(message, content_type="application/json")
+            data = image.to_native()
+            cache.set(cache_key, data, 60 * 60)
 
-        return HttpResponse(json.dumps(image.to_native()), content_type="application/json")
+        return HttpResponse(json.dumps(data), content_type="application/json")
 
     if request.method == "PATCH":
         return patch(request, image_id)
