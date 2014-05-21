@@ -30,16 +30,15 @@ dev_requires = [
 
 install_requires = [
     "Django>=1.5",
-    "six==1.6.1"
-]
-
-server_requires = [
+    "six==1.6.1",
     "slimit==0.8.1",
     "jsonfield==0.9.20",
     "Pillow==2.4.0",
     "South==0.8.4",
     "logan==0.5.9.1"
 ]
+
+server_requires = []
 
 if 'test' in sys.argv:
     setup_requires.extend(dev_requires)

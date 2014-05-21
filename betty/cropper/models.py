@@ -42,7 +42,7 @@ class Ratio(object):
 class Image(models.Model):
 
     source = models.FileField(upload_to=source_upload_to, storage=betty_storage, max_length=255)
-    optimized = models.FileField(upload_to=optimized_upload_to, storage=betty_storage, max_length=255)
+    optimized = models.FileField(upload_to=optimized_upload_to, storage=betty_storage, max_length=255, null=True, blank=True)
     name = models.CharField(max_length=255)
     height = models.IntegerField(null=True, blank=True)
     width = models.IntegerField(null=True, blank=True)
@@ -230,6 +230,3 @@ class Image(models.Model):
             if self.selections and data['selections'][ratio] == self.selections.get(ratio):
                 data['selections'][ratio]["source"] = "user"
         return data
-
-    def src_path(self):
-        return self.source.path
