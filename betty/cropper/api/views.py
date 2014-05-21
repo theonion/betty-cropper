@@ -17,7 +17,7 @@ from PIL import ImageFile
 
 from betty.conf.app import settings
 from .decorators import betty_token_auth
-from betty.cropper.models import Image, source_upload_to, optimized_upload_to
+from betty.cropper.models import Image, source_upload_to
 
 ACC_HEADERS = {
     'Access-Control-Allow-Origin': '*',

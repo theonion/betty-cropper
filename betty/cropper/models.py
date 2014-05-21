@@ -182,6 +182,9 @@ class Image(models.Model):
         img = img.resize((width, height), PILImage.ANTIALIAS)
 
         if extension == 'jpg':
+            if img.mode != "RGB":
+                # JPEGs need to be in RGB mode
+                img = img.convert("RGB")
             pillow_kwargs = {"format": "jpeg", "quality": 80}
         if extension == 'png':
             pillow_kwargs = {"format": "png"}

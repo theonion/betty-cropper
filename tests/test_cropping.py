@@ -169,5 +169,20 @@ class ImageSavingTestCase(TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertFalse(os.path.exists(os.path.join(image.path(), 'original', '666.jpg')))
 
+    def test_non_rgb(self):
+        image = Image.objects.create(
+            name="animated.gif",
+            width=512,
+            height=512
+        )
+
+        lenna = File(open(os.path.join(TEST_DATA_PATH, "animated.gif"), "rb"))
+        image.source.save("animated.gif", lenna)
+
+        res = self.client.get('/images/{}/1x1/240.jpg'.format(image.id))
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res['Content-Type'], 'image/jpeg')
+        self.assertTrue(os.path.exists(os.path.join(image.path(), '1x1', '240.jpg')))
+
     def tearDown(self):
         shutil.rmtree(settings.BETTY_IMAGE_ROOT, ignore_errors=True)
