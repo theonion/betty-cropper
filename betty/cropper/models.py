@@ -72,7 +72,7 @@ class Image(models.Model):
         If the width exists in the database, that value will be returned,
         otherwise the width will be read from the filesystem."""
         if self.height in (None, 0):
-            img = PILImage.open(self.src_path())
+            img = PILImage.open(self.source.path)
             self.height = img.size[1]
             self.width = img.size[0]
         return self.height
@@ -83,7 +83,7 @@ class Image(models.Model):
         If the width exists in the database, that value will be returned,
         otherwise the width will be read from the filesystem."""
         if self.width in (None, 0):
-            img = PILImage.open(self.src_path())
+            img = PILImage.open(self.source.path)
             self.height = img.size[1]
             self.width = img.size[0]
         return self.width
