@@ -2,6 +2,8 @@ import os
 import json
 import shutil
 
+from PIL import Image as PILImage
+
 from django.test import TestCase, Client
 
 from django.contrib.auth.models import User
@@ -77,12 +79,14 @@ class APITestCase(TestCase):
         self.assertEqual(res.status_code, 200)
         response_json = json.loads(res.content.decode("utf-8"))
         self.assertEqual(response_json.get('name'), 'A COOL TRAIN')
-        self.assertEqual(response_json.get('width'), settings.BETTY_MAX_WIDTH)
 
         image = Image.objects.get(id=response_json['id'])
         self.assertTrue(os.path.exists(image.path()))
-        self.assertTrue(os.path.exists(image.src_path()))
-        self.assertEqual(os.path.basename(image.src_path()), "huge.jpg")
+        self.assertTrue(os.path.exists(image.optimized.path))
+        img = PILImage.open(image.optimized.path)
+        self.assertEqual(img.size[0], settings.BETTY_MAX_WIDTH)
+
+        self.assertEqual(os.path.basename(image.source.path), "huge.jpg")
         self.assertEqual(image.name, "A COOL TRAIN")
 
     def test_gif_upload(self):
@@ -100,7 +104,20 @@ class APITestCase(TestCase):
         image = Image.objects.get(id=response_json['id'])
         self.assertTrue(os.path.exists(image.path()))
         self.assertTrue(os.path.exists(image.src_path()))
-        self.assertEqual(os.path.basename(image.src_path()), "animated.png")
+        self.assertEqual(os.path.basename(image.source.path), "animated.gif")
+
+        self.assertTrue(
+            os.path.exists(
+                os.path.join(image.path(), "animated/original.gif")
+            )
+        )
+
+        self.assertTrue(
+            os.path.exists(
+                os.path.join(image.path(), "animated/original.jpg")
+            )
+        )
+
         self.assertEqual(image.name, "Some science shit")
 
     def test_update_selection(self):

@@ -98,12 +98,21 @@ def new(request):
 
         os.makedirs(os.path.join(image.path(), "animated"))
 
-        # First, let's move the original
+        # First, let's copy the original
         animated_path = os.path.join(image.path(), "animated/original.gif")
         shutil.copy(source_path, animated_path)
+        
+        # Next, we'll make a thumbnail of the original
+        still_path = os.path.join(image.path(), "animated/original.jpg")
+        if img.mode != "RGB":
+            jpeg = img.convert("RGB")
+            jpeg.save(still_path, "JPEG")
+        else:
+            img.save(still_path, "JPEG")
 
-    # If the image is really large, we'll save a more reasonable version as the "original"
-    if img.size[0] > (settings.BETTY_MAX_WIDTH * 2):
+    elif img.size[0] > (settings.BETTY_MAX_WIDTH * 2):
+        # If the image is really large, we'll save a more reasonable version as the "original"
+
         height = settings.BETTY_MAX_WIDTH * float(img.size[1]) / float(img.size[0])
         img = img.resize((settings.BETTY_MAX_WIDTH, int(round(height))), PILImage.ANTIALIAS)
     

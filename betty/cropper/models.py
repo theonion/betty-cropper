@@ -157,7 +157,10 @@ class Image(models.Model):
         return os.path.join(settings.BETTY_IMAGE_ROOT, id_string[1:])
 
     def crop(self, ratio, width, extension, fp=None):
-        img = PILImage.open(self.optimized.path)
+        if self.optimized:
+            img = PILImage.open(self.optimized.path)
+        else:
+            img = PILImage.open(self.source.path)
         icc_profile = img.info.get("icc_profile")
         if ratio.string == 'original':
             ratio.width = img.size[0]
