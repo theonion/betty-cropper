@@ -185,7 +185,7 @@ class Image(models.Model):
             if img.mode != "RGB":
                 # JPEGs need to be in RGB mode
                 img = img.convert("RGB")
-            pillow_kwargs = {"format": "jpeg", "quality": 80}
+            pillow_kwargs = {"format": "jpeg", "quality": self.jpeg_quality}
         if extension == 'png':
             pillow_kwargs = {"format": "png"}
 

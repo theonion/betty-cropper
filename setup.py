@@ -35,7 +35,8 @@ install_requires = [
     "jsonfield==0.9.20",
     "Pillow==2.4.0",
     "South==0.8.4",
-    "logan==0.5.9.1"
+    "logan==0.5.9.1",
+    "celery==3.1.11"
 ]
 
 server_requires = []

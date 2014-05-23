@@ -19,6 +19,8 @@ from PIL import ImageFile
 from betty.conf.app import settings
 from .decorators import betty_token_auth
 from betty.cropper.models import Image, source_upload_to
+from betty.cropper.tasks import search_image_quality
+
 
 ACC_HEADERS = {
     'Access-Control-Allow-Origin': '*',
@@ -125,6 +127,9 @@ def new(request):
     image.source.name = source_path
     image.optimized.name = optimized_path
     image.save()
+
+    if settings.BETTY_JPEG_QUALITY_RANGE:
+        search_image_quality.delay(image.id)
 
     return HttpResponse(json.dumps(image.to_native()), content_type="application/json")
 

@@ -70,6 +70,24 @@ class APITestCase(TestCase):
         self.assertEqual(image.name, "LENNA DOT PNG")
         self.assertEqual(image.credit, "Playboy")
 
+    def test_imgmin_upload(self):
+        assert self.client.login(username="admin", password=self.password)
+
+        _cached_range = settings.BETTY_JPEG_QUALITY_RANGE
+        settings.BETTY_JPEG_QUALITY_RANGE = (60, 95)
+
+        lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
+        with open(lenna_path, "rb") as lenna:
+            data = {"image": lenna, "name": "LENNA DOT PNG", "credit": "Playboy"}
+            res = self.client.post('/images/api/new', data)
+        self.assertEqual(res.status_code, 200)
+
+        response_json = json.loads(res.content.decode("utf-8"))
+        image = Image.objects.get(id=response_json['id'])
+        self.assertEqual(image.jpeg_quality, 95)
+
+        settings.BETTY_JPEG_QUALITY_RANGE = _cached_range
+
     def test_large_image_upload(self):
         assert self.client.login(username="admin", password=self.password)
         image_path = os.path.join(TEST_DATA_PATH, 'huge.jpg')

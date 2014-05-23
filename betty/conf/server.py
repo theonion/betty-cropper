@@ -107,8 +107,9 @@ INSTALLED_APPS = (
     'south',
 )
 
+CELERY_IGNORE_RESULT = True
 CELERY_ALWAYS_EAGER = True
-BROKER_URL = 'redis://localhost:6379'
+BROKER_URL = 'amqp://guest@127.0.0.1:5672//'
 
 BETTY_STANDALONE_SERVER = True
 
