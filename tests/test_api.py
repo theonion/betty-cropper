@@ -88,6 +88,24 @@ class APITestCase(TestCase):
 
         settings.BETTY_JPEG_QUALITY_RANGE = _cached_range
 
+    def test_imgmin_upload_lowquality(self):
+        assert self.client.login(username="admin", password=self.password)
+
+        _cached_range = settings.BETTY_JPEG_QUALITY_RANGE
+        settings.BETTY_JPEG_QUALITY_RANGE = (60, 95)
+
+        lenna_path = os.path.join(TEST_DATA_PATH, '1200.jpg')
+        with open(lenna_path, "rb") as image:
+            data = {"image": image, "name": "some guy walking"}
+            res = self.client.post('/images/api/new', data)
+        self.assertEqual(res.status_code, 200)
+
+        response_json = json.loads(res.content.decode("utf-8"))
+        image = Image.objects.get(id=response_json['id'])
+        self.assertEqual(image.jpeg_quality, 72)
+
+        settings.BETTY_JPEG_QUALITY_RANGE = _cached_range
+
     def test_large_image_upload(self):
         assert self.client.login(username="admin", password=self.password)
         image_path = os.path.join(TEST_DATA_PATH, 'huge.jpg')
