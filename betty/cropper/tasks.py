@@ -38,7 +38,7 @@ def prepare_image(im):
         new_size = (im.size[0] * scale, im.size[1] * scale)
         im = im.resize(map(int, new_size), PILImage.ANTIALIAS)
     if im.mode != "RGB":
-        im = im.covert("RGB", palette=PILImage.ADAPTIVE)
+        im = im.convert("RGB", palette=PILImage.ADAPTIVE)
     return im
 
 
@@ -55,7 +55,6 @@ def search_image_quality(image_id):
     search_range = settings.BETTY_JPEG_QUALITY_RANGE
     while (search_range[1] - search_range[0]) > 1:
         quality = int(round(search_range[0] + (search_range[1] - search_range[0]) / 2.0))
-        print("Searching: {}".format(quality))
 
         handler, output_filepath = tempfile.mkstemp()
         search_im.save(output_filepath, "jpeg", quality=quality, icc_profile=icc_profile, optimize=True)
@@ -65,10 +64,6 @@ def search_image_quality(image_id):
         density_ratio = (get_color_density(saved) - original_density) / original_density
 
         if pixel_error > settings.BETTY_JPEG_MAX_ERROR or density_ratio > settings.BETTY_COLOR_DENSITY_RATIO:
-            if pixel_error > settings.BETTY_JPEG_MAX_ERROR:
-                print("Error: {}".format(pixel_error))
-            if density_ratio > settings.BETTY_COLOR_DENSITY_RATIO:
-                print("Color density ratio: {}".format(density_ratio))
             search_range = (quality, search_range[1])
         else:
             search_range = (search_range[0], quality)
