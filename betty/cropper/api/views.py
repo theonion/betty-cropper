@@ -15,10 +15,11 @@ from django.views.decorators.cache import never_cache
 
 from PIL import Image as PILImage
 from PIL import ImageFile
+from PIL import JpegImagePlugin
 
 from betty.conf.app import settings
 from .decorators import betty_token_auth
-from betty.cropper.models import Image, source_upload_to
+from betty.cropper.models import Image, source_upload_to, optimized_upload_to
 from betty.cropper.tasks import search_image_quality
 
 
@@ -94,6 +95,9 @@ def new(request):
 
     # Cache the icc_profile, in case we need to resize this on save.
     icc_profile = img.info.get("icc_profile")
+    if img.format == "JPEG":
+        quantization = img.quantization
+        sampling = JpegImagePlugin.get_sampling(img)
 
     # If the image is a GIF, we need to do some special stuff
     if img.format == "GIF":
@@ -113,14 +117,22 @@ def new(request):
         else:
             img.save(still_path, "JPEG")
 
-    elif img.size[0] > (settings.BETTY_MAX_WIDTH * 2):
+    elif img.size[0] > settings.BETTY_MAX_WIDTH:
         # If the image is really large, we'll save a more reasonable version as the "original"
-
         height = settings.BETTY_MAX_WIDTH * float(img.size[1]) / float(img.size[0])
         img = img.resize((settings.BETTY_MAX_WIDTH, int(round(height))), PILImage.ANTIALIAS)
     
-    optimized_path = os.path.join(image.path(), "optimized.png")
-    img.save(optimized_path, "PNG", icc_profile=icc_profile)
+    optimized_path = optimized_upload_to(image, filename)
+    if img.format == "JPEG":
+        # For JPEG files, we need to make sure that we keep the quantization profile
+        img.save(
+            optimized_path,
+            icc_profile=icc_profile,
+            quality="keep",
+            qtables=quantization,
+            subsampling=sampling)
+    else:
+        img.save(optimized_path, icc_profile=icc_profile)
     
     img.width = img.size[0]
     img.height = img.size[1]

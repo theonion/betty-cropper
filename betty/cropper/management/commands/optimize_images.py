@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 from PIL import Image as PILImage
 
 from betty.cropper.models import Image
-from betty.cropper.tasks import search_image_quality
+from betty.cropper.tasks import search_image_quality, optimized_upload_to
 from betty.conf.app import settings
 
 
@@ -21,8 +21,14 @@ class Command(BaseCommand):
                     height = settings.BETTY_MAX_WIDTH * float(img.size[1]) / float(img.size[0])
                     img = img.resize((settings.BETTY_MAX_WIDTH, int(round(height))), PILImage.ANTIALIAS)
 
-                optimized_path = os.path.join(image.path(), "optimized.png")
-                img.save(optimized_path, "PNG", icc_profile=icc_profile)
+                filename = os.path.split(image.source.path)[1]
+                optimized_path = optimized_upload_to(image, filename)
+                if img.format == "JPEG":
+                    # For JPEG files, we need to make sure that we keep the quantization profile
+                    img.save(optimized_path, icc_profile=icc_profile, quality="keep")
+                else:
+                    img.save(optimized_path, icc_profile=icc_profile)
+
                 image.optimized.name = optimized_path
                 image.save()
 

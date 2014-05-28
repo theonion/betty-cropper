@@ -23,7 +23,8 @@ def source_upload_to(instance, filename):
 
 
 def optimized_upload_to(instance, filename):
-    return os.path.join(instance.path(), "optimized.png")
+    path, ext = os.path.splitext(filename)
+    return os.path.join(instance.path(), "optimized.{}".format(ext))
 
 
 class Ratio(object):
@@ -48,7 +49,7 @@ class Image(models.Model):
     width = models.IntegerField(null=True, blank=True)
     credit = models.CharField(max_length=120, null=True, blank=True)
     selections = JSONField(null=True, blank=True)
-    jpeg_quality = models.IntegerField(default=80)
+    jpeg_quality = models.IntegerField(null=True, blank=True)
     animated = models.BooleanField(default=False)
 
     class Meta:
@@ -181,12 +182,19 @@ class Image(models.Model):
         height = int(round(width * float(ratio.height) / float(ratio.width)))
         img = img.resize((width, height), PILImage.ANTIALIAS)
 
-        if extension == 'jpg':
-            if img.mode != "RGB":
-                # JPEGs need to be in RGB mode
-                img = img.convert("RGB")
-            pillow_kwargs = {"format": "jpeg", "quality": self.jpeg_quality}
-        if extension == 'png':
+        if img.mode != "RGB":
+            img = img.convert("RGB")
+
+        if extension == "jpg":
+            pillow_kwargs = {"format": "jpeg"}
+            if self.jpeg_quality:
+                pillow_kwargs["quality"] = self.jpeg_quality
+            elif img.format == "JPEG":
+                pillow_kwargs["quality"] = "keep"
+            else:
+                pillow_kwargs["quality"] = settings.BETTY_DEFAULT_JPEG_QUALITY
+
+        if extension == "png":
             pillow_kwargs = {"format": "png"}
 
         if icc_profile:

@@ -6,9 +6,13 @@ import tempfile
 
 from celery import shared_task
 from PIL import Image as PILImage
+from PIL import JpegImagePlugin
 
 from betty.conf.app import settings
 from betty.cropper.models import Image
+
+
+COLOR_DENSITY_RATIO = 0.11
 
 
 def get_color_density(im):
@@ -30,40 +34,64 @@ def get_error(a, b):
     return pixel_error
 
 
-def prepare_image(im):
-    area = im.size[0] * im.size[1]
-    max_area = (1000.0 * 1000.0)
-    if area > max_area:
-        scale = max_area / area
-        new_size = (im.size[0] * scale, im.size[1] * scale)
-        im = im.resize(map(int, new_size), PILImage.ANTIALIAS)
-    if im.mode != "RGB":
-        im = im.convert("RGB", palette=PILImage.ADAPTIVE)
-    return im
+def fail(task, exc, task_id, args, kwargs, einfo):
+    print(exc)
 
 
-@shared_task
+@shared_task(on_failure=fail)
 def search_image_quality(image_id):
 
     image = Image.objects.get(id=image_id)
     
-    im = PILImage.open(image.source.path)
-    search_im = prepare_image(im)
+    im = PILImage.open(image.optimized.path)
+    search_im = im.copy()
+
+    area = search_im.size[0] * search_im.size[1]
+    max_area = (1000.0 * 1000.0)
+    if area > max_area:
+        scale = max_area / area
+        new_size = (search_im.size[0] * scale, search_im.size[1] * scale)
+        search_im = search_im.resize(map(int, new_size), PILImage.ANTIALIAS)
+    if im.mode != "RGB":
+        im = im.convert("RGB", palette=PILImage.ADAPTIVE)
+
     original_density = get_color_density(search_im)
     icc_profile = im.info.get("icc_profile")
 
     search_range = settings.BETTY_JPEG_QUALITY_RANGE
+
+    # First, let's check to make sure that this image isn't already an optimized JPEG
+    if im.format == "JPEG":
+        original_path = tempfile.mkstemp()[1]
+        search_im.save(
+            original_path,
+            "JPEG",
+            qtables=im.quantization,
+            subsampling=JpegImagePlugin.get_sampling(im),
+            icc_profile=icc_profile)
+        optimized_path = tempfile.mkstemp()[1]
+        search_im.save(
+            optimized_path,
+            "JPEG",
+            quality=settings.BETTY_DEFAULT_JPEG_QUALITY,
+            icc_profile=icc_profile,
+            optimize=True)
+        if os.stat(original_path).st_size < os.stat(optimized_path).st_size:
+            # Looks like the original was already compressed, let's bail.
+            return
+
     while (search_range[1] - search_range[0]) > 1:
         quality = int(round(search_range[0] + (search_range[1] - search_range[0]) / 2.0))
+        print("Searching: {}".format(quality))
 
-        handler, output_filepath = tempfile.mkstemp()
+        output_filepath = tempfile.mkstemp()[1]
         search_im.save(output_filepath, "jpeg", quality=quality, icc_profile=icc_profile, optimize=True)
         saved = PILImage.open(output_filepath)
 
         pixel_error = get_error(saved, search_im)
         density_ratio = (get_color_density(saved) - original_density) / original_density
 
-        if pixel_error > settings.BETTY_JPEG_MAX_ERROR or density_ratio > settings.BETTY_COLOR_DENSITY_RATIO:
+        if pixel_error > settings.BETTY_JPEG_MAX_ERROR or density_ratio > COLOR_DENSITY_RATIO:
             search_range = (quality, search_range[1])
         else:
             search_range = (search_range[0], quality)
