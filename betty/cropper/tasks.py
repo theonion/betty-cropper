@@ -62,7 +62,7 @@ def search_image_quality(image_id):
         search_im.save(
             original_path,
             "JPEG",
-            qtables=JpegImagePlugin.convert_dict_qtables(im.quantization),
+            quantization=im.quantization,
             subsampling=JpegImagePlugin.get_sampling(im),
             icc_profile=icc_profile)
         optimized_path = tempfile.mkstemp()[1]

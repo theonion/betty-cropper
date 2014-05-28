@@ -18,7 +18,7 @@ class Command(BaseCommand):
                 img = PILImage.open(image.source.path)
                 icc_profile = img.info.get("icc_profile")
                 if img.format == "JPEG":
-                    qtables = JpegImagePlugin.convert_dict_qtables(img.quantization)
+                    quantization = img.quantization
                     subsampling = JpegImagePlugin.get_sampling(img)
                 
                 if img.size[0] > (settings.BETTY_MAX_WIDTH * 2):
@@ -32,7 +32,7 @@ class Command(BaseCommand):
                     img.save(
                         optimized_path,
                         icc_profile=icc_profile,
-                        qtables=qtables,
+                        quantization=quantization,
                         subsampling=subsampling)
                 else:
                     img.save(optimized_path, icc_profile=icc_profile)

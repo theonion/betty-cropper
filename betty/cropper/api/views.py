@@ -96,7 +96,7 @@ def new(request):
     # Cache the icc_profile, in case we need to resize this on save.
     icc_profile = img.info.get("icc_profile")
     if img.format == "JPEG":
-        quantization = JpegImagePlugin.convert_dict_qtables(img.quantization)
+        quantization = img.quantization
         sampling = JpegImagePlugin.get_sampling(img)
 
     # If the image is a GIF, we need to do some special stuff
@@ -129,7 +129,7 @@ def new(request):
             optimized_path,
             icc_profile=icc_profile,
             quality="keep",
-            qtables=quantization,
+            quantization=quantization,
             subsampling=sampling)
     else:
         img.save(optimized_path, icc_profile=icc_profile)
