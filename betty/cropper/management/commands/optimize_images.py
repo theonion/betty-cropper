@@ -14,7 +14,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         for image in Image.objects.iterator():
-            if image.optimized is None:
+            if not image.optimized.name:
                 img = PILImage.open(image.source.path)
                 icc_profile = img.info.get("icc_profile")
                 if img.format == "JPEG":
@@ -40,5 +40,5 @@ class Command(BaseCommand):
                 image.optimized.name = optimized_path
                 image.save()
 
-            if image.jpeg_quality == 80:
+            if image.jpeg_quality is None:
                 search_image_quality(image.id)
