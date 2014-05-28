@@ -34,11 +34,7 @@ def get_error(a, b):
     return pixel_error
 
 
-def fail(task, exc, task_id, args, kwargs, einfo):
-    print(exc)
-
-
-@shared_task(on_failure=fail)
+@shared_task
 def search_image_quality(image_id):
 
     image = Image.objects.get(id=image_id)
