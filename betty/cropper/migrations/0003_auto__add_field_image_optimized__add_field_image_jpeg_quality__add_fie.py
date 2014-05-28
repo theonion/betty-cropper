@@ -15,7 +15,7 @@ class Migration(SchemaMigration):
 
         # Adding field 'Image.jpeg_quality'
         db.add_column(u'cropper_image', 'jpeg_quality',
-                      self.gf('django.db.models.fields.IntegerField')(default=80),
+                      self.gf('django.db.models.fields.IntegerField')(null=True, blank=True),
                       keep_default=False)
 
         # Adding field 'Image.animated'
