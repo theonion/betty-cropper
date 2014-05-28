@@ -1,7 +1,6 @@
 import json
 import os
 import shutil
-import zlib
 
 from django.core.cache import cache
 from django.http import (
@@ -13,14 +12,9 @@ from django.http import (
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.cache import never_cache
 
-from PIL import Image as PILImage
-from PIL import ImageFile
-from PIL import JpegImagePlugin
-
 from betty.conf.app import settings
 from .decorators import betty_token_auth
-from betty.cropper.models import Image, source_upload_to, optimized_upload_to
-from betty.cropper.tasks import search_image_quality
+from betty.cropper.models import Image
 
 
 ACC_HEADERS = {
@@ -63,85 +57,12 @@ def new(request):
     image_file = request.FILES.get("image")
     if image_file is None:
         return HttpResponseBadRequest(json.dumps({'message': 'No image'}))
-    filename = image_file.name
 
-    image = Image.objects.create(
-        name=request.POST.get("name") or filename,
+    image = Image.objects.create_from_upload(
+        image_file,
+        name=request.POST.get("name"),
         credit=request.POST.get("credit")
     )
-    os.makedirs(image.path())
-    source_path = source_upload_to(image, filename)
-    original = open(source_path, "wb+")
-
-    parser = ImageFile.Parser()
-    try:
-        for chunk in image_file.chunks():
-            try:
-                parser.feed(chunk)
-                original.write(chunk)
-            except zlib.error as e:
-                if e.args[0].startswith("Error -5"):
-                    pass
-                else:
-                    raise
-    except:
-        pass
-
-    try:
-        img = parser.close()
-    except IOError:
-        return HttpResponseBadRequest(json.dumps({'message': 'Bad image'}))
-    original.close()
-
-    # Cache the icc_profile, in case we need to resize this on save.
-    icc_profile = img.info.get("icc_profile")
-    if img.format == "JPEG":
-        quantization = img.quantization
-        sampling = JpegImagePlugin.get_sampling(img)
-
-    # If the image is a GIF, we need to do some special stuff
-    if img.format == "GIF":
-        image.animated = True
-
-        os.makedirs(os.path.join(image.path(), "animated"))
-
-        # First, let's copy the original
-        animated_path = os.path.join(image.path(), "animated/original.gif")
-        shutil.copy(source_path, animated_path)
-        
-        # Next, we'll make a thumbnail of the original
-        still_path = os.path.join(image.path(), "animated/original.jpg")
-        if img.mode != "RGB":
-            jpeg = img.convert("RGB")
-            jpeg.save(still_path, "JPEG")
-        else:
-            img.save(still_path, "JPEG")
-
-    elif img.size[0] > settings.BETTY_MAX_WIDTH:
-        # If the image is really large, we'll save a more reasonable version as the "original"
-        height = settings.BETTY_MAX_WIDTH * float(img.size[1]) / float(img.size[0])
-        img = img.resize((settings.BETTY_MAX_WIDTH, int(round(height))), PILImage.ANTIALIAS)
-    
-    optimized_path = optimized_upload_to(image, filename)
-    if img.format == "JPEG":
-        # For JPEG files, we need to make sure that we keep the quantization profile
-        img.save(
-            optimized_path,
-            icc_profile=icc_profile,
-            quality="keep",
-            quantization=quantization,
-            subsampling=sampling)
-    else:
-        img.save(optimized_path, icc_profile=icc_profile)
-    
-    img.width = img.size[0]
-    img.height = img.size[1]
-    image.source.name = source_path
-    image.optimized.name = optimized_path
-    image.save()
-
-    if settings.BETTY_JPEG_QUALITY_RANGE:
-        search_image_quality.delay(image.id)
 
     return HttpResponse(json.dumps(image.to_native()), content_type="application/json")
 
