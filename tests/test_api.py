@@ -94,14 +94,16 @@ class APITestCase(TestCase):
         _cached_range = settings.BETTY_JPEG_QUALITY_RANGE
         settings.BETTY_JPEG_QUALITY_RANGE = (60, 95)
 
-        lenna_path = os.path.join(TEST_DATA_PATH, "Sam_Hat1.jpg")
-        with open(lenna_path, "rb") as image:
+        sam_path = os.path.join(TEST_DATA_PATH, "Sam_Hat1.jpg")
+        with open(sam_path, "rb") as image:
             data = {"image": image, "name": "some guy walking"}
             res = self.client.post('/images/api/new', data)
         self.assertEqual(res.status_code, 200)
 
         response_json = json.loads(res.content.decode("utf-8"))
         image = Image.objects.get(id=response_json["id"])
+        self.assertTrue(os.path.exists(image.optimized.path))
+
         self.assertEqual(image.jpeg_quality, None)
 
         settings.BETTY_JPEG_QUALITY_RANGE = _cached_range
