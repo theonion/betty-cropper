@@ -4,8 +4,8 @@ from django.core.management.base import BaseCommand
 from PIL import Image as PILImage
 from PIL import JpegImagePlugin
 
-from betty.cropper.models import Image
-from betty.cropper.tasks import search_image_quality, optimized_upload_to
+from betty.cropper.models import Image, optimized_upload_to
+from betty.cropper.tasks import search_image_quality
 from betty.conf.app import settings
 
 
