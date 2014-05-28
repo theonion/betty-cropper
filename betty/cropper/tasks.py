@@ -48,8 +48,8 @@ def search_image_quality(image_id):
         scale = max_area / area
         new_size = (search_im.size[0] * scale, search_im.size[1] * scale)
         search_im = search_im.resize(map(int, new_size), PILImage.ANTIALIAS)
-    if im.mode != "RGB":
-        im = im.convert("RGB", palette=PILImage.ADAPTIVE)
+    if search_im.mode != "RGB":
+        search_im = search_im.convert("RGB", palette=PILImage.ADAPTIVE)
 
     original_density = get_color_density(search_im)
     icc_profile = im.info.get("icc_profile")
@@ -78,7 +78,6 @@ def search_image_quality(image_id):
 
     while (search_range[1] - search_range[0]) > 1:
         quality = int(round(search_range[0] + (search_range[1] - search_range[0]) / 2.0))
-        print("Searching: {}".format(quality))
 
         output_filepath = tempfile.mkstemp()[1]
         search_im.save(output_filepath, "jpeg", quality=quality, icc_profile=icc_profile, optimize=True)
