@@ -41,10 +41,7 @@ def image_js(request):
 
 @cache_control(max_age=300)
 def redirect_crop(request, id, ratio_slug, width, extension):
-    try:
-        image_id = int(id.replace("/", ""))
-    except ValueError:
-        raise Http404
+    image_id = int(id.replace("/", ""))
 
     """
     This is a little bit of a hack, but basically, we just make a disposable image object,
@@ -65,18 +62,12 @@ def crop(request, id, ratio_slug, width, extension):
     except ValueError:
         raise Http404
 
-    try:
-        width = int(width)
-    except ValueError:
-        return HttpResponseServerError("Invalid width")
+    width = int(width)
 
     if width > 2000:
         return HttpResponseServerError("Invalid width")
 
-    try:
-        image_id = int(id.replace("/", ""))
-    except ValueError:
-        raise Http404
+    image_id = int(id.replace("/", ""))
 
     try:
         image = Image.objects.get(id=image_id)
