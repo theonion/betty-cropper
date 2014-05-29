@@ -10,6 +10,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         for image in Image.objects.iterator():
+            if not image.source.name:
+                continue
+
             if not image.optimized.name:
                 optimize_image.apply(args=(image.id,))
 
