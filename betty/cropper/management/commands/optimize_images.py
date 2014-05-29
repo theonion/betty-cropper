@@ -1,12 +1,8 @@
-import os
 
 from django.core.management.base import BaseCommand
-from PIL import Image as PILImage
-from PIL import JpegImagePlugin
 
-from betty.cropper.models import Image, optimized_upload_to
-from betty.cropper.tasks import search_image_quality
-from betty.conf.app import settings
+from betty.cropper.models import Image
+from betty.cropper.tasks import search_image_quality, optimize_image
 
 
 class Command(BaseCommand):
@@ -15,30 +11,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         for image in Image.objects.iterator():
             if not image.optimized.name:
-                img = PILImage.open(image.source.path)
-                icc_profile = img.info.get("icc_profile")
-                if img.format == "JPEG":
-                    quantization = img.quantization
-                    subsampling = JpegImagePlugin.get_sampling(img)
-                
-                if img.size[0] > (settings.BETTY_MAX_WIDTH * 2):
-                    height = settings.BETTY_MAX_WIDTH * float(img.size[1]) / float(img.size[0])
-                    img = img.resize((settings.BETTY_MAX_WIDTH, int(round(height))), PILImage.ANTIALIAS)
-
-                filename = os.path.split(image.source.path)[1]
-                optimized_path = optimized_upload_to(image, filename)
-                if img.format == "JPEG":
-                    # For JPEG files, we need to make sure that we keep the quantization profile
-                    img.save(
-                        optimized_path,
-                        icc_profile=icc_profile,
-                        quantization=quantization,
-                        subsampling=subsampling)
-                else:
-                    img.save(optimized_path, icc_profile=icc_profile)
-
-                image.optimized.name = optimized_path
-                image.save()
+                optimize_image.appy(image.id)
 
             if image.jpeg_quality is None:
-                search_image_quality(image.id)
+                search_image_quality.apply(image.id)
