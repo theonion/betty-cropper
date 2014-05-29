@@ -7,9 +7,9 @@ from django.core.files.storage import FileSystemStorage
 from django.core.urlresolvers import reverse
 
 from PIL import Image as PILImage
-from PIL import JpegImagePlugin
 
 from betty.conf.app import settings
+from betty.cropper.tasks import search_image_quality, optimize_image
 
 from jsonfield import JSONField
 
@@ -26,7 +26,7 @@ def source_upload_to(instance, filename):
 
 def optimized_upload_to(instance, filename):
     path, ext = os.path.splitext(filename)
-    return os.path.join(instance.path(), "optimized.{}".format(ext))
+    return os.path.join(instance.path(), "optimized{}".format(ext))
 
 
 class Ratio(object):
@@ -44,13 +44,14 @@ class Ratio(object):
 
 class ImageManager(models.Manager):
 
-    def create_from_upload(self, upload, name=None, credit=None):
+    def create_from_path(self, path, filename=None, name=None, credit=None):
         """Creates an image object from a TemporaryUploadedFile insance"""
 
-        im = PILImage.open(upload.temporary_file_path())
-        format = im.format
+        im = PILImage.open(path)
+        if filename is None:
+            filename = os.path.split(path)[1]
         if name is None:
-            name = upload.name
+            name = filename
 
         image = self.create(
             name=name,
@@ -62,15 +63,9 @@ class ImageManager(models.Manager):
         os.makedirs(image.path())
 
         # Let's make sure we copy the temp file to the source location
-        source_path = source_upload_to(image, upload.name)
-        shutil.copy(upload.temporary_file_path(), source_path)
+        source_path = source_upload_to(image, filename)
+        shutil.copy(path, source_path)
         image.source.name = source_path
-
-        # First we need to cache some stuff from the original image
-        icc_profile = im.info.get("icc_profile")
-        if im.format == "JPEG":
-            quantization = im.quantization
-            sampling = JpegImagePlugin.get_sampling(im)
 
         # If the image is a GIF, we need to do some special stuff
         if im.format == "GIF":
@@ -80,7 +75,7 @@ class ImageManager(models.Manager):
 
             # First, let's copy the original
             animated_path = os.path.join(image.path(), "animated/original.gif")
-            shutil.copy(upload.temporary_file_path(), animated_path)
+            shutil.copy(path, animated_path)
             
             # Next, we'll make a thumbnail of the original
             still_path = os.path.join(image.path(), "animated/original.jpg")
@@ -89,28 +84,13 @@ class ImageManager(models.Manager):
                 jpeg.save(still_path, "JPEG")
             else:
                 im.save(still_path, "JPEG")
-
-        elif im.size[0] > settings.BETTY_MAX_WIDTH:
-            # If the image is really large, we'll save a more reasonable version as the "original"
-            height = settings.BETTY_MAX_WIDTH * float(im.size[1]) / float(im.size[0])
-            im = im.resize((settings.BETTY_MAX_WIDTH, int(round(height))), PILImage.ANTIALIAS)
-
-        image.optimized.name = optimized_upload_to(image, upload.name)
-        if format == "JPEG":
-            # For JPEG files, we need to make sure that we keep the quantization profile
-            im.save(
-                image.optimized.name,
-                icc_profile=icc_profile,
-                quantization=quantization,
-                subsampling=sampling)
-        else:
-            im.save(image.optimized.name, icc_profile=icc_profile)
     
         image.save()
 
-        from betty.cropper.tasks import search_image_quality
         if settings.BETTY_JPEG_QUALITY_RANGE:
-            search_image_quality.delay(image.id)
+            optimize_image.apply_async(args=(image.id,), link=search_image_quality.s())
+        else:
+            optimize_image.apply_async(args=(image.id,))
 
         return image
 

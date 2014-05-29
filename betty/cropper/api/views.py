@@ -58,8 +58,9 @@ def new(request):
     if image_file is None:
         return HttpResponseBadRequest(json.dumps({'message': 'No image'}))
 
-    image = Image.objects.create_from_upload(
-        image_file,
+    image = Image.objects.create_from_path(
+        image_file.temporary_file_path(),
+        filename=image_file.name,
         name=request.POST.get("name"),
         credit=request.POST.get("credit")
     )
