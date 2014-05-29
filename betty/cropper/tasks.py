@@ -51,16 +51,25 @@ def optimize_image(image_id):
     image.optimized.name = optimized_upload_to(image, filename)
     if format == "JPEG":
         # For JPEG files, we need to make sure that we keep the quantization profile
-        im.save(
-            image.optimized.name,
-            icc_profile=icc_profile,
-            quality="keep",
-            subsampling=subsampling
-        )
+        try:
+            im.save(
+                image.optimized.name,
+                icc_profile=icc_profile,
+                quality="keep",
+                subsampling=subsampling
+            )
+        except TypeError as e:
+            # Maybe the image already had an invalid quant table?
+            if e.message.startswith("Not a valid numbers of quantization tables"):
+                im.save(
+                    image.optimized.name,
+                    icc_profile=icc_profile
+                )
+            else:
+                raise
     else:
         im.save(image.optimized.name, icc_profile=icc_profile)
     image.save()
-    print(image.optimized)
 
     return image_id
 
