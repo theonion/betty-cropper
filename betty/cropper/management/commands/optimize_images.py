@@ -11,7 +11,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         for image in Image.objects.iterator():
             if not image.optimized.name:
-                optimize_image.appy(image.id)
+                optimize_image.appy(args=(image.id,))
 
             if image.jpeg_quality is None:
-                search_image_quality.apply(image.id)
+                search_image_quality.apply(args=(image.id,))
