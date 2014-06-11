@@ -7,7 +7,6 @@
         ASPECT_RATIO_TOLERANCE = .1, // 10% tolerance. 
         breakpoints = [{{ BETTY_WIDTHS|join:","}}];
 
-
     w.picturefill = function(elements) {
         //don't need to do them all at once. can decide to do lazy load if needed
         if (elements instanceof Array) {
@@ -100,7 +99,7 @@
                                 }
                                 id_str += id.charAt(ii);
                             }
-                            var url = IMAGE_URL + "/" + id_str + "/" + crop + "/" + width + "." + format;
+                            var url = IMAGE_URL + id_str + "/" + crop + "/" + width + "." + format;
 
                             imageData.push({
                                 'div': div,

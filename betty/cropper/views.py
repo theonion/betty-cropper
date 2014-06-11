@@ -29,6 +29,8 @@ def image_js(request):
         "BETTY_IMAGE_URL": settings.BETTY_IMAGE_URL,
         "BETTY_WIDTHS": sorted(widths)
     }
+    if context["BETTY_IMAGE_URL"].endswith("/"):
+        context["BETTY_IMAGE_URL"] = context["BETTY_IMAGE_URL"][:-1]
     BETTY_RATIOS = []
     ratios_sorted = sorted(settings.BETTY_RATIOS, key=lambda r: Ratio(r).width / float(Ratio(r).height))
     for ratio_string in ratios_sorted:
