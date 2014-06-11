@@ -107,8 +107,10 @@ INSTALLED_APPS = (
     'south',
 )
 
+CELERY_IGNORE_RESULT = True
 CELERY_ALWAYS_EAGER = True
-BROKER_URL = 'redis://localhost:6379'
+CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
+BROKER_URL = 'amqp://guest@127.0.0.1:5672//'
 
 BETTY_STANDALONE_SERVER = True
 
@@ -122,3 +124,6 @@ STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
 )
+
+# Doing this because we always want to upload to temp files.
+FILE_UPLOAD_HANDLERS = ("django.core.files.uploadhandler.TemporaryFileUploadHandler",)

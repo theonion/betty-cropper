@@ -2,6 +2,7 @@ import os
 import json
 import shutil
 
+
 from django.test import TestCase, Client
 
 from django.contrib.auth.models import User
@@ -62,8 +63,9 @@ class APITestCase(TestCase):
 
         image = Image.objects.get(id=response_json['id'])
         self.assertTrue(os.path.exists(image.path()))
-        self.assertTrue(os.path.exists(image.src_path()))
-        self.assertEqual(os.path.basename(image.src_path()), "Lenna.png")
+        self.assertTrue(os.path.exists(image.source.path))
+        self.assertTrue(os.path.exists(image.optimized.path))
+        self.assertEqual(os.path.basename(image.source.path), "Lenna.png")
         self.assertEqual(image.name, "LENNA DOT PNG")
         self.assertEqual(image.credit, "Playboy")
 

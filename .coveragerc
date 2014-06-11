@@ -1,2 +1,2 @@
 [run]
-omit = *migrations/*
+omit = *migrations/*,betty/cropped/*,betty/image_browser/*,betty/storage.py

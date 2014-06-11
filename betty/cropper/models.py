@@ -1,5 +1,6 @@
 import io
 import os
+import shutil
 
 from django.db import models
 from django.core.files.storage import FileSystemStorage
@@ -8,6 +9,7 @@ from django.core.urlresolvers import reverse
 from PIL import Image as PILImage
 
 from betty.conf.app import settings
+from betty.cropper.tasks import search_image_quality, optimize_image
 
 from jsonfield import JSONField
 
@@ -20,6 +22,11 @@ betty_storage = FileSystemStorage(
 
 def source_upload_to(instance, filename):
     return os.path.join(instance.path(), filename)
+
+
+def optimized_upload_to(instance, filename):
+    path, ext = os.path.splitext(filename)
+    return os.path.join(instance.path(), "optimized{}".format(ext))
 
 
 class Ratio(object):
@@ -35,15 +42,72 @@ class Ratio(object):
             self.height = int(ratio.split("x")[1])
 
 
+class ImageManager(models.Manager):
+
+    def create_from_path(self, path, filename=None, name=None, credit=None):
+        """Creates an image object from a TemporaryUploadedFile insance"""
+
+        im = PILImage.open(path)
+        if filename is None:
+            filename = os.path.split(path)[1]
+        if name is None:
+            name = filename
+
+        image = self.create(
+            name=name,
+            credit=credit,
+            width=im.size[0],
+            height=im.size[1]
+        )
+
+        os.makedirs(image.path())
+
+        # Let's make sure we copy the temp file to the source location
+        source_path = source_upload_to(image, filename)
+        shutil.copy(path, source_path)
+        image.source.name = source_path
+
+        # If the image is a GIF, we need to do some special stuff
+        if im.format == "GIF":
+            image.animated = True
+
+            os.makedirs(os.path.join(image.path(), "animated"))
+
+            # First, let's copy the original
+            animated_path = os.path.join(image.path(), "animated/original.gif")
+            shutil.copy(path, animated_path)
+            
+            # Next, we'll make a thumbnail of the original
+            still_path = os.path.join(image.path(), "animated/original.jpg")
+            if im.mode != "RGB":
+                jpeg = im.convert("RGB")
+                jpeg.save(still_path, "JPEG")
+            else:
+                im.save(still_path, "JPEG")
+    
+        image.save()
+
+        if settings.BETTY_JPEG_QUALITY_RANGE:
+            optimize_image.apply_async(args=(image.id,), link=search_image_quality.s())
+        else:
+            optimize_image.apply_async(args=(image.id,))
+
+        return image
+
+
 class Image(models.Model):
 
     source = models.FileField(upload_to=source_upload_to, storage=betty_storage, max_length=255)
+    optimized = models.FileField(upload_to=optimized_upload_to, storage=betty_storage, max_length=255, null=True, blank=True)
     name = models.CharField(max_length=255)
     height = models.IntegerField(null=True, blank=True)
     width = models.IntegerField(null=True, blank=True)
     credit = models.CharField(max_length=120, null=True, blank=True)
     selections = JSONField(null=True, blank=True)
-    # jpeg_quality = models.IntegerField(default=80)
+    jpeg_quality = models.IntegerField(null=True, blank=True)
+    animated = models.BooleanField(default=False)
+
+    objects = ImageManager()
 
     class Meta:
         permissions = (
@@ -66,7 +130,7 @@ class Image(models.Model):
         If the width exists in the database, that value will be returned,
         otherwise the width will be read from the filesystem."""
         if self.height in (None, 0):
-            img = PILImage.open(self.src_path())
+            img = PILImage.open(self.source.path)
             self.height = img.size[1]
             self.width = img.size[0]
         return self.height
@@ -77,7 +141,7 @@ class Image(models.Model):
         If the width exists in the database, that value will be returned,
         otherwise the width will be read from the filesystem."""
         if self.width in (None, 0):
-            img = PILImage.open(self.src_path())
+            img = PILImage.open(self.source.path)
             self.height = img.size[1]
             self.width = img.size[0]
         return self.width
@@ -151,7 +215,10 @@ class Image(models.Model):
         return os.path.join(settings.BETTY_IMAGE_ROOT, id_string[1:])
 
     def crop(self, ratio, width, extension, fp=None):
-        img = PILImage.open(self.src_path())
+        if self.optimized:
+            img = PILImage.open(self.optimized.path)
+        else:
+            img = PILImage.open(self.source.path)
         icc_profile = img.info.get("icc_profile")
         if ratio.string == 'original':
             ratio.width = img.size[0]
@@ -172,9 +239,19 @@ class Image(models.Model):
         height = int(round(width * float(ratio.height) / float(ratio.width)))
         img = img.resize((width, height), PILImage.ANTIALIAS)
 
-        if extension == 'jpg':
-            pillow_kwargs = {"format": "jpeg", "quality": 80}
-        if extension == 'png':
+        if img.mode != "RGB":
+            img = img.convert("RGB")
+
+        if extension == "jpg":
+            pillow_kwargs = {"format": "jpeg"}
+            if self.jpeg_quality:
+                pillow_kwargs["quality"] = self.jpeg_quality
+            elif img.format == "JPEG":
+                pillow_kwargs["quality"] = "keep"
+            else:
+                pillow_kwargs["quality"] = settings.BETTY_DEFAULT_JPEG_QUALITY
+
+        if extension == "png":
             pillow_kwargs = {"format": "png"}
 
         if icc_profile:
@@ -221,6 +298,3 @@ class Image(models.Model):
             if self.selections and data['selections'][ratio] == self.selections.get(ratio):
                 data['selections'][ratio]["source"] = "user"
         return data
-
-    def src_path(self):
-        return self.source.path

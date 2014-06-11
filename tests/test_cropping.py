@@ -98,6 +98,10 @@ class ImageSavingTestCase(TestCase):
         res = self.client.get('/images/666/13x4/256.jpg')
         self.assertEqual(res.status_code, 404)
 
+    def test_malformed_ratio(self):
+        res = self.client.get('/images/666/farts/256.jpg')
+        self.assertEqual(res.status_code, 404)
+
     def test_bad_extension(self):
         res = self.client.get('/images/666/1x1/500.gif')
         self.assertEqual(res.status_code, 404)
@@ -168,6 +172,31 @@ class ImageSavingTestCase(TestCase):
         self.assertEqual(res['Content-Type'], 'image/jpeg')
         self.assertEqual(res.status_code, 200)
         self.assertFalse(os.path.exists(os.path.join(image.path(), 'original', '666.jpg')))
+
+    def test_non_rgb(self):
+        image = Image.objects.create(
+            name="animated.gif",
+            width=512,
+            height=512
+        )
+
+        lenna = File(open(os.path.join(TEST_DATA_PATH, "animated.gif"), "rb"))
+        image.source.save("animated.gif", lenna)
+
+        res = self.client.get('/images/{}/1x1/240.jpg'.format(image.id))
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res['Content-Type'], 'image/jpeg')
+        self.assertTrue(os.path.exists(os.path.join(image.path(), '1x1/240.jpg')))
+
+        res = self.client.get('/images/{}/original/1200.jpg'.format(image.id))
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res['Content-Type'], 'image/jpeg')
+        self.assertTrue(os.path.exists(os.path.join(image.path(), 'original/1200.jpg')))
+
+    def test_image_js(self):
+        res = self.client.get("/images/image.js")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res['Content-Type'], 'application/javascript')
 
     def tearDown(self):
         shutil.rmtree(settings.BETTY_IMAGE_ROOT, ignore_errors=True)
