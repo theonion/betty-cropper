@@ -75,6 +75,8 @@ class ImageFileTestCase(TestCase):
         self.assertTrue(os.path.exists(image.optimized.path))
         self.assertTrue(os.path.exists(image.source.path))
 
+        self.assertEqual(image.to_native()["width"], 3200)
+
         optimized = PILImage.open(image.optimized.path)
         self.assertEqual(optimized.size[0], settings.BETTY_MAX_WIDTH)
         self.assertTrue(os.stat(image.optimized.path).st_size < os.stat(image.source.path).st_size)

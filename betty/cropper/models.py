@@ -291,6 +291,13 @@ class Image(models.Model):
 
     def to_native(self):
         """Returns a Python dictionary, sutiable for Serialization"""
+        
+        # This is kiiiiinda a hack. If we have an optimized image, hack up the height and width.
+        if self.width > settings.BETTY_MAX_WIDTH and self.optimized:
+            height = settings.BETTY_MAX_WIDTH * float(self.height) / float(self.width)
+            self.height = int(round(height))
+            self.width = settings.BETTY_MAX_WIDTH
+        
         data = {
             'id': self.id,
             'name': self.name,
