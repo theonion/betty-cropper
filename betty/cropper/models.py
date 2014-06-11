@@ -151,6 +151,13 @@ class Image(models.Model):
 
         If the selection for this ratio has been set manually, that value
         is returned exactly, otherwise the selection is auto-generated."""
+
+        # This is kiiiiinda a hack. If we have an optimized image, hack up the height and width.
+        if self.width > settings.BETTY_MAX_WIDTH and self.optimized:
+            height = settings.BETTY_MAX_WIDTH * float(self.height) / float(self.width)
+            self.height = int(round(height))
+            self.width = settings.BETTY_MAX_WIDTH
+
         selection = None
         if self.selections is not None:
             if ratio.string in self.selections:
