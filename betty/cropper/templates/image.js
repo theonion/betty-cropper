@@ -70,6 +70,12 @@
                         crop = computeAspectRatio(_w, _h);
                     }
 
+                    // Scale up to the pixel ratio
+                    if (w.devicePixelRatio) {
+                      _w = Math.round(w.devicePixelRatio * _w);
+                      _h = Math.round(w.devicePixelRatio * _h);
+                    }
+
                     var width = null;
                     for (var j = 0; j < breakpoints.length; j++) {
                         if (_w <= breakpoints[j]) {
@@ -79,11 +85,6 @@
                     }
                     if (width === null) {
                       width = _w;
-                    }
-
-                    // Scale the image up to the pixel ratio
-                    if (w.devicePixelRatio) {
-                      width = Math.round(w.devicePixelRatio * width);
                     }
 
                     // if the existing image is larger (or the same) than the one we're about to load, do not update.
