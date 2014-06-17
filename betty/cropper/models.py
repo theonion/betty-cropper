@@ -1,15 +1,17 @@
 import io
 import os
 import shutil
+import tempfile
 
 from django.db import models
 from django.core.files.storage import FileSystemStorage
 from django.core.urlresolvers import reverse
 
 from PIL import Image as PILImage
+from PIL import JpegImagePlugin
 
 from betty.conf.app import settings
-from betty.cropper.tasks import search_image_quality, optimize_image
+from betty.cropper.tasks import search_image_quality
 
 from jsonfield import JSONField
 
@@ -27,6 +29,63 @@ def source_upload_to(instance, filename):
 def optimized_upload_to(instance, filename):
     path, ext = os.path.splitext(filename)
     return os.path.join(instance.path(), "optimized{}".format(ext))
+
+
+def optimize_image(image):
+
+    im = PILImage.open(image.source.path)
+    
+    # Let's cache some important stuff
+    format = im.format
+    icc_profile = im.info.get("icc_profile")
+    quantization = getattr(im, "quantization", None)
+    subsampling = None
+    if format == "JPEG":
+        subsampling = JpegImagePlugin.get_sampling(im)
+
+    filename = os.path.split(image.source.path)[1]
+
+    if im.size[0] > settings.BETTY_MAX_WIDTH:
+        # If the image is really large, we'll save a more reasonable version as the "original"
+        height = settings.BETTY_MAX_WIDTH * float(im.size[1]) / float(im.size[0])
+        im = im.resize((settings.BETTY_MAX_WIDTH, int(round(height))), PILImage.ANTIALIAS)
+
+        """OK, so this suuuuuucks. When we convert or resize an Image, it
+        is no longer a JPEG. So, in order to reset the quanitzation, etc,
+        we need to save this to a file and then re-read it from the
+        filesystem. Silly, I know. Once my pull request is approved, this
+        can be removed, and we can just pass the qtables into the save method.
+        PR is here: https://github.com/python-imaging/Pillow/pull/677
+        """
+        temp = tempfile.NamedTemporaryFile()
+        im.save(temp, format="JPEG")
+        temp.seek(0)
+        im = PILImage.open(temp)
+
+        im.quantization = quantization
+
+    image.optimized.name = optimized_upload_to(image, filename)
+    if format == "JPEG":
+        # For JPEG files, we need to make sure that we keep the quantization profile
+        try:
+            im.save(
+                image.optimized.name,
+                icc_profile=icc_profile,
+                quality="keep",
+                subsampling=subsampling
+            )
+        except TypeError as e:
+            # Maybe the image already had an invalid quant table?
+            if e.message.startswith("Not a valid numbers of quantization tables"):
+                im.save(
+                    image.optimized.name,
+                    icc_profile=icc_profile
+                )
+            else:
+                raise
+    else:
+        im.save(image.optimized.name, icc_profile=icc_profile)
+    image.save()
 
 
 class Ratio(object):
@@ -87,11 +146,10 @@ class ImageManager(models.Manager):
                 im.save(still_path, "JPEG")
     
         image.save()
+        optimize_image(image)
 
         if settings.BETTY_JPEG_QUALITY_RANGE:
-            optimize_image.apply_async(args=(image.id,), link=search_image_quality.s())
-        else:
-            optimize_image.apply_async(args=(image.id,))
+            search_image_quality.apply_async(args=(image.id,))
 
         return image
 
