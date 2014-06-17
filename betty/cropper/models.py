@@ -76,6 +76,7 @@ class ImageManager(models.Manager):
             # First, let's copy the original
             animated_path = os.path.join(image.path(), "animated/original.gif")
             shutil.copy(path, animated_path)
+            os.chmod(animated_path, 744)
             
             # Next, we'll make a thumbnail of the original
             still_path = os.path.join(image.path(), "animated/original.jpg")

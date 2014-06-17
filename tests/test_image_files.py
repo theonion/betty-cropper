@@ -1,5 +1,6 @@
 import os
 import shutil
+import stat
 
 from django.test import TestCase
 from PIL import Image as PILImage
@@ -142,6 +143,10 @@ class ImageFileTestCase(TestCase):
         self.assertTrue(os.path.exists(image.path()))
         self.assertTrue(os.path.exists(image.source.path))
         self.assertEqual(os.path.basename(image.source.path), "animated.gif")
+
+        original_gif = os.path.join(image.path(), "animated/original.gif")
+
+        self.assertEqual(stat.S_IMODE(os.lstat(original_gif).st_mode), 744)
 
         self.assertTrue(
             os.path.exists(
