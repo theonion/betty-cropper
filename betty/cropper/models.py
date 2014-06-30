@@ -41,7 +41,10 @@ def optimize_image(image):
     quantization = getattr(im, "quantization", None)
     subsampling = None
     if format == "JPEG":
-        subsampling = JpegImagePlugin.get_sampling(im)
+        try:
+            subsampling = JpegImagePlugin.get_sampling(im)
+        except:
+            pass  # Sometimes, crazy images exist.
 
     filename = os.path.split(image.source.path)[1]
 
@@ -65,15 +68,14 @@ def optimize_image(image):
         im.quantization = quantization
 
     image.optimized.name = optimized_upload_to(image, filename)
-    if format == "JPEG":
+    if format == "JPEG" and im.mode == "RGB":
         # For JPEG files, we need to make sure that we keep the quantization profile
         try:
             im.save(
                 image.optimized.name,
                 icc_profile=icc_profile,
                 quality="keep",
-                subsampling=subsampling
-            )
+                subsampling=subsampling)
         except TypeError as e:
             # Maybe the image already had an invalid quant table?
             if e.message.startswith("Not a valid numbers of quantization tables"):

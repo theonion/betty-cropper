@@ -82,6 +82,20 @@ class ImageFileTestCase(TestCase):
         self.assertEqual(optimized.size[0], settings.BETTY_MAX_WIDTH)
         self.assertTrue(os.stat(image.optimized.path).st_size < os.stat(image.source.path).st_size)
 
+    def test_l_mode(self):
+        path = os.path.join(TEST_DATA_PATH, "Header-Just_How.jpg")
+        image = Image.objects.create_from_path(path)
+
+        # Re-load the image, now that the task is done
+        image = Image.objects.get(id=image.id)
+
+        self.assertTrue(image.source.path.endswith("Header-Just_How.jpg"))
+        self.assertEqual(image.width, 1280)
+        self.assertEqual(image.height, 720)
+        self.assertEqual(image.jpeg_quality, None)
+        self.assertTrue(os.path.exists(image.optimized.path))
+        self.assertTrue(os.path.exists(image.source.path))
+
     def test_imgmin_upload(self):
 
         _cached_range = settings.BETTY_JPEG_QUALITY_RANGE

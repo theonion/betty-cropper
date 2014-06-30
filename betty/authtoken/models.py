@@ -23,7 +23,7 @@ class BettyCropperUser(object):
         self._permissions = permissions
 
     def __str__(self):
-        return 'AnonymousUser'
+        return 'BettyCropperUser'
 
     def __eq__(self, other):
         return isinstance(other, self.__class__)
@@ -35,16 +35,16 @@ class BettyCropperUser(object):
         return 1  # instances always return the same hash value
 
     def save(self):
-        raise NotImplementedError("Django doesn't provide a DB representation for AnonymousUser.")
+        raise NotImplementedError("Django doesn't provide a DB representation for BettyCropperUser.")
 
     def delete(self):
-        raise NotImplementedError("Django doesn't provide a DB representation for AnonymousUser.")
+        raise NotImplementedError("Django doesn't provide a DB representation for BettyCropperUser.")
 
     def set_password(self, raw_password):
-        raise NotImplementedError("Django doesn't provide a DB representation for AnonymousUser.")
+        raise NotImplementedError("Django doesn't provide a DB representation for BettyCropperUser.")
 
     def check_password(self, raw_password):
-        raise NotImplementedError("Django doesn't provide a DB representation for AnonymousUser.")
+        raise NotImplementedError("Django doesn't provide a DB representation for BettyCropperUser.")
 
     def _get_groups(self):
         return self._groups
