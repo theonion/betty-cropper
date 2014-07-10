@@ -96,6 +96,17 @@ class ImageFileTestCase(TestCase):
         self.assertTrue(os.path.exists(image.optimized.path))
         self.assertTrue(os.path.exists(image.source.path))
 
+    def test_fucked_up_quant_tables(self):
+        path = os.path.join(TEST_DATA_PATH, "tumblr.jpg")
+        image = Image.objects.create_from_path(path)
+
+        # Re-load the image, now that the task is done
+        image = Image.objects.get(id=image.id)
+
+        self.assertTrue(image.source.path.endswith("tumblr.jpg"))
+        self.assertEqual(image.width, 1280)
+        self.assertEqual(image.height, 704)
+
     def test_imgmin_upload(self):
 
         _cached_range = settings.BETTY_JPEG_QUALITY_RANGE

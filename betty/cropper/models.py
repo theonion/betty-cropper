@@ -76,7 +76,7 @@ def optimize_image(image):
                 icc_profile=icc_profile,
                 quality="keep",
                 subsampling=subsampling)
-        except TypeError as e:
+        except (TypeError, ValueError) as e:
             # Maybe the image already had an invalid quant table?
             if e.message.startswith("Not a valid numbers of quantization tables"):
                 im.save(
