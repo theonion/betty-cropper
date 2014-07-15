@@ -104,7 +104,7 @@ def update_selection(request, image_id, ratio_slug):
         image.selections = {}
 
     image.selections[ratio_slug] = selection
-    cache.delete("image-{}".format(image.id))
+    cache.delete(image.cache_key())
     image.save()
 
     ratio_path = os.path.join(image.path(), ratio_slug)
@@ -162,7 +162,7 @@ def detail(request, image_id):
         for field in ("name", "credit", "selections"):
             if field in request_json:
                 setattr(image, field, request_json[field])
-        cache.delete("image-{}".format(image.id))
+        cache.delete(image.cache_key())
         image.save()
 
         return HttpResponse(json.dumps(image.to_native()), content_type="application/json")

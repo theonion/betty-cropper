@@ -373,3 +373,9 @@ class Image(models.Model):
             if self.selections and data['selections'][ratio] == self.selections.get(ratio):
                 data['selections'][ratio]["source"] = "user"
         return data
+
+    def cache_key(self):
+        """
+        Returns string unique to cache instance
+        """
+        return "image={}".format(self.id)
