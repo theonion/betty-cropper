@@ -307,10 +307,9 @@ class Image(models.Model):
         height = int(round(width * float(ratio.height) / float(ratio.width)))
         img = img.resize((width, height), PILImage.ANTIALIAS)
 
-        if img.mode != "RGB":
-            img = img.convert("RGB")
-
         if extension == "jpg":
+            if img.mode != "RGB":
+                img = img.convert("RGB")
             pillow_kwargs = {"format": "jpeg"}
             if self.jpeg_quality:
                 pillow_kwargs["quality"] = self.jpeg_quality
