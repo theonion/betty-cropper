@@ -53,6 +53,7 @@ def crossdomain(origin="*", methods=[], headers=["X-Betty-Api-Key", "Content-Typ
 @crossdomain(methods=['POST', 'OPTIONS'])
 @betty_token_auth(["server.image_add"])
 def new(request):
+    request.POST  # nginx bug?
 
     image_file = request.FILES.get("image")
     if image_file is None:
