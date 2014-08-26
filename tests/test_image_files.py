@@ -60,7 +60,32 @@ class ImageFileTestCase(TestCase):
             JpegImagePlugin.get_sampling(optimized),
         )
 
-        # self.assertEqual(os.stat(image.optimized.path).st_size, os.stat(image.source.path).st_size)
+    def test_jpeg_noext(self):
+        path = os.path.join(TEST_DATA_PATH, "Sam_Hat1_noext")
+        image = Image.objects.create_from_path(path)
+
+        # Re-load the image, now that the task is done
+        image = Image.objects.get(id=image.id)
+
+        self.assertTrue(image.source.path.endswith("Sam_Hat1_noext"))
+        self.assertEqual(image.width, 3264)
+        self.assertEqual(image.height, 2448)
+        self.assertEqual(image.jpeg_quality, None)
+        self.assertTrue(os.path.exists(image.optimized.path))
+        self.assertTrue(os.path.exists(image.source.path))
+
+        source = PILImage.open(image.source.path)
+        optimized = PILImage.open(image.optimized.path)
+
+        self.assertEqual(
+            source.quantization,
+            optimized.quantization
+        )
+
+        self.assertEqual(
+            JpegImagePlugin.get_sampling(source),
+            JpegImagePlugin.get_sampling(optimized),
+        )
 
     def test_huge_jpeg(self):
         path = os.path.join(TEST_DATA_PATH, "huge.jpg")
