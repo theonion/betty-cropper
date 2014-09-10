@@ -104,8 +104,13 @@ INSTALLED_APPS = (
     'betty.cropper',
     'betty.authtoken',
     'betty.image_browser',
-    'south',
 )
+
+# Only use south with django < 1.7
+import django
+if django.VERSION < (1, 7):
+    INSTALLED_APPS = INSTALLED_APPS + ('south',)
+
 
 CELERY_IGNORE_RESULT = True
 CELERY_ALWAYS_EAGER = True
