@@ -14,6 +14,7 @@ from django.views.decorators.cache import never_cache
 
 from betty.conf.app import settings
 from .decorators import betty_token_auth
+from .helpers import message
 from betty.cropper.models import Image
 
 
@@ -55,7 +56,7 @@ def crossdomain(origin="*", methods=[], headers=["X-Betty-Api-Key", "Content-Typ
 def new(request):
     image_file = request.FILES.get("image")
     if image_file is None:
-        return HttpResponseBadRequest(json.dumps({'message': 'No image'}))
+        return HttpResponseBadRequest(message('No image'))
 
     image = Image.objects.create_from_path(
         image_file.temporary_file_path(),
@@ -76,14 +77,12 @@ def update_selection(request, image_id, ratio_slug):
     try:
         image = Image.objects.get(id=image_id)
     except Image.DoesNotExist:
-        message = json.dumps({"message": "No such image!"})
-        return HttpResponseNotFound(message, content_type="application/json")
+        return HttpResponseNotFound(message("No such image!"), content_type="application/json")
 
     try:
         request_json = json.loads(request.body.decode("utf-8"))
     except Exception:
-        message = json.dumps({"message": "Bad JSON"})
-        return HttpResponseBadRequest(message, content_type="application/json")
+        return HttpResponseBadRequest(message("Bad JSON"), content_type="application/json")
     try:
         selection = {
             "x0": int(request_json["x0"]),
@@ -92,12 +91,10 @@ def update_selection(request, image_id, ratio_slug):
             "y1": int(request_json["y1"]),
         }
     except (KeyError, ValueError):
-        message = json.dumps({"message": "Bad selection"})
-        return HttpResponseBadRequest(message, content_type="application/json")
+        return HttpResponseBadRequest(message("Bad selection"), content_type="application/json")
 
     if ratio_slug not in settings.BETTY_RATIOS:
-        message = json.dumps({"message": "No such ratio"})
-        return HttpResponseBadRequest(message, content_type="application/json")
+        return HttpResponseBadRequest(message("No such ratio"), content_type="application/json")
 
     if image.selections is None:
         image.selections = {}
@@ -149,14 +146,12 @@ def detail(request, image_id):
         try:
             image = Image.objects.get(id=image_id)
         except Image.DoesNotExist:
-            message = json.dumps({"message": "No such image!"})
-            return HttpResponseNotFound(message, content_type="application/json")
+            return HttpResponseNotFound(message("No such image!"), content_type="application/json")
 
         try:
             request_json = json.loads(request.body.decode("utf-8"))
         except Exception:
-            message = json.dumps({"message": "Bad Request"})
-            return HttpResponseBadRequest(message, content_type="application/json")
+            return HttpResponseBadRequest(message("Bad Request"), content_type="application/json")
 
         for field in ("name", "credit", "selections"):
             if field in request_json:
@@ -174,10 +169,9 @@ def detail(request, image_id):
             try:
                 image = Image.objects.get(id=image_id)
             except Image.DoesNotExist:
-                message = json.dumps({"message": "No such image!"})
-                return HttpResponseNotFound(message, content_type="application/json")
+                return HttpResponseNotFound(message("No such image!"), content_type="application/json")
             data = image.to_native()
-            cache.set(cache_key, data, 60 * 60)
+            cache.set(cache_key, data, 360)
 
         return HttpResponse(json.dumps(data), content_type="application/json")
 

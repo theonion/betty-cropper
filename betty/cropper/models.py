@@ -98,10 +98,11 @@ class Ratio(object):
         self.width = 0
 
         if ratio != "original":
-            if len(ratio.split("x")) != 2:
+            ratio_parts = ratio.split("x")
+            if len(ratio_parts) != 2:
                 raise ValueError("Improper ratio!")
-            self.width = int(ratio.split("x")[0])
-            self.height = int(ratio.split("x")[1])
+            self.width = int(ratio_parts[0])
+            self.height = int(ratio_parts[1])
 
 
 class ImageManager(models.Manager):
