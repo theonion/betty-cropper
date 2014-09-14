@@ -1,7 +1,6 @@
 import io
 import os
 import shutil
-import tempfile
 
 from django.db import models
 from django.core.files.storage import FileSystemStorage
@@ -145,13 +144,17 @@ class ImageManager(models.Manager):
 
 class Image(models.Model):
 
-    source = models.FileField(upload_to=source_upload_to, storage=betty_storage, max_length=255)
-    optimized = models.FileField(upload_to=optimized_upload_to, storage=betty_storage, max_length=255, null=True, blank=True)
     name = models.CharField(max_length=255)
+    credit = models.CharField(max_length=120, null=True, blank=True)
+
+    source = models.FileField(upload_to=source_upload_to, storage=betty_storage, max_length=255, null=True, blank=True)
+    optimized = models.FileField(upload_to=optimized_upload_to, storage=betty_storage, max_length=255, null=True, blank=True)
+    
     height = models.IntegerField(null=True, blank=True)
     width = models.IntegerField(null=True, blank=True)
-    credit = models.CharField(max_length=120, null=True, blank=True)
+
     selections = JSONField(null=True, blank=True)
+
     jpeg_quality = models.IntegerField(null=True, blank=True)
     animated = models.BooleanField(default=False)
 
