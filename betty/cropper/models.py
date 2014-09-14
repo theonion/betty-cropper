@@ -53,20 +53,6 @@ def optimize_image(image):
         height = settings.BETTY_MAX_WIDTH * float(im.size[1]) / float(im.size[0])
         im = im.resize((settings.BETTY_MAX_WIDTH, int(round(height))), PILImage.ANTIALIAS)
 
-        """OK, so this suuuuuucks. When we convert or resize an Image, it
-        is no longer a JPEG. So, in order to reset the quanitzation, etc,
-        we need to save this to a file and then re-read it from the
-        filesystem. Silly, I know. Once my pull request is approved, this
-        can be removed, and we can just pass the qtables into the save method.
-        PR is here: https://github.com/python-imaging/Pillow/pull/677
-        """
-        temp = tempfile.NamedTemporaryFile()
-        im.save(temp, format="JPEG")
-        temp.seek(0)
-        im = PILImage.open(temp)
-
-        im.quantization = quantization
-
     image.optimized.name = optimized_upload_to(image, filename)
     if format == "JPEG" and im.mode == "RGB":
         # For JPEG files, we need to make sure that we keep the quantization profile
@@ -74,7 +60,7 @@ def optimize_image(image):
             im.save(
                 image.optimized.name,
                 icc_profile=icc_profile,
-                quality="keep",
+                qtables=quantization,
                 subsampling=subsampling,
                 format="JPEG")
         except (TypeError, ValueError) as e:
