@@ -4,6 +4,7 @@ from betty.conf.app import settings
 from django.http import Http404, HttpResponse, HttpResponseServerError, HttpResponseRedirect
 from django.shortcuts import render
 from django.views.decorators.cache import cache_control
+from six.moves import urllib
 
 from .models import Image, Ratio
 from .utils.placeholder import placeholder
@@ -25,12 +26,18 @@ def image_js(request):
     widths = settings.BETTY_WIDTHS
     if 0 not in widths:
         widths.append(0)
+
+    betty_image_url = settings.BETTY_IMAGE_URL
+    # make the url protocol-relative
+    url_parts = list(urllib.parse.urlparse(betty_image_url))
+    url_parts[0] = ""
+    betty_image_url = urllib.parse.urlunparse(url_parts)
+    if betty_image_url.endswith("/"):
+        betty_image_url = betty_image_url[:-1]
     context = {
-        "BETTY_IMAGE_URL": settings.BETTY_IMAGE_URL,
+        "BETTY_IMAGE_URL": betty_image_url,
         "BETTY_WIDTHS": sorted(widths)
     }
-    if context["BETTY_IMAGE_URL"].endswith("/"):
-        context["BETTY_IMAGE_URL"] = context["BETTY_IMAGE_URL"][:-1]
     BETTY_RATIOS = []
     ratios_sorted = sorted(settings.BETTY_RATIOS, key=lambda r: Ratio(r).width / float(Ratio(r).height))
     for ratio_string in ratios_sorted:
