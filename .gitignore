@@ -6,3 +6,5 @@ dist
 include
 .Python
 .DS_Store
+betty.conf.py
+betty.db
