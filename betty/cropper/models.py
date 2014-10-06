@@ -367,4 +367,4 @@ class Image(models.Model):
         """
         Returns string unique to cache instance
         """
-        return "image={}".format(self.id)
+        return "image-{}".format(self.id)
