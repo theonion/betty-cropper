@@ -2,7 +2,7 @@
     /* We can request an image at every possible width, but let's limit it to a reasonable number
        We can set these so they correspond to our more common sizes.
     */
-    var IMAGE_URL = "{{ BETTY_IMAGE_URL }}",
+    var IMAGE_URL = w.BETTY_IMAGE_URL || "{{ BETTY_IMAGE_URL }}",
         RATIOS = {{ BETTY_RATIOS|safe }},
         ASPECT_RATIO_TOLERANCE = .1, // 10% tolerance. 
         breakpoints = [{{ BETTY_WIDTHS|join:","}}];
