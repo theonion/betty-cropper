@@ -79,10 +79,11 @@ class BettyCropperUser(object):
         return True
 
 
-class ApiTokenManager(models.Manager):
+def random_token():
+    return binascii.hexlify(os.urandom(20))
 
-    def random_token(self):
-        return binascii.hexlify(os.urandom(20))
+
+class ApiTokenManager(models.Manager):
 
     def create_superuser(self):
         return self.create(
@@ -112,8 +113,8 @@ class ApiToken(models.Model):
 
     objects = ApiTokenManager()
 
-    public_token = models.CharField(max_length=255, unique=True, default=objects.random_token)
-    private_token = models.CharField(max_length=255, default=objects.random_token)
+    public_token = models.CharField(max_length=255, unique=True, default=random_token)
+    private_token = models.CharField(max_length=255, default=random_token)
 
     image_read_permission = models.BooleanField(default=False)
     image_change_permission = models.BooleanField(default=False)

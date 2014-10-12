@@ -1,42 +1,35 @@
 # -*- coding: utf-8 -*-
-from south.utils import datetime_utils as datetime
-from south.db import db
-from south.v2 import SchemaMigration
-from django.db import models
+from __future__ import unicode_literals
+
+from django.db import models, migrations
+import django.core.files.storage
+import betty.cropper.models
+import jsonfield.fields
 
 
-class Migration(SchemaMigration):
+class Migration(migrations.Migration):
 
-    def forwards(self, orm):
-        # Adding model 'Image'
-        db.create_table(u'cropper_image', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('source', self.gf('django.db.models.fields.files.FileField')(max_length=100)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=255)),
-            ('height', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
-            ('width', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
-            ('credit', self.gf('django.db.models.fields.CharField')(max_length=120, null=True, blank=True)),
-            ('selections', self.gf('jsonfield.fields.JSONField')(null=True, blank=True)),
-        ))
-        db.send_create_signal(u'cropper', ['Image'])
+    dependencies = [
+    ]
 
-
-    def backwards(self, orm):
-        # Deleting model 'Image'
-        db.delete_table(u'cropper_image')
-
-
-    models = {
-        u'cropper.image': {
-            'Meta': {'object_name': 'Image'},
-            'credit': ('django.db.models.fields.CharField', [], {'max_length': '120', 'null': 'True', 'blank': 'True'}),
-            'height': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'selections': ('jsonfield.fields.JSONField', [], {'null': 'True', 'blank': 'True'}),
-            'source': ('django.db.models.fields.files.FileField', [], {'max_length': '100'}),
-            'width': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'})
-        }
-    }
-
-    complete_apps = ['cropper']
+    operations = [
+        migrations.CreateModel(
+            name='Image',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=255)),
+                ('credit', models.CharField(max_length=120, null=True, blank=True)),
+                ('source', models.FileField(storage=django.core.files.storage.FileSystemStorage(base_url=b'/', location=b'/private/var/folders/_3/mlzyzxsj5lb617stmlnstkgr0000gp/T/virtualenv.xyQsXv9C/images'), max_length=255, null=True, upload_to=betty.cropper.models.source_upload_to, blank=True)),
+                ('optimized', models.FileField(storage=django.core.files.storage.FileSystemStorage(base_url=b'/', location=b'/private/var/folders/_3/mlzyzxsj5lb617stmlnstkgr0000gp/T/virtualenv.xyQsXv9C/images'), max_length=255, null=True, upload_to=betty.cropper.models.optimized_upload_to, blank=True)),
+                ('height', models.IntegerField(null=True, blank=True)),
+                ('width', models.IntegerField(null=True, blank=True)),
+                ('selections', jsonfield.fields.JSONField(null=True, blank=True)),
+                ('jpeg_quality', models.IntegerField(null=True, blank=True)),
+                ('animated', models.BooleanField(default=False)),
+            ],
+            options={
+                'permissions': (('read', 'Can search images, and see the detail data'), ('crop', 'Can crop images')),
+            },
+            bases=(models.Model,),
+        ),
+    ]
