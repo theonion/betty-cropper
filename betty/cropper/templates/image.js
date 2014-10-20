@@ -162,21 +162,26 @@
   // Run on resize and domready (w.load as a fallback)
   if (!w.IMAGE_LISTENERS_DISABLED) {
 
+    addEventListener(w, "load", w.picturefill);
+    addEventListener(w, "DOMContentLoaded", function () {
+      w.picturefill();
+      removeEventListener(w, "load");
+    });
+
     var pictureFillTimeout;
+
     addEventListener(w, "resize", function () {
       clearTimeout(pictureFillTimeout);
       pictureFillTimeout = setTimeout(function () {
         w.picturefill(null, true);
       }, 100);
     });
-
-    addEventListener(w, "DOMContentLoaded", function () {
-      w.picturefill();
-      removeEventListener(w, "load");
+    addEventListener(w, "scroll", function() {
+      clearTimeout(pictureFillTimeout);
+      pictureFillTimeout = setTimeout(function () {
+        w.picturefill();
+      }, 50);
     });
-
-    addEventListener(w, "load", w.picturefill);
-    addEventListener(w, "scroll", w.picturefill);
 
   }
 
