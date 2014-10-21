@@ -168,19 +168,23 @@
       removeEventListener(w, "load");
     });
 
-    var pictureFillTimeout;
-
+    var resizeTimeout;
     addEventListener(w, "resize", function () {
-      clearTimeout(pictureFillTimeout);
-      pictureFillTimeout = setTimeout(function () {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(function () {
         w.picturefill(null, true);
       }, 100);
     });
+
+    var scrollTimeout;
     addEventListener(w, "scroll", function() {
-      clearTimeout(pictureFillTimeout);
-      pictureFillTimeout = setTimeout(function () {
+      if (scrollTimeout !== null) {
+        return;
+      }
+      scrollTimeout = setTimeout(function () {
         w.picturefill();
-      }, 50);
+        scrollTimeout = null;
+      }, 100);
     });
 
   }
