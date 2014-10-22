@@ -7,6 +7,30 @@
       ASPECT_RATIO_TOLERANCE = .1, // 10% tolerance.
       breakpoints = [{{ BETTY_WIDTHS|join:","}}];
 
+  // Credit to https://remysharp.com/2010/07/21/throttling-function-calls
+  function throttle(fn, threshhold, scope) {
+    threshhold || (threshhold = 250);
+    var last,
+        deferTimer;
+    return function () {
+      var context = scope || this;
+
+      var now = +new Date,
+          args = arguments;
+      if (last && now < last + threshhold) {
+        // hold on to it
+        clearTimeout(deferTimer);
+        deferTimer = setTimeout(function () {
+          last = now;
+          fn.apply(context, args);
+        }, threshhold);
+      } else {
+        last = now;
+        fn.apply(context, args);
+      }
+    };
+  }
+
   w.picturefill = function(elements, forceRerender) {
 
     // get elements to picturefill
@@ -33,7 +57,7 @@
       // check if image is in viewport for lazy loading, and
       // preload images if they're within 100px of being shown.
       var innerHeight = w.innerHeight || w.document.documentElement.clientHeight,
-          visible = el.getBoundingClientRect().top <= (innerHeight - 100);
+          visible = el.getBoundingClientRect().top <= (innerHeight + 250);
 
       // this is a div to picturefill, start working on it if it hasn't been rendered yet
       if (el.getAttribute("data-image-id") !== null
@@ -177,16 +201,7 @@
       }, 100);
     });
 
-    var scrollTimeout;
-    addEventListener(w, "scroll", function() {
-      if (scrollTimeout !== null) {
-        return;
-      }
-      scrollTimeout = setTimeout(function () {
-        w.picturefill();
-        scrollTimeout = null;
-      }, 100);
-    });
+    addEventListener(w, "scroll", throttle(w.picturefill, 100));
 
   }
 
