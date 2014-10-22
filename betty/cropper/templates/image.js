@@ -30,9 +30,10 @@
         continue;
       }
 
-      // check if image is in viewport for lazy loading
+      // check if image is in viewport for lazy loading, and
+      // preload images if they're within 100px of being shown.
       var innerHeight = w.innerHeight || w.document.documentElement.clientHeight,
-          visible = el.getBoundingClientRect().top <= innerHeight;
+          visible = el.getBoundingClientRect().top <= (innerHeight - 100);
 
       // this is a div to picturefill, start working on it if it hasn't been rendered yet
       if (el.getAttribute("data-image-id") !== null
