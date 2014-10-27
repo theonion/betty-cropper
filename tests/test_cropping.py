@@ -107,7 +107,7 @@ class ImageSavingTestCase(TestCase):
         self.assertEqual(res.status_code, 404)
 
     def test_too_large(self):
-        res = self.client.get('/images/666/1x1/2001.jpg')
+        res = self.client.get("/images/666/1x1/{}.jpg".format(settings.BETTY_MAX_WIDTH + 1))
         self.assertEqual(res.status_code, 500)
 
     def test_image_redirect(self):
