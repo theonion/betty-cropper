@@ -74,7 +74,7 @@ def crop(request, id, ratio_slug, width, extension):
 
     width = int(width)
 
-    if width > 2000:
+    if width > settings.BETTY_MAX_WIDTH:
         return HttpResponseServerError("Invalid width")
 
     image_id = int(id.replace("/", ""))
