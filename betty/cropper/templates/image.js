@@ -5,6 +5,7 @@
   var IMAGE_URL = w.BETTY_IMAGE_URL || "{{ BETTY_IMAGE_URL }}",
       RATIOS = {{ BETTY_RATIOS|safe }},
       ASPECT_RATIO_TOLERANCE = .1, // 10% tolerance.
+      MAX_WIDTH = {{ BETTY_MAX_WIDTH }},
       breakpoints = [{{ BETTY_WIDTHS|join:","}}];
 
   // Credit to https://remysharp.com/2010/07/21/throttling-function-calls
@@ -121,7 +122,11 @@
             }
           }
           if (width === null) {
-            width = _w;
+            if (_w > MAX_WIDTH) {
+              width = MAX_WIDTH;
+            } else {
+              width = _w;
+            }
           }
 
           // if the existing image is larger (or the same) than the one we're about to load, do not update.
