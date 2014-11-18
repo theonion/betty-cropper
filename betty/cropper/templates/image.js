@@ -152,7 +152,7 @@
       data.img.src = data.url;
       if (!data.img.parentNode) {
         data.div.appendChild(data.img);
-        data.div.parentNode.setAttribute("data-image-rendered", "true");
+        data.div.parentNode.setAttribute("data-rendered", "true");
       }
     }
   };
