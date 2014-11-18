@@ -10,8 +10,8 @@
     > cd betty-cropper
     > virtualenv .
     > source bin/activate
-    > pip install .
-    > pip install -r requirements-dev.txt
+    > pip install -e .
+    > pip install file://$(pwd)#egg=betty-cropper[dev]
 
 To run the tests:
 
