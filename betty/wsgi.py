@@ -11,7 +11,7 @@ from betty.cropper.utils.runner import configure
 configure()
 
 # Build the wsgi app
-import django.core.handlers.wsgi
+import django.core.wsgi
 
 # Run WSGI handler for the application
-application = django.core.handlers.wsgi.WSGIHandler()
+application = django.core.wsgi.get_wsgi_application()
