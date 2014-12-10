@@ -6,6 +6,7 @@
       RATIOS = {{ BETTY_RATIOS|safe }},
       ASPECT_RATIO_TOLERANCE = .1, // 10% tolerance.
       MAX_WIDTH = {{ BETTY_MAX_WIDTH }},
+      PICTUREFILL_SELECTOR = w.PICTUREFILL_SELECTOR || "div",
       breakpoints = [{{ BETTY_WIDTHS|join:","}}];
 
   // Credit to https://remysharp.com/2010/07/21/throttling-function-calls
@@ -41,7 +42,7 @@
     } else if (elements instanceof HTMLElement) {
       ps = [elements];
     } else {
-      ps = w.document.getElementsByTagName("div");
+      ps = w.document.querySelector(PICTUREFILL_SELECTOR);
     }
 
     // loop through elements and fill them in
