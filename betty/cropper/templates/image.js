@@ -42,7 +42,7 @@
     } else if (elements instanceof HTMLElement) {
       ps = [elements];
     } else {
-      ps = w.document.querySelector(PICTUREFILL_SELECTOR);
+      ps = w.document.querySelectorAll(PICTUREFILL_SELECTOR);
     }
 
     // loop through elements and fill them in
