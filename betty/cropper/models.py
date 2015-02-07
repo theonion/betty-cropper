@@ -72,7 +72,7 @@ def optimize_image(image):
             else:
                 raise
     else:
-        im.save(image.optimized.name, icc_profile=icc_profile)
+        im.save(image.optimized.name, format=format, icc_profile=icc_profile)
     image.save()
 
 
