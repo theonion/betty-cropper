@@ -37,7 +37,7 @@ Currently, authentication means sending an `X-Betty-Api-Key` header with a value
 
 `POST` an image (using the key "image") to /api/new, for example:
     
-    > curl -H "X-Betty-Api_key: YOUR_PUBLIC_TOKEN" --form "image=@Lenna.png" http://localhost:8000/api/new
+    > curl -H "X-Betty-Api-Key: YOUR_PUBLIC_TOKEN" --form "image=@Lenna.png" http://localhost:8000/api/new
 
 This should return JSON representing that image and its crops, for instance:
 
@@ -61,22 +61,22 @@ You can get a cropped version of this image using a URL like: [http://localhost:
 
 To get the data form an image, send a `GET` request to /api/id, for example:
 
-    > curl -H "X-Betty-Api_key: YOUR_PUBLIC_TOKEN" http://localhost:8000/api/1
+    > curl -H "X-Betty-Api-Key: YOUR_PUBLIC_TOKEN" http://localhost:8000/api/1
 
 To update the name or credit, use a `PATCH` on that same endpoint:
 
-    > curl -H "X-Betty-Api_key: YOUR_PUBLIC_TOKEN" \
+    > curl -H "X-Betty-Api-Key: YOUR_PUBLIC_TOKEN" \
            -H "Content-Type: application/json" \
            -XPATCH http://localhost:8000/api/1 \
            -d '{"name":"Testing", "credit":"Some guy"}'
 
 To update the selections used for a crop, you can `POST` to /api/id/ratio, for example:
 
-    > curl -H "X-Betty-Api_key: YOUR_PUBLIC_TOKEN" \
+    > curl -H "X-Betty-Api-Key: YOUR_PUBLIC_TOKEN" \
            -H "Content-Type: application/json" \
            -XPOST http://localhost:8000/api/1/1x1 \
            -d '{"x0":1,"y0":1,"x1":510,"y1":510}' 
 
 `GET` /api/search, with an option "q" parameter in order to get a list of files matching that description. For example:
 
-    > curl -H "X-Betty-Api_key: YOUR_PUBLIC_TOKEN" -XGET http://localhost:8000/api/search?q=lenna
+    > curl -H "X-Betty-Api-Key: YOUR_PUBLIC_TOKEN" -XGET http://localhost:8000/api/search?q=lenna
