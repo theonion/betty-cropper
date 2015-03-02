@@ -1,4 +1,7 @@
-import os
-import sys
+from logan.runner import configure_app
 
-sys.path.append(os.path.dirname(__file__))
+configure_app(
+    project="betty",
+    default_settings="betty.conf.server",
+    config_path="./tests/betty.testconf.py"
+)

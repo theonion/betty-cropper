@@ -1,8 +1,4 @@
-from django.test import TestCase
-
 from betty.cropper.models import Image
-
-import pytest
 
 
 def test_id_string():
