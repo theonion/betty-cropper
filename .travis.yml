@@ -11,6 +11,8 @@ cache:
   directories:
   - "$HOME/.pip-cache/"
 install:
+- "if [[ $TRAVIS_PYTHON_VERSION == 3.2 ]]; then pip install https://github.com/dcramer/logan/archive/abaf5d49e80446de9e58dcafdcfa8166855a88b9.zip; fi"
+- "if [[ $TRAVIS_PYTHON_VERSION == 3.3 ]]; then pip install https://github.com/dcramer/logan/archive/abaf5d49e80446de9e58dcafdcfa8166855a88b9.zip; fi"
 - pip install --download-cache $HOME/.pip-cache -r requirements-dev.txt
 script:
 - py.test tests/ --cov betty --cov-report term-missing

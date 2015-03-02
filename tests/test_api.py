@@ -2,11 +2,6 @@ import os
 import json
 import shutil
 
-
-from django.test import TestCase, Client
-
-from django.contrib.auth.models import User
-
 from betty.conf.app import settings
 from betty.cropper.models import Image
 
@@ -14,12 +9,6 @@ TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'images')
 
 
 import pytest
-
-
-class PatchClient(Client):
-    def patch(self, *args, **kwargs):
-        kwargs["REQUEST_METHOD"] = "PATCH"
-        return super(PatchClient, self).post(*args, **kwargs)
 
 
 def test_no_api_key(client):
