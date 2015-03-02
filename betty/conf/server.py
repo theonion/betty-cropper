@@ -103,7 +103,7 @@ INSTALLED_APPS = (
 
     'betty.cropper',
     'betty.authtoken',
-    'betty.image_browser',
+    # 'betty.image_browser',
 )
 
 # Only use south with django < 1.7

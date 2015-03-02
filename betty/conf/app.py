@@ -9,6 +9,14 @@ except ImportError:
 
 from django.conf import settings as _settings
 
+from django.apps import AppConfig
+
+
+class BettyConfConfig(AppConfig):
+    name = 'rock_n_roll'
+    verbose_name = "Rock ’n’ roll"
+
+
 PACKAGE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 DEFAULTS = {

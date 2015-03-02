@@ -1,5 +1,3 @@
-from betty.conf.server import *  # noqa
-
 import os
 import tempfile
 
