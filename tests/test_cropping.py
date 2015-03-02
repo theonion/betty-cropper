@@ -1,7 +1,6 @@
 import os
 import shutil
 
-from django.test import TestCase, Client
 from django.core.files import File
 
 from betty.conf.app import settings
@@ -9,16 +8,13 @@ from betty.cropper.models import Image, Ratio
 
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'images')
 
-from django.utils.six.moves.urllib.parse import (
-    unquote, urlparse, urlsplit, urlunsplit,
-)
-
 
 import pytest
 
 
 @pytest.mark.django_db
 def test_image_selections():
+
     image = Image.objects.create(
         name="Lenna.gif",
         width=512,
@@ -110,6 +106,7 @@ def test_image_redirect(client):
     assert res['Location'].endswith("/images/6666/66/1x1/100.jpg")
 
 
+@pytest.mark.django_db
 def test_placeholder(settings, client):
     settings.BETTY_PLACEHOLDER = True
 
@@ -125,81 +122,81 @@ def test_placeholder(settings, client):
     assert res['Content-Type'] == 'image/png'
     assert res.status_code == 200
 
+    settings.BETTY_PLACEHOLDER = False
     res = client.get('/images/666/1x1/256.jpg')
     assert res.status_code == 404
 
 
-class ImageSavingTestCase(TestCase):
+@pytest.mark.django_db
+def test_missing_file(client):
+    image = Image.objects.create(name="Lenna.gif", width=512, height=512)
 
-    def setUp(self):
-        self.client = Client()
+    res = client.get('/images/{0}/1x1/256.jpg'.format(image.id))
+    assert res.status_code == 500
 
 
+@pytest.mark.django_db
+def test_image_save(client):
+    shutil.rmtree(settings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
-    def test_missing_file(self):
-        image = Image.objects.create(name="Lenna.gif", width=512, height=512)
+    image = Image.objects.create(
+        name="Lenna.png",
+        width=512,
+        height=512
+    )
+    lenna = File(open(os.path.join(TEST_DATA_PATH, "Lenna.png"), "rb"))
+    image.source.save("Lenna.png", lenna)
 
-        res = self.client.get('/images/{0}/1x1/256.jpg'.format(image.id))
-        self.assertEqual(res.status_code, 500)
+    # Now let's test that a JPEG crop will return properly.
+    res = client.get('/images/{}/1x1/240.jpg'.format(image.id))
+    assert res['Content-Type'] == 'image/jpeg'
+    assert res.status_code == 200
+    assert os.path.exists(os.path.join(image.path(), '1x1', '240.jpg'))
 
-    def test_image_save(self):
+    # Now let's test that a PNG crop will return properly.
+    res = client.get('/images/{}/1x1/240.png'.format(image.id))
+    assert res['Content-Type'] == 'image/png'
+    assert res.status_code == 200
+    assert os.path.exists(os.path.join(image.path(), '1x1', '240.png'))
 
-        image = Image.objects.create(
-            name="Lenna.png",
-            width=512,
-            height=512
-        )
-        lenna = File(open(os.path.join(TEST_DATA_PATH, "Lenna.png"), "rb"))
-        image.source.save("Lenna.png", lenna)
+    # Let's test an "original" crop
+    res = client.get('/images/{}/original/240.jpg'.format(image.id))
+    assert res['Content-Type'] == 'image/jpeg'
+    assert res.status_code == 200
+    assert os.path.exists(os.path.join(image.path(), 'original', '240.jpg'))
 
-        # Now let's test that a JPEG crop will return properly.
-        res = self.client.get('/images/{}/1x1/240.jpg'.format(image.id))
-        self.assertEqual(res['Content-Type'], 'image/jpeg')
-        self.assertEqual(res.status_code, 200)
-        self.assertTrue(os.path.exists(os.path.join(image.path(), '1x1', '240.jpg')))
+    # Finally, let's test a width that doesn't exist
+    res = client.get('/images/{}/original/666.jpg'.format(image.id))
+    res['Content-Type'] == 'image/jpeg'
+    assert res.status_code == 200
+    assert not os.path.exists(os.path.join(image.path(), 'original', '666.jpg'))
 
-        # Now let's test that a PNG crop will return properly.
-        res = self.client.get('/images/{}/1x1/240.png'.format(image.id))
-        self.assertEqual(res['Content-Type'], 'image/png')
-        self.assertEqual(res.status_code, 200)
-        self.assertTrue(os.path.exists(os.path.join(image.path(), '1x1', '240.png')))
 
-        # Let's test an "original" crop
-        res = self.client.get('/images/{}/original/240.jpg'.format(image.id))
-        self.assertEqual(res['Content-Type'], 'image/jpeg')
-        self.assertEqual(res.status_code, 200)
-        self.assertTrue(os.path.exists(os.path.join(image.path(), 'original', '240.jpg')))
+@pytest.mark.django_db
+def test_non_rgb(client):
+    shutil.rmtree(settings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
-        # Finally, let's test a width that doesn't exist
-        res = self.client.get('/images/{}/original/666.jpg'.format(image.id))
-        self.assertEqual(res['Content-Type'], 'image/jpeg')
-        self.assertEqual(res.status_code, 200)
-        self.assertFalse(os.path.exists(os.path.join(image.path(), 'original', '666.jpg')))
+    image = Image.objects.create(
+        name="animated.gif",
+        width=512,
+        height=512
+    )
 
-    def test_non_rgb(self):
-        image = Image.objects.create(
-            name="animated.gif",
-            width=512,
-            height=512
-        )
+    lenna = File(open(os.path.join(TEST_DATA_PATH, "animated.gif"), "rb"))
+    image.source.save("animated.gif", lenna)
 
-        lenna = File(open(os.path.join(TEST_DATA_PATH, "animated.gif"), "rb"))
-        image.source.save("animated.gif", lenna)
+    res = client.get('/images/{}/1x1/240.jpg'.format(image.id))
+    assert res.status_code == 200
+    assert res['Content-Type'] == 'image/jpeg'
+    assert os.path.exists(os.path.join(image.path(), '1x1/240.jpg'))
 
-        res = self.client.get('/images/{}/1x1/240.jpg'.format(image.id))
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(res['Content-Type'], 'image/jpeg')
-        self.assertTrue(os.path.exists(os.path.join(image.path(), '1x1/240.jpg')))
+    res = client.get('/images/{}/original/1200.jpg'.format(image.id))
+    assert res.status_code == 200
+    assert res['Content-Type'] == 'image/jpeg'
+    assert os.path.exists(os.path.join(image.path(), 'original/1200.jpg'))
 
-        res = self.client.get('/images/{}/original/1200.jpg'.format(image.id))
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(res['Content-Type'], 'image/jpeg')
-        self.assertTrue(os.path.exists(os.path.join(image.path(), 'original/1200.jpg')))
 
-    def test_image_js(self):
-        res = self.client.get("/images/image.js")
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(res['Content-Type'], 'application/javascript')
-
-    def tearDown(self):
-        shutil.rmtree(settings.BETTY_IMAGE_ROOT, ignore_errors=True)
+def test_image_js(client):
+    res = client.get("/images/image.js")
+    assert res.status_code == 200
+    assert res['Content-Type'] == 'application/javascript'
