@@ -19,17 +19,15 @@ license = 'MIT'
 setup_requires = []
 
 dev_requires = [
-    "httmock==1.2.2",
-    "django-discover-runner",
     "flake8>=2.0,<2.1",
-    "pytest",
-    "pytest-django",
+    "pytest==2.6.4",
+    "pytest-django==2.8.0",
     "pytest-cov>=1.4",
     "coveralls==0.4.1",
 ]
 
 install_requires = [
-    "Django>=1.5",
+    "Django>=1.7",
     "six==1.6.1",
     "slimit==0.8.1",
     "jsonfield==0.9.20",

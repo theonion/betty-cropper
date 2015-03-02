@@ -2,213 +2,211 @@ import os
 import shutil
 import stat
 
-from django.test import TestCase
 from PIL import Image as PILImage
 from PIL import JpegImagePlugin
 
 from betty.cropper.models import Image
-from betty.conf.app import settings
+from betty.conf.app import settings as bettysettings
 
+import pytest
 
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'images')
 
 
-class ImageFileTestCase(TestCase):
+@pytest.mark.django_db
+def test_png():
+    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
-    def test_png(self):
+    path = os.path.join(TEST_DATA_PATH, "Lenna.png")
+    image = Image.objects.create_from_path(path)
 
-        path = os.path.join(TEST_DATA_PATH, "Lenna.png")
-        image = Image.objects.create_from_path(path)
+    # Re-load the image, now that the task is done
+    image = Image.objects.get(id=image.id)
 
-        # Re-load the image, now that the task is done
-        image = Image.objects.get(id=image.id)
+    assert image.source.path.endswith("Lenna.png")
+    assert image.width == 512
+    assert image.height == 512
+    assert image.jpeg_quality is None
+    assert os.path.exists(image.optimized.path)
+    assert os.path.exists(image.source.path)
 
-        self.assertTrue(image.source.path.endswith("Lenna.png"))
-        self.assertEqual(image.width, 512)
-        self.assertEqual(image.height, 512)
-        self.assertEqual(image.jpeg_quality, None)
-        self.assertTrue(os.path.exists(image.optimized.path))
-        self.assertTrue(os.path.exists(image.source.path))
+    # Since this image is 512x512, it shouldn't end up getting changed by the optimization process
+    assert os.stat(image.optimized.path).st_size == os.stat(image.source.path).st_size
 
-        # Since this image is 512x512, it shouldn't end up getting changed by the optimization process
-        self.assertTrue(os.stat(image.optimized.path).st_size, os.stat(image.source.path).st_size)
 
-    def test_jpeg(self):
-        path = os.path.join(TEST_DATA_PATH, "Sam_Hat1.jpg")
-        image = Image.objects.create_from_path(path)
+@pytest.mark.django_db
+def test_jpeg():
+    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
-        # Re-load the image, now that the task is done
-        image = Image.objects.get(id=image.id)
+    path = os.path.join(TEST_DATA_PATH, "Sam_Hat1.jpg")
+    image = Image.objects.create_from_path(path)
 
-        self.assertTrue(image.source.path.endswith("Sam_Hat1.jpg"))
-        self.assertEqual(image.width, 3264)
-        self.assertEqual(image.height, 2448)
-        self.assertEqual(image.jpeg_quality, None)
-        self.assertTrue(os.path.exists(image.optimized.path))
-        self.assertTrue(os.path.exists(image.source.path))
+    # Re-load the image, now that the task is done
+    image = Image.objects.get(id=image.id)
 
-        source = PILImage.open(image.source.path)
-        optimized = PILImage.open(image.optimized.path)
+    assert image.source.path.endswith("Sam_Hat1.jpg")
+    assert image.width == 3264
+    assert image.height == 2448
+    assert image.jpeg_quality is None
+    assert os.path.exists(image.optimized.path)
+    assert os.path.exists(image.source.path)
 
-        self.assertEqual(
-            source.quantization,
-            optimized.quantization
-        )
+    source = PILImage.open(image.source.path)
+    optimized = PILImage.open(image.optimized.path)
 
-        self.assertEqual(
-            JpegImagePlugin.get_sampling(source),
-            JpegImagePlugin.get_sampling(optimized),
-        )
+    assert source.quantization == optimized.quantization
+    assert JpegImagePlugin.get_sampling(source) == JpegImagePlugin.get_sampling(optimized)
 
-    def test_jpeg_noext(self):
-        path = os.path.join(TEST_DATA_PATH, "Sam_Hat1_noext")
-        image = Image.objects.create_from_path(path)
 
-        # Re-load the image, now that the task is done
-        image = Image.objects.get(id=image.id)
+@pytest.mark.django_db
+def test_jpeg_noext():
+    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
-        self.assertTrue(image.source.path.endswith("Sam_Hat1_noext"))
-        self.assertEqual(image.width, 3264)
-        self.assertEqual(image.height, 2448)
-        self.assertEqual(image.jpeg_quality, None)
-        self.assertTrue(os.path.exists(image.optimized.path))
-        self.assertTrue(os.path.exists(image.source.path))
+    path = os.path.join(TEST_DATA_PATH, "Sam_Hat1_noext")
+    image = Image.objects.create_from_path(path)
 
-        source = PILImage.open(image.source.path)
-        optimized = PILImage.open(image.optimized.path)
+    # Re-load the image, now that the task is done
+    image = Image.objects.get(id=image.id)
 
-        self.assertEqual(
-            source.quantization,
-            optimized.quantization
-        )
+    assert image.source.path.endswith("Sam_Hat1_noext")
+    assert image.width == 3264
+    assert image.height == 2448
+    assert image.jpeg_quality is None
+    assert os.path.exists(image.optimized.path)
+    assert os.path.exists(image.source.path)
 
-        self.assertEqual(
-            JpegImagePlugin.get_sampling(source),
-            JpegImagePlugin.get_sampling(optimized),
-        )
+    source = PILImage.open(image.source.path)
+    optimized = PILImage.open(image.optimized.path)
 
-    def test_huge_jpeg(self):
-        path = os.path.join(TEST_DATA_PATH, "huge.jpg")
-        image = Image.objects.create_from_path(path)
+    assert source.quantization == optimized.quantization
 
-        # Re-load the image, now that the task is done
-        image = Image.objects.get(id=image.id)
+    assert JpegImagePlugin.get_sampling(source) == JpegImagePlugin.get_sampling(optimized)
 
-        self.assertTrue(image.source.path.endswith("huge.jpg"))
-        self.assertEqual(image.width, 8720)
-        self.assertEqual(image.height, 8494)
-        self.assertEqual(image.jpeg_quality, None)
-        self.assertTrue(os.path.exists(image.optimized.path))
-        self.assertTrue(os.path.exists(image.source.path))
 
-        self.assertEqual(image.to_native()["width"], 3200)
+@pytest.mark.django_db
+def test_huge_jpeg():
+    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
-        optimized = PILImage.open(image.optimized.path)
-        self.assertEqual(optimized.size[0], settings.BETTY_MAX_WIDTH)
-        self.assertTrue(os.stat(image.optimized.path).st_size < os.stat(image.source.path).st_size)
+    path = os.path.join(TEST_DATA_PATH, "huge.jpg")
+    image = Image.objects.create_from_path(path)
 
-    def test_l_mode(self):
-        path = os.path.join(TEST_DATA_PATH, "Header-Just_How.jpg")
-        image = Image.objects.create_from_path(path)
+    # Re-load the image, now that the task is done
+    image = Image.objects.get(id=image.id)
 
-        # Re-load the image, now that the task is done
-        image = Image.objects.get(id=image.id)
+    assert image.source.path.endswith("huge.jpg")
+    assert image.width == 8720
+    assert image.height == 8494
+    assert image.jpeg_quality is None
+    assert os.path.exists(image.optimized.path)
+    assert os.path.exists(image.source.path)
 
-        self.assertTrue(image.source.path.endswith("Header-Just_How.jpg"))
-        self.assertEqual(image.width, 1280)
-        self.assertEqual(image.height, 720)
-        self.assertEqual(image.jpeg_quality, None)
-        self.assertTrue(os.path.exists(image.optimized.path))
-        self.assertTrue(os.path.exists(image.source.path))
+    assert image.to_native()["width"] == 3200
 
-    def test_fucked_up_quant_tables(self):
-        path = os.path.join(TEST_DATA_PATH, "tumblr.jpg")
-        image = Image.objects.create_from_path(path)
+    optimized = PILImage.open(image.optimized.path)
+    assert optimized.size[0] == bettysettings.BETTY_MAX_WIDTH
+    assert os.stat(image.optimized.path).st_size < os.stat(image.source.path).st_size
 
-        # Re-load the image, now that the task is done
-        image = Image.objects.get(id=image.id)
 
-        self.assertTrue(image.source.path.endswith("tumblr.jpg"))
-        self.assertEqual(image.width, 1280)
-        self.assertEqual(image.height, 704)
+@pytest.mark.django_db
+def test_l_mode():
+    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
-    def test_imgmin_upload(self):
+    path = os.path.join(TEST_DATA_PATH, "Header-Just_How.jpg")
+    image = Image.objects.create_from_path(path)
 
-        _cached_range = settings.BETTY_JPEG_QUALITY_RANGE
-        settings.BETTY_JPEG_QUALITY_RANGE = (60, 95)
+    # Re-load the image, now that the task is done
+    image = Image.objects.get(id=image.id)
 
-        path = os.path.join(TEST_DATA_PATH, "Lenna.png")
-        image = Image.objects.create_from_path(path)
+    assert image.source.path.endswith("Header-Just_How.jpg")
+    assert image.width == 1280
+    assert image.height == 720
+    assert image.jpeg_quality is None
+    assert os.path.exists(image.optimized.path)
+    assert os.path.exists(image.source.path)
 
-        # Re-load the image, now that the task is done
-        image = Image.objects.get(id=image.id)
 
-        # Lenna should be a 95 quality, but we'll leave a fudge factor
-        self.assertTrue(abs(image.jpeg_quality - 95) < 2)
+@pytest.mark.django_db
+def test_fucked_up_quant_tables():
+    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
-        settings.BETTY_JPEG_QUALITY_RANGE = _cached_range
+    path = os.path.join(TEST_DATA_PATH, "tumblr.jpg")
+    image = Image.objects.create_from_path(path)
 
-    def test_imgmin_upload_lowquality(self):
+    # Re-load the image, now that the task is done
+    image = Image.objects.get(id=image.id)
 
-        _cached_range = settings.BETTY_JPEG_QUALITY_RANGE
-        settings.BETTY_JPEG_QUALITY_RANGE = (60, 95)
+    assert image.source.path.endswith("tumblr.jpg")
+    assert image.width == 1280
+    assert image.height == 704
 
-        path = os.path.join(TEST_DATA_PATH, "Sam_Hat1.jpg")
-        image = Image.objects.create_from_path(path)
 
-        settings.BETTY_JPEG_QUALITY_RANGE = _cached_range
+@pytest.mark.django_db
+def test_imgmin_upload(settings):
+    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
-        # Re-load the image, now that the task is done
-        image = Image.objects.get(id=image.id)
+    settings.BETTY_JPEG_QUALITY_RANGE = (60, 95)
 
-        # This image is already optimized, so this should do nothing.
-        self.assertEqual(image.jpeg_quality, None)
+    path = os.path.join(TEST_DATA_PATH, "Lenna.png")
+    image = Image.objects.create_from_path(path)
 
-    def test_imgmin_large(self):
+    # Re-load the image, now that the task is done
+    image = Image.objects.get(id=image.id)
 
-        _cached_range = settings.BETTY_JPEG_QUALITY_RANGE
-        settings.BETTY_JPEG_QUALITY_RANGE = (60, 95)
+    # Lenna should be a 95 quality, but we'll leave a fudge factor
+    assert abs(image.jpeg_quality - 95) < 2
 
-        path = os.path.join(TEST_DATA_PATH, "Sam_Hat1.png")
-        image = Image.objects.create_from_path(path)
 
-        settings.BETTY_JPEG_QUALITY_RANGE = _cached_range
+@pytest.mark.django_db
+def test_imgmin_upload_lowquality(settings):
+    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
-        # Re-load the image, now that the task is done
-        image = Image.objects.get(id=image.id)
+    settings.BETTY_JPEG_QUALITY_RANGE = (60, 95)
 
-        # Lenna should be a 95 quality, but we'll leave a fudge factor
-        self.assertTrue(abs(image.jpeg_quality - 95) < 2)
+    path = os.path.join(TEST_DATA_PATH, "Sam_Hat1.jpg")
+    image = Image.objects.create_from_path(path)
 
-    def test_gif_upload(self):
+    # Re-load the image, now that the task is done
+    image = Image.objects.get(id=image.id)
 
-        path = os.path.join(TEST_DATA_PATH, "animated.gif")
-        image = Image.objects.create_from_path(path)
+    # This image is already optimized, so this should do nothing.
+    assert image.jpeg_quality is None
 
-        # Re-load the image, now that the task is done
-        image = Image.objects.get(id=image.id)
 
-        self.assertEqual(image.width, 256)
-        self.assertEqual(image.height, 256)
-        self.assertTrue(os.path.exists(image.path()))
-        self.assertTrue(os.path.exists(image.source.path))
-        self.assertEqual(os.path.basename(image.source.path), "animated.gif")
+@pytest.mark.django_db
+def test_imgmin_large(settings):
+    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
-        original_gif = os.path.join(image.path(), "animated/original.gif")
+    settings.BETTY_JPEG_QUALITY_RANGE = (60, 95)
 
-        self.assertEqual(stat.S_IMODE(os.lstat(original_gif).st_mode), 744)
+    path = os.path.join(TEST_DATA_PATH, "Sam_Hat1.png")
+    image = Image.objects.create_from_path(path)
 
-        self.assertTrue(
-            os.path.exists(
-                os.path.join(image.path(), "animated/original.gif")
-            )
-        )
+    # Re-load the image, now that the task is done
+    image = Image.objects.get(id=image.id)
 
-        self.assertTrue(
-            os.path.exists(
-                os.path.join(image.path(), "animated/original.jpg")
-            )
-        )
+    # Lenna should be a 95 quality, but we'll leave a fudge factor
+    assert abs(image.jpeg_quality - 95) < 2
 
-    def tearDown(self):
-        shutil.rmtree(settings.BETTY_IMAGE_ROOT, ignore_errors=True)
+
+@pytest.mark.django_db
+def test_gif_upload():
+    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
+
+    path = os.path.join(TEST_DATA_PATH, "animated.gif")
+    image = Image.objects.create_from_path(path)
+
+    # Re-load the image, now that the task is done
+    image = Image.objects.get(id=image.id)
+
+    assert image.width == 256
+    assert image.height == 256
+    assert os.path.exists(image.path())
+    assert os.path.exists(image.source.path)
+    assert os.path.basename(image.source.path) == "animated.gif"
+
+    original_gif = os.path.join(image.path(), "animated/original.gif")
+
+    assert stat.S_IMODE(os.lstat(original_gif).st_mode) == 744
+
+    assert os.path.exists(os.path.join(image.path(), "animated/original.gif"))
+    assert os.path.exists(os.path.join(image.path(), "animated/original.jpg"))
