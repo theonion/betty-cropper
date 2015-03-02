@@ -1,3 +1,4 @@
+import errno
 import io
 import os
 import shutil
@@ -33,7 +34,7 @@ def optimized_upload_to(instance, filename):
 def optimize_image(image):
 
     im = PILImage.open(image.source.path)
-    
+
     # Let's cache some important stuff
     format = im.format
     icc_profile = im.info.get("icc_profile")
@@ -47,32 +48,35 @@ def optimize_image(image):
 
     filename = os.path.split(image.source.path)[1]
 
+    image.optimized.name = optimized_upload_to(image, filename)
     if im.size[0] > settings.BETTY_MAX_WIDTH:
         # If the image is really large, we'll save a more reasonable version as the "original"
         height = settings.BETTY_MAX_WIDTH * float(im.size[1]) / float(im.size[0])
         im = im.resize((settings.BETTY_MAX_WIDTH, int(round(height))), PILImage.ANTIALIAS)
 
-    image.optimized.name = optimized_upload_to(image, filename)
-    if format == "JPEG" and im.mode == "RGB":
-        # For JPEG files, we need to make sure that we keep the quantization profile
-        try:
-            im.save(
-                image.optimized.name,
-                icc_profile=icc_profile,
-                qtables=quantization,
-                subsampling=subsampling,
-                format="JPEG")
-        except (TypeError, ValueError) as e:
-            # Maybe the image already had an invalid quant table?
-            if e.message.startswith("Not a valid numbers of quantization tables"):
+        if format == "JPEG" and im.mode == "RGB":
+            # For JPEG files, we need to make sure that we keep the quantization profile
+            try:
                 im.save(
                     image.optimized.name,
-                    icc_profile=icc_profile
-                )
-            else:
-                raise
+                    icc_profile=icc_profile,
+                    qtables=quantization,
+                    subsampling=subsampling,
+                    format="JPEG")
+            except (TypeError, ValueError) as e:
+                # Maybe the image already had an invalid quant table?
+                if e.message.startswith("Not a valid numbers of quantization tables"):
+                    im.save(
+                        image.optimized.name,
+                        icc_profile=icc_profile
+                    )
+                else:
+                    raise
+        else:
+            im.save(image.optimized.name, icc_profile=icc_profile)
     else:
-        im.save(image.optimized.name, icc_profile=icc_profile)
+        shutil.copy2(image.source.path, image.optimized.name)
+
     image.save()
 
 
@@ -107,7 +111,12 @@ class ImageManager(models.Manager):
             height=im.size[1]
         )
 
-        os.makedirs(image.path())
+        try:
+            os.makedirs(image.path())
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+        
 
         # Let's make sure we copy the temp file to the source location
         source_path = source_upload_to(image, filename)
@@ -124,7 +133,7 @@ class ImageManager(models.Manager):
             animated_path = os.path.join(image.path(), "animated/original.gif")
             shutil.copy(path, animated_path)
             os.chmod(animated_path, 744)
-            
+
             # Next, we'll make a thumbnail of the original
             still_path = os.path.join(image.path(), "animated/original.jpg")
             if im.mode != "RGB":
@@ -132,7 +141,7 @@ class ImageManager(models.Manager):
                 jpeg.save(still_path, "JPEG")
             else:
                 im.save(still_path, "JPEG")
-    
+
         image.save()
         optimize_image(image)
 
@@ -149,7 +158,7 @@ class Image(models.Model):
 
     source = models.FileField(upload_to=source_upload_to, storage=betty_storage, max_length=255, null=True, blank=True)
     optimized = models.FileField(upload_to=optimized_upload_to, storage=betty_storage, max_length=255, null=True, blank=True)
-    
+
     height = models.IntegerField(null=True, blank=True)
     width = models.IntegerField(null=True, blank=True)
 
@@ -341,13 +350,13 @@ class Image(models.Model):
 
     def to_native(self):
         """Returns a Python dictionary, sutiable for Serialization"""
-        
+
         # This is kiiiiinda a hack. If we have an optimized image, hack up the height and width.
         if self.width > settings.BETTY_MAX_WIDTH and self.optimized:
             height = settings.BETTY_MAX_WIDTH * float(self.height) / float(self.width)
             self.height = int(round(height))
             self.width = settings.BETTY_MAX_WIDTH
-        
+
         data = {
             'id': self.id,
             'name': self.name,
