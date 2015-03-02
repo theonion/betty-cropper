@@ -32,3 +32,4 @@ deploy:
     tags: true
     repo: theonion/betty-cropper
     python: 2.7
+sudo: false
