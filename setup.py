@@ -24,6 +24,8 @@ dev_requires = [
     "pytest-django==2.8.0",
     "pytest-cov>=1.4",
     "coveralls==0.4.1",
+    "numpy==1.9.1",
+    "scipy==0.15.1"
 ]
 
 install_requires = [
@@ -37,7 +39,11 @@ install_requires = [
     "celery==3.1.11"
 ]
 
-server_requires = []
+imgmin_requires = [
+    "numpy==1.9.1",
+    "scipy==0.15.1"
+]
+
 
 if 'test' in sys.argv:
     setup_requires.extend(dev_requires)
@@ -105,7 +111,7 @@ setup(
     tests_require=dev_requires,
     extras_require={
         'dev': dev_requires,
-        'server': server_requires
+        'imgmin': imgmin_requires
     },
     entry_points={
         "console_scripts": [

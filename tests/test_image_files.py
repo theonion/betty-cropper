@@ -141,54 +141,6 @@ def test_fucked_up_quant_tables():
 
 
 @pytest.mark.django_db
-def test_imgmin_upload(settings):
-    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
-
-    settings.BETTY_JPEG_QUALITY_RANGE = (60, 95)
-
-    path = os.path.join(TEST_DATA_PATH, "Lenna.png")
-    image = Image.objects.create_from_path(path)
-
-    # Re-load the image, now that the task is done
-    image = Image.objects.get(id=image.id)
-
-    # Lenna should be a 95 quality, but we'll leave a fudge factor
-    assert abs(image.jpeg_quality - 95) < 2
-
-
-@pytest.mark.django_db
-def test_imgmin_upload_lowquality(settings):
-    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
-
-    settings.BETTY_JPEG_QUALITY_RANGE = (60, 95)
-
-    path = os.path.join(TEST_DATA_PATH, "Sam_Hat1.jpg")
-    image = Image.objects.create_from_path(path)
-
-    # Re-load the image, now that the task is done
-    image = Image.objects.get(id=image.id)
-
-    # This image is already optimized, so this should do nothing.
-    assert image.jpeg_quality is None
-
-
-@pytest.mark.django_db
-def test_imgmin_large(settings):
-    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
-
-    settings.BETTY_JPEG_QUALITY_RANGE = (60, 95)
-
-    path = os.path.join(TEST_DATA_PATH, "Sam_Hat1.png")
-    image = Image.objects.create_from_path(path)
-
-    # Re-load the image, now that the task is done
-    image = Image.objects.get(id=image.id)
-
-    # Lenna should be a 95 quality, but we'll leave a fudge factor
-    assert abs(image.jpeg_quality - 95) < 2
-
-
-@pytest.mark.django_db
 def test_gif_upload():
     shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 

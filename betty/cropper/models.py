@@ -165,6 +165,7 @@ class Image(models.Model):
     selections = JSONField(null=True, blank=True)
 
     jpeg_quality = models.IntegerField(null=True, blank=True)
+    jpeg_quality_settings = JSONField(null=True, blank=True)
     animated = models.BooleanField(default=False)
 
     objects = ImageManager()
@@ -273,6 +274,19 @@ class Image(models.Model):
 
         return selection
 
+    def get_jpeg_quality(self, width):
+        quality = None
+
+        if self.jpeg_quality_settings:
+            closest = 0
+            for w, q in self.jpeg_quality_settings.items():
+                if abs(width - int(w)) < abs(width - closest):
+                    closest = w
+
+            quality = self.jpeg_quality_settings[w]
+
+        return quality
+
     def path(self):
         id_string = ""
         for index, char in enumerate(str(self.id)):
@@ -310,8 +324,10 @@ class Image(models.Model):
             if img.mode != "RGB":
                 img = img.convert("RGB")
             pillow_kwargs = {"format": "jpeg"}
-            if self.jpeg_quality:
-                pillow_kwargs["quality"] = self.jpeg_quality
+
+
+            if self.get_jpeg_quality(width):
+                pillow_kwargs["quality"] = self.get_jpeg_quality(width)
             elif img.format == "JPEG":
                 pillow_kwargs["quality"] = "keep"
             else:

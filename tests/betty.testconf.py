@@ -8,4 +8,4 @@ BETTY_DEFAULT_IMAGE = 666
 BETTY_IMAGE_URL = "http://localhost:8081/images/"
 MEDIA_ROOT = tempfile.mkdtemp("bettycropper")
 TEMPLATE_DIRS = (os.path.join(MODULE_ROOT, "tests", "templates"),)
-BETTY_WIDTHS = [80, 150, 240, 300, 320, 400, 480, 620, 640, 820, 960, 1200, 1600]
+BETTY_WIDTHS = [240, 640, 820, 960, 1200]
