@@ -24,8 +24,8 @@ dev_requires = [
     "pytest-django==2.8.0",
     "pytest-cov>=1.4",
     "coveralls==0.4.1",
-    "numpy==1.9.1",
-    "scipy==0.15.1"
+    "numpy>=1.6.0",
+    "scipy>=0.10.0"
 ]
 
 install_requires = [
@@ -40,8 +40,8 @@ install_requires = [
 ]
 
 imgmin_requires = [
-    "numpy==1.9.1",
-    "scipy==0.15.1"
+    "numpy>=1.6.0",
+    "scipy>=0.10.0"
 ]
 
 
