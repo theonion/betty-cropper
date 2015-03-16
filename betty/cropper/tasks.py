@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-import itertools
 import os
 import tempfile
 
@@ -39,9 +38,8 @@ def is_optimized(image):
         if os.stat(image.source.path).st_size < os.stat(optimized_path).st_size:
             # Looks like the original was already compressed, let's bail.
             return True
-    
-    return False
 
+    return False
 
 
 @shared_task
@@ -52,7 +50,7 @@ def search_image_quality(image_id):
     from betty.cropper.models import Image
 
     image = Image.objects.get(id=image_id)
-    
+
     if is_optimized(image):
         # If the image is already optimized, let's leave this alone...
         return
@@ -62,4 +60,6 @@ def search_image_quality(image_id):
         if width > 0:
             quality = detect_optimal_quality(image.optimized.path, width)
             image.jpeg_quality_settings[width] = quality
+
+    image.clear_crops()
     image.save()
