@@ -296,7 +296,7 @@ class Image(models.Model):
             closest = 0
             for w, q in self.jpeg_quality_settings.items():
                 if abs(width - int(w)) < abs(width - closest):
-                    closest = w
+                    closest = int(w)
 
             quality = self.jpeg_quality_settings[w]
 
