@@ -275,7 +275,7 @@ class Image(models.Model):
 
     def clear_crops(self, ratios=None):
         if ratios is None:
-            ratios = settings.BETTY_RATIOS
+            ratios = list(settings.BETTY_RATIOS)
             ratios.append("original")
 
         for ratio_slug in ratios:
