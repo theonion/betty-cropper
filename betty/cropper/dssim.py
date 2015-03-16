@@ -109,6 +109,7 @@ def enough_colors(img):
     # Someday, check if the image is greyscale...
     return True
 
+
 def get_distortion(one, two):
     # This computes the "DSSIM" of the images, using the SSIM of each channel
 
