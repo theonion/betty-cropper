@@ -56,7 +56,13 @@ def search_image_quality(image_id):
         return
 
     image.jpeg_quality_settings = {}
+    last_width = 0
     for width in sorted(settings.BETTY_WIDTHS, reverse=True):
+
+        if abs(last_width - width) < 100:
+            # Sometimes the widths are really too close. We only need to check every 100 px
+            continue
+
         if width > 0:
             quality = detect_optimal_quality(image.optimized.path, width)
             image.jpeg_quality_settings[width] = quality
@@ -64,6 +70,8 @@ def search_image_quality(image_id):
             if quality == settings.BETTY_JPEG_QUALITY_RANGE[-1]:
                 # We'are already at max...
                 break
+
+        last_width = width
 
     image.clear_crops()
     image.save()

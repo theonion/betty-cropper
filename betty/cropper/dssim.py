@@ -4,10 +4,9 @@ try:
 except ImportError:
     pass
 
+from betty.conf.app import settings
 import os
-import sys
 import tempfile
-import shutil
 import math
 
 from PIL import Image
@@ -16,8 +15,6 @@ from PIL import Image
 MIN_UNIQUE_COLORS = 4096
 COLOR_DENSITY_RATIO = 0.11
 
-QUALITY_OUT_MAX = 92
-QUALITY_OUT_MIN = 65
 QUALITY_IN_MIN = 82
 
 ERROR_THRESHOLD = 1.3
@@ -86,6 +83,7 @@ def compute_ssim(im1, im2, l=255):
     index = np.mean(ssim_map)
 
     return index
+
 
 def unique_colors(img):
     # For RGB, we need to get unique "rows" basically, as the color dimesion is an array.
@@ -158,8 +156,8 @@ def detect_optimal_quality(path, width=None, verbose=False):
         return None
 
     # TODO: Check if the quality is lower than we'd want... (probably impossible)
-    qmin = QUALITY_OUT_MIN
-    qmax = QUALITY_OUT_MAX
+    qmin = settings.BETTY_JPEG_QUALITY_RANGE[0]
+    qmax = settings.BETTY_JPEG_QUALITY_RANGE[1]
 
     # Do a binary search of image quality...
     while qmax > qmin + 1:
