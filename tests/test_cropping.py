@@ -188,7 +188,8 @@ def test_non_rgb(client):
     res = client.get('/images/{}/1x1/240.jpg'.format(image.id))
     assert res.status_code == 200
     assert res['Content-Type'] == 'image/jpeg'
-    assert os.path.exists(os.path.join(image.path(), '1x1/240.jpg'))
+    cropped_path = os.path.join(image.path(), '1x1/240.jpg')
+    assert os.path.exists(cropped_path)
 
     res = client.get('/images/{}/original/1200.jpg'.format(image.id))
     assert res.status_code == 200

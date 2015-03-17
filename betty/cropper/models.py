@@ -116,7 +116,6 @@ class ImageManager(models.Manager):
         except OSError as e:
             if e.errno != errno.EEXIST:
                 raise
-        
 
         # Let's make sure we copy the temp file to the source location
         source_path = source_upload_to(image, filename)
@@ -165,6 +164,7 @@ class Image(models.Model):
     selections = JSONField(null=True, blank=True)
 
     jpeg_quality = models.IntegerField(null=True, blank=True)
+    jpeg_quality_settings = JSONField(null=True, blank=True)
     animated = models.BooleanField(default=False)
 
     objects = ImageManager()
@@ -273,6 +273,36 @@ class Image(models.Model):
 
         return selection
 
+    def clear_crops(self, ratios=None):
+        if ratios is None:
+            ratios = list(settings.BETTY_RATIOS)
+            ratios.append("original")
+
+        for ratio_slug in ratios:
+            ratio_path = os.path.join(self.path(), ratio_slug)
+            if os.path.exists(ratio_path):
+                if settings.BETTY_CACHE_FLUSHER:
+                    for crop in os.listdir(ratio_path):
+                        width, format = crop.split(".")
+                        ratio = os.path.basename(ratio_path)
+                        full_url = self.get_absolute_url(ratio=ratio, width=width, format=format)
+                        settings.BETTY_CACHE_FLUSHER(full_url)
+
+                shutil.rmtree(ratio_path)
+
+    def get_jpeg_quality(self, width):
+        quality = None
+
+        if self.jpeg_quality_settings:
+            closest = 0
+            for w, q in self.jpeg_quality_settings.items():
+                if abs(width - int(w)) < abs(width - closest):
+                    closest = int(w)
+
+            quality = self.jpeg_quality_settings[w]
+
+        return quality
+
     def path(self):
         id_string = ""
         for index, char in enumerate(str(self.id)):
@@ -310,8 +340,9 @@ class Image(models.Model):
             if img.mode != "RGB":
                 img = img.convert("RGB")
             pillow_kwargs = {"format": "jpeg"}
-            if self.jpeg_quality:
-                pillow_kwargs["quality"] = self.jpeg_quality
+
+            if self.get_jpeg_quality(width):
+                pillow_kwargs["quality"] = self.get_jpeg_quality(width)
             elif img.format == "JPEG":
                 pillow_kwargs["quality"] = "keep"
             else:

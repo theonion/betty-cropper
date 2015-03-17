@@ -106,16 +106,7 @@ def update_selection(request, image_id, ratio_slug):
     cache.delete(image.cache_key())
     image.save()
 
-    ratio_path = os.path.join(image.path(), ratio_slug)
-    if os.path.exists(ratio_path):
-        if settings.BETTY_CACHE_FLUSHER:
-            for crop in os.listdir(ratio_path):
-                width, format = crop.split(".")
-                ratio = os.path.basename(ratio_path)
-                full_url = image.get_absolute_url(ratio=ratio, width=width, format=format)
-                settings.BETTY_CACHE_FLUSHER(full_url)
-            
-        shutil.rmtree(ratio_path)
+    image.clear_crops(ratio_slug)
 
     return HttpResponse(json.dumps(image.to_native()), content_type="application/json")
 
