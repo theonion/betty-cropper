@@ -25,7 +25,8 @@ dev_requires = [
     "pytest-cov>=1.4",
     "coveralls==0.4.1",
     "numpy>=1.6.0",
-    "scipy>=0.10.0"
+    "scipy>=0.10.0",
+    "psutil==2.2.1"
 ]
 
 install_requires = [

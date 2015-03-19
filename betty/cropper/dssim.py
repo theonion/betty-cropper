@@ -140,9 +140,10 @@ def detect_optimal_quality(path, width=None, verbose=False):
         }
         if icc_profile:
             pillow_kwargs["icc_profile"] = icc_profile
-        handle, tmppath = tempfile.mkstemp(prefix="imgmin")
+        fd, tmppath = tempfile.mkstemp(prefix="imgmin")
         pil_original.save(tmppath, **pillow_kwargs)
         pil_original = Image.open(tmppath)
+        os.close(fd)
 
     if width:
         height = int(math.ceil((pil_original.size[1] * width) / float(pil_original.size[0])))
@@ -163,7 +164,7 @@ def detect_optimal_quality(path, width=None, verbose=False):
     while qmax > qmin + 1:
         quality = int(round((qmax + qmin) / 2.0))
 
-        handle, tmppath = tempfile.mkstemp(prefix="imgmin{}".format(quality))
+        fd, tmppath = tempfile.mkstemp(prefix="imgmin{}".format(quality))
         pillow_kwargs = {
             "format": "jpeg",
             "quality": quality,
@@ -188,6 +189,7 @@ def detect_optimal_quality(path, width=None, verbose=False):
         else:
             qmax = quality
 
+        os.close(fd)
         os.remove(tmppath)
 
         if verbose:

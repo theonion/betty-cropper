@@ -28,13 +28,14 @@ def is_optimized(image):
 
     # First, let's check to make sure that this image isn't already an optimized JPEG
     if im.format == "JPEG":
-        optimized_path = tempfile.mkstemp()[1]
+        fd, optimized_path = tempfile.mkstemp()
         im.save(
             optimized_path,
             format="JPEG",
             quality=settings.BETTY_DEFAULT_JPEG_QUALITY,
             icc_profile=icc_profile,
             optimize=True)
+        os.close(fd)
         if os.stat(image.source.path).st_size < os.stat(optimized_path).st_size:
             # Looks like the original was already compressed, let's bail.
             return True

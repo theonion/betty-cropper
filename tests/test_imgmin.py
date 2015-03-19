@@ -1,8 +1,6 @@
 import os
+import psutil
 import shutil
-
-from PIL import Image as PILImage
-from PIL import JpegImagePlugin
 
 from betty.cropper.models import Image
 from betty.conf.app import settings as bettysettings
@@ -26,6 +24,10 @@ def test_imgmin_upload(settings):
 
     assert len(image.jpeg_quality_settings) > 1
 
+    # Make sure that we closed all the files
+    process = psutil.Process(os.getpid())
+    assert len(process.open_files()) == 0
+
 
 @pytest.mark.django_db
 def test_imgmin_cartoon(settings):
@@ -44,6 +46,11 @@ def test_imgmin_cartoon(settings):
         "1200": 92,
     }
 
+    # Make sure that we closed all the files
+    process = psutil.Process(os.getpid())
+    print(process.open_files())
+    assert len(process.open_files()) == 0
+
 
 @pytest.mark.django_db
 def test_imgmin_upload_lowquality(settings):
@@ -59,3 +66,8 @@ def test_imgmin_upload_lowquality(settings):
 
     # This image is already optimized, so this should do nothing.
     assert image.jpeg_quality_settings is None
+
+    # Make sure that we closed all the files
+    process = psutil.Process(os.getpid())
+    print(process.open_files())
+    assert len(process.open_files()) == 0
