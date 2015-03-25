@@ -106,7 +106,7 @@ def update_selection(request, image_id, ratio_slug):
     cache.delete(image.cache_key())
     image.save()
 
-    image.clear_crops(ratio_slug)
+    image.clear_crops(ratios=[ratio_slug])
 
     return HttpResponse(json.dumps(image.to_native()), content_type="application/json")
 

@@ -129,7 +129,12 @@ def test_crop_clearing(admin_client):
 
     # Now let's generate a couple crops
     admin_client.get("/images/{}/1x1/240.jpg".format(image_id))
-    admin_client.get("/images/{}/16x9/666.png".format(image_id))
+    admin_client.get("/images/{}/16x9/640.png".format(image_id))
+
+    image = Image.objects.get(id=image_id)
+
+    assert os.path.exists(os.path.join(image.path(), "1x1", "240.jpg"))
+    assert os.path.exists(os.path.join(image.path(), "16x9", "640.png"))
 
     # Now we update the selection
     new_selection = {
@@ -145,6 +150,10 @@ def test_crop_clearing(admin_client):
         content_type="application/json",
     )
     assert res.status_code == 200
+
+    # Let's make sure that the crops got removed
+    assert not os.path.exists(os.path.join(image.path(), "1x1", "240.jpg"))
+    assert os.path.exists(os.path.join(image.path(), "16x9", "640.png"))
 
 
 @pytest.mark.django_db
