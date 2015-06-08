@@ -11,7 +11,7 @@
     > virtualenv .
     > source bin/activate
     > pip install -e .
-    > pip install file://$(pwd)#egg=betty-cropper[dev]
+    > pip install "file://$(pwd)#egg=betty-cropper[dev]"
 
 To run the tests:
 
