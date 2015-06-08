@@ -157,6 +157,32 @@ def test_crop_clearing(admin_client):
 
 
 @pytest.mark.django_db
+def test_image_delete(admin_client):
+    image = Image.objects.create(name="Testing", width=512, height=512)
+
+    res = admin_client.get("/images/api/{0}".format(image.id))
+    assert res.status_code == 200
+
+    res = admin_client.post(
+        "/images/api/{0}".format(image.id),
+        content_type="application/json",
+        REQUEST_METHOD="DELETE",
+    )
+    assert res.status_code == 200
+    assert not Image.objects.filter(id=image.id)
+
+
+@pytest.mark.django_db
+def test_image_delete_invalid_id(admin_client):
+    res = admin_client.post(
+        "/images/api/{0}".format(101),
+        content_type="application/json",
+        REQUEST_METHOD="DELETE",
+    )
+    assert res.status_code == 404
+
+
+@pytest.mark.django_db
 def test_image_detail(admin_client):
     image = Image.objects.create(name="Testing", width=512, height=512)
 

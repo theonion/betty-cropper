@@ -131,8 +131,22 @@ def search(request):
 
 @never_cache
 @csrf_exempt
-@crossdomain(methods=["GET", "PATCH", "OPTIONS"])
+@crossdomain(methods=["GET", "PATCH", "OPTIONS", "DELETE"])
 def detail(request, image_id):
+
+    @betty_token_auth(["server.image_delete"])
+    def delete(request, image_id):
+
+        try:
+            image = Image.objects.get(id=image_id)
+        except Image.DoesNotExist:
+            message = json.dumps({"message": "No such image!"})
+            return HttpResponseNotFound(message, content_type="application/json")
+
+        image.delete()
+        cache.delete(image.cache_key())
+
+        return HttpResponse(json.dumps({"message": "OK"}), content_type="application/json")
 
     @betty_token_auth(["server.image_change"])
     def patch(request, image_id):
@@ -172,6 +186,8 @@ def detail(request, image_id):
 
         return HttpResponse(json.dumps(data), content_type="application/json")
 
-    if request.method == "PATCH":
+    if request.method == "DELETE":
+        return delete(request, image_id)
+    elif request.method == "PATCH":
         return patch(request, image_id)
     return get(request, image_id)
