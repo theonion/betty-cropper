@@ -24,6 +24,7 @@ dev_requires = [
     "pytest-django==2.8.0",
     "pytest-cov>=1.4",
     "coveralls==0.4.1",
+    "mock>=1.0.1",
     "numpy>=1.6.0",
     "scipy>=0.10.0",
     "psutil==2.2.1"
