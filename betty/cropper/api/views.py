@@ -143,8 +143,8 @@ def detail(request, image_id):
             message = json.dumps({"message": "No such image!"})
             return HttpResponseNotFound(message, content_type="application/json")
 
-        image.delete()
         cache.delete(image.cache_key())
+        image.delete()
 
         return HttpResponse(json.dumps({"message": "OK"}), content_type="application/json")
 
