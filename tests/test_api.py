@@ -2,6 +2,8 @@ import os
 import json
 import shutil
 
+from mock import patch
+
 from betty.conf.app import settings
 from betty.cropper.models import Image
 
@@ -154,6 +156,37 @@ def test_crop_clearing(admin_client):
     # Let's make sure that the crops got removed
     assert not os.path.exists(os.path.join(image.path(), "1x1", "240.jpg"))
     assert os.path.exists(os.path.join(image.path(), "16x9", "640.png"))
+
+
+@pytest.mark.django_db
+def test_image_delete(admin_client):
+    image = Image.objects.create(name="Testing", width=512, height=512)
+    path = image.path()  # Save path before deletion
+
+    res = admin_client.get("/images/api/{0}".format(image.id))
+    assert res.status_code == 200
+
+    with patch('betty.cropper.models.settings.BETTY_CACHE_FLUSHER') as mock_flusher:
+        with patch('shutil.rmtree') as mock_rmtree:
+            res = admin_client.post(
+                "/images/api/{0}".format(image.id),
+                content_type="application/json",
+                REQUEST_METHOD="DELETE",
+            )
+            assert res.status_code == 200
+            assert not Image.objects.filter(id=image.id)
+            mock_flusher.assert_called_with('/images/1/16x9/640.png')
+            mock_rmtree.assert_called_with(path, ignore_errors=True)
+
+
+@pytest.mark.django_db
+def test_image_delete_invalid_id(admin_client):
+    res = admin_client.post(
+        "/images/api/{0}".format(101),
+        content_type="application/json",
+        REQUEST_METHOD="DELETE",
+    )
+    assert res.status_code == 404
 
 
 @pytest.mark.django_db

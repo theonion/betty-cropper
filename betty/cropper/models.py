@@ -4,6 +4,7 @@ import os
 import shutil
 
 from django.db import models
+from django.dispatch import receiver
 from django.core.files.storage import FileSystemStorage
 from django.core.urlresolvers import reverse
 
@@ -408,3 +409,9 @@ class Image(models.Model):
         Returns string unique to cache instance
         """
         return "image-{}".format(self.id)
+
+
+@receiver(models.signals.post_delete, sender=Image)
+def auto_flush_and_delete_files_on_delete(sender, instance, **kwargs):
+    instance.clear_crops()
+    shutil.rmtree(instance.path(), ignore_errors=True)
