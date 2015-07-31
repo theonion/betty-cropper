@@ -7,7 +7,7 @@
       ASPECT_RATIO_TOLERANCE = .1, // 10% tolerance.
       MAX_WIDTH = {{ BETTY_MAX_WIDTH }},
       PICTUREFILL_SELECTOR = w.PICTUREFILL_SELECTOR || "div",
-      BREAKPOINTS = [{{ BETTY_WIDTHS|join:","}}];
+      breakpoints = [{{ BETTY_WIDTHS|join:","}}];
 
   // Credit to https://remysharp.com/2010/07/21/throttling-function-calls
   function throttle(fn, threshhold, scope) {
@@ -63,7 +63,7 @@
 
       // this is a div to picturefill, start working on it if it hasn't been rendered yet
       if (el.getAttribute("data-image-id") !== null
-          && visible
+          && visible 
           && (forceRerender || !el.getAttribute("data-rendered"))) {
         var imageContainer = el.getElementsByTagName("div")[0],
             imageId = el.getAttribute("data-image-id"),
@@ -116,9 +116,9 @@
 
           // determine if a breakpoint width should be used, otherwise use previously defined width
           var width = null;
-          for (var j = 0; j < BREAKPOINTS.length; j++) {
-            if (_w <= BREAKPOINTS[j]) {
-              width = BREAKPOINTS[j];
+          for (var j = 0; j < breakpoints.length; j++) {
+            if (_w <= breakpoints[j]) {
+              width = breakpoints[j];
               break;
             }
           }
