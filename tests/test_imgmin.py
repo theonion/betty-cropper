@@ -10,6 +10,13 @@ import pytest
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'images')
 
 
+def get_open_files(process):
+    files = process.open_files()
+    # Ignore IPython dev files
+    return [f for f in files
+            if not f.path.endswith('/.ipython/profile_default/history.sqlite')]
+
+
 @pytest.mark.django_db
 def test_imgmin_upload(settings):
     shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
@@ -26,7 +33,7 @@ def test_imgmin_upload(settings):
 
     # Make sure that we closed all the files
     process = psutil.Process(os.getpid())
-    assert len(process.open_files()) == 0
+    assert len(get_open_files(process)) == 0
 
 
 @pytest.mark.django_db
@@ -48,8 +55,8 @@ def test_imgmin_cartoon(settings):
 
     # Make sure that we closed all the files
     process = psutil.Process(os.getpid())
-    print(process.open_files())
-    assert len(process.open_files()) == 0
+    print(get_open_files(process))
+    assert len(get_open_files(process)) == 0
 
 
 @pytest.mark.django_db
@@ -69,5 +76,5 @@ def test_imgmin_upload_lowquality(settings):
 
     # Make sure that we closed all the files
     process = psutil.Process(os.getpid())
-    print(process.open_files())
-    assert len(process.open_files()) == 0
+    print(get_open_files(process))
+    assert len(get_open_files(process)) == 0

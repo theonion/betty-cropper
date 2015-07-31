@@ -105,6 +105,7 @@ def test_image_redirect(client):
     assert res.status_code == 302
     assert res['Location'].endswith("/images/6666/66/1x1/100.jpg")
 
+# -------
 
 @pytest.mark.django_db
 def test_placeholder(settings, client):
@@ -134,6 +135,7 @@ def test_missing_file(client):
     res = client.get('/images/{0}/1x1/256.jpg'.format(image.id))
     assert res.status_code == 500
 
+# ----
 
 @pytest.mark.django_db
 def test_image_save(client):
@@ -197,11 +199,11 @@ def test_non_rgb(client):
     assert os.path.exists(os.path.join(image.path(), 'original/1200.jpg'))
 
 
-def test_image_js(client):
-    settings.BETTY_WIDTHS = [200, 100]
+def test_image_js(settings, client):
+    settings.BETTY_WIDTHS = [100, 200]
     settings.BETTY_CLIENT_ONLY_WIDTHS = [2, 1]
     res = client.get("/images/image.js")
     assert res.status_code == 200
     assert res['Content-Type'] == 'application/javascript'
-    # Appends '0' if missing
-    assert "BREAKPOINTS = [0,1,2,100,200];" in res.content
+    # Sorted + appends '0' if missing
+    assert res.context['BETTY_WIDTHS'] == [0, 1, 2, 100, 200]
