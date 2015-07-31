@@ -7,7 +7,7 @@
       ASPECT_RATIO_TOLERANCE = .1, // 10% tolerance.
       MAX_WIDTH = {{ BETTY_MAX_WIDTH }},
       PICTUREFILL_SELECTOR = w.PICTUREFILL_SELECTOR || "div",
-      BREAKPOINTS = [{{ BETTY_CLIENT_WIDTHS|join:","}}];
+      BREAKPOINTS = [{{ BETTY_WIDTHS|join:","}}];
 
   // Credit to https://remysharp.com/2010/07/21/throttling-function-calls
   function throttle(fn, threshhold, scope) {

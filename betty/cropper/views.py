@@ -23,7 +23,7 @@ EXTENSION_MAP = {
 
 @cache_control(max_age=300)
 def image_js(request):
-    widths = settings.BETTY_CLIENT_WIDTHS or settings.BETTY_WIDTHS
+    widths = settings.BETTY_WIDTHS + settings.BETTY_CLIENT_ONLY_WIDTHS
     if 0 not in widths:
         widths.append(0)
 
@@ -36,7 +36,7 @@ def image_js(request):
         betty_image_url = betty_image_url[:-1]
     context = {
         "BETTY_IMAGE_URL": betty_image_url,
-        "BETTY_CLIENT_WIDTHS": sorted(widths),
+        "BETTY_WIDTHS": sorted(widths),
         "BETTY_MAX_WIDTH": settings.BETTY_MAX_WIDTH
     }
     BETTY_RATIOS = []
