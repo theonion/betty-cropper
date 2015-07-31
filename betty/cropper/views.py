@@ -24,8 +24,8 @@ EXTENSION_MAP = {
 @cache_control(max_age=300)
 def image_js(request):
     widths = set(settings.BETTY_WIDTHS + settings.BETTY_CLIENT_ONLY_WIDTHS)
-    if 0 not in widths:
-        widths.add(0)
+    # Ensure '0' always present
+    widths.add(0)
 
     betty_image_url = settings.BETTY_IMAGE_URL
     # make the url protocol-relative
