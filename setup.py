@@ -32,7 +32,7 @@ dev_requires = [
 
 install_requires = [
     "Django>=1.7",
-    "six==1.6.1",
+    "six==1.9.0",
     "slimit==0.8.1",
     "jsonfield==0.9.20",
     "Pillow==2.5.3",

@@ -197,7 +197,11 @@ def test_non_rgb(client):
     assert os.path.exists(os.path.join(image.path(), 'original/1200.jpg'))
 
 
-def test_image_js(client):
+def test_image_js(settings, client):
+    settings.BETTY_WIDTHS = [100, 200]
+    settings.BETTY_CLIENT_ONLY_WIDTHS = [2, 1]
     res = client.get("/images/image.js")
     assert res.status_code == 200
     assert res['Content-Type'] == 'application/javascript'
+    # Sorted + appends '0' if missing
+    assert res.context['BETTY_WIDTHS'] == [0, 1, 2, 100, 200]

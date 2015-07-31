@@ -24,6 +24,7 @@ DEFAULTS = {
     "BETTY_IMAGE_URL": urljoin(_settings.MEDIA_URL, "images/"),
     "BETTY_RATIOS": ("1x1", "2x1", "3x1", "3x4", "4x3", "16x9"),
     "BETTY_WIDTHS": [],
+    "BETTY_CLIENT_ONLY_WIDTHS": [],
     "BETTY_PLACEHOLDER": _settings.DEBUG,
     "BETTY_PLACEHOLDER_COLORS": (
         (153, 153, 51),
