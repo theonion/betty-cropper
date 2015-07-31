@@ -105,7 +105,6 @@ def test_image_redirect(client):
     assert res.status_code == 302
     assert res['Location'].endswith("/images/6666/66/1x1/100.jpg")
 
-# -------
 
 @pytest.mark.django_db
 def test_placeholder(settings, client):
@@ -135,7 +134,6 @@ def test_missing_file(client):
     res = client.get('/images/{0}/1x1/256.jpg'.format(image.id))
     assert res.status_code == 500
 
-# ----
 
 @pytest.mark.django_db
 def test_image_save(client):
