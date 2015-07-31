@@ -9,3 +9,5 @@ include
 .DS_Store
 betty.conf.py
 betty.db
+share/
+images/

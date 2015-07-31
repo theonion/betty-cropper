@@ -198,6 +198,19 @@ def test_non_rgb(client):
 
 
 def test_image_js(client):
+    settings.BETTY_WIDTHS = [200, 100]
     res = client.get("/images/image.js")
     assert res.status_code == 200
     assert res['Content-Type'] == 'application/javascript'
+    # Appends '0' if missing
+    assert "breakpoints = [0,100,200];" in res.content
+
+
+def test_image_js_client_widths(client):
+    settings.BETTY_WIDTHS = [200, 100]
+    # Override BETTY_WIDTHS with custom client widths
+    settings.BETTY_CLIENT_WIDTHS = [3, 2, 1]
+    res = client.get("/images/image.js")
+    assert res.status_code == 200
+    assert res['Content-Type'] == 'application/javascript'
+    assert "breakpoints = [0,1,2,3];" in res.content
