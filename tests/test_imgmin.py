@@ -10,6 +10,8 @@ import pytest
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'images')
 
 
+# mparent(2015-07-31): This is a workaround for the existing open_files() check to work under an
+# environment containing IPython dev tools.
 def get_open_files(process):
     files = process.open_files()
     # Ignore IPython dev files
