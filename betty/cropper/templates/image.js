@@ -34,7 +34,10 @@
   }
 
   w.picturefill = function(elements, forceRerender) {
-
+    // It is sometimes desirable to scroll without loading images as we go.
+    if (w.pauseBettyCroppyPicturefill) {
+      return;
+    }
     // get elements to picturefill
     var ps;
     if (elements instanceof Array) {
@@ -57,9 +60,11 @@
       }
 
       // check if image is in viewport for lazy loading, and
-      // preload images if they're within 100px of being shown.
-      var innerHeight = w.innerHeight || w.document.documentElement.clientHeight,
-          visible = el.getBoundingClientRect().top <= (innerHeight + 250);
+      // preload images if they're within 100px of being shown above scroll,
+      // within 250px of being shown below scroll.
+      var elementRect = el.getBoundingClientRect(),
+          innerHeight = w.innerHeight || w.document.documentElement.clientHeight,
+          visible = elementRect.top <= (innerHeight + 250) && elementRect.top >= -100;
 
       // this is a div to picturefill, start working on it if it hasn't been rendered yet
       if (el.getAttribute("data-image-id") !== null
