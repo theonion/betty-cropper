@@ -33,9 +33,9 @@
     };
   }
 
-  w.picturefill = function(elements, forceRerender) {
+  w.picturefill = function picturefill (elements, forceRerender) {
     // It is sometimes desirable to scroll without loading images as we go.
-    if (w.pauseBettyCroppyPicturefill) {
+    if (picturefill.paused()) {
       return;
     }
     // get elements to picturefill
@@ -161,6 +161,25 @@
         data.div.parentNode.setAttribute("data-rendered", "true");
       }
     }
+  };
+
+  /**
+   * picturefill pause and resume.
+   * Useful to prevent loading unneccessary images, such as when scrolling
+   * the reading list.
+   */
+  var isPaused = false;
+  picturefill.pause = function () {
+    isPaused = true;
+  };
+
+  picturefill.resume = function () {
+   isPaused = false;
+   picturefill();
+  };
+
+  picturefill.paused = function () {
+   return isPaused;
   };
 
   /**
