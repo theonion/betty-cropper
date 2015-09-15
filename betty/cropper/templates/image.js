@@ -33,9 +33,9 @@
     };
   }
 
-  w.picturefill = function picturefill (elements, forceRerender) {
+  w.picturefill = function (elements, forceRerender) {
     // It is sometimes desirable to scroll without loading images as we go.
-    if (picturefill.paused()) {
+    if (w.picturefill.paused()) {
       return;
     }
     // get elements to picturefill
@@ -169,16 +169,16 @@
    * the reading list.
    */
   var isPaused = false;
-  picturefill.pause = function () {
+  w.picturefill.pause = function () {
     isPaused = true;
   };
 
-  picturefill.resume = function () {
+  w.picturefill.resume = function () {
    isPaused = false;
    picturefill();
   };
 
-  picturefill.paused = function () {
+  w.picturefill.paused = function () {
    return isPaused;
   };
 
