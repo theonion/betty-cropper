@@ -33,8 +33,11 @@
     };
   }
 
-  w.picturefill = function(elements, forceRerender) {
-
+  w.picturefill = function (elements, forceRerender) {
+    // It is sometimes desirable to scroll without loading images as we go.
+    if (w.picturefill.paused()) {
+      return;
+    }
     // get elements to picturefill
     var ps;
     if (elements instanceof Array) {
@@ -57,9 +60,11 @@
       }
 
       // check if image is in viewport for lazy loading, and
-      // preload images if they're within 100px of being shown.
-      var innerHeight = w.innerHeight || w.document.documentElement.clientHeight,
-          visible = el.getBoundingClientRect().top <= (innerHeight + 250);
+      // preload images if they're within 100px of being shown above scroll,
+      // within 250px of being shown below scroll.
+      var elementRect = el.getBoundingClientRect(),
+          innerHeight = w.innerHeight || w.document.documentElement.clientHeight,
+          visible = elementRect.top <= (innerHeight + 250) && elementRect.top >= -100;
 
       // this is a div to picturefill, start working on it if it hasn't been rendered yet
       if (el.getAttribute("data-image-id") !== null
@@ -156,6 +161,25 @@
         data.div.parentNode.setAttribute("data-rendered", "true");
       }
     }
+  };
+
+  /**
+   * picturefill pause and resume.
+   * Useful to prevent loading unneccessary images, such as when scrolling
+   * the reading list.
+   */
+  var isPaused = false;
+  w.picturefill.pause = function () {
+    isPaused = true;
+  };
+
+  w.picturefill.resume = function () {
+   isPaused = false;
+   picturefill();
+  };
+
+  w.picturefill.paused = function () {
+   return isPaused;
   };
 
   /**
