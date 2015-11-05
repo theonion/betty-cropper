@@ -1,20 +1,21 @@
 language: python
 python:
-  - '2.7_with_system_site_packages'
+  - '2.7'
   - '3.4'
 matrix:
   allow_failures:
     - python: '3.4'
 cache: apt
 before_install:
-  - '[ "$TRAVIS_PYTHON_VERSION" = "2.7_with_system_site_packages" ] && wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh || true'
+  # Miniconda workaround for installing scipy in Travis
+  - '[ "$TRAVIS_PYTHON_VERSION" = "2.7" ] && wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh || true'
   - '[ "$TRAVIS_PYTHON_VERSION" = "3.4" ] && wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh || true'
   - chmod +x miniconda.sh
   - ./miniconda.sh -b
+  - '[ "$TRAVIS_PYTHON_VERSION" = "2.7" ] && export PATH=/home/travis/miniconda2/bin:$PATH || true'
   - '[ "$TRAVIS_PYTHON_VERSION" = "3.4" ] && export PATH=/home/travis/miniconda3/bin:$PATH || true'
-  - '[ "$TRAVIS_PYTHON_VERSION" = "2.7_with_system_site_packages" ] && export PATH=/home/travis/miniconda/bin:$PATH || true'
   - conda update --yes conda
-  - '[ "$TRAVIS_PYTHON_VERSION" = "2.7_with_system_site_packages" ] && travis_retry conda install --yes python=2.7 pip numpy scipy || true'
+  - '[ "$TRAVIS_PYTHON_VERSION" = "2.7" ] && travis_retry conda install --yes python=2.7 pip numpy scipy || true'
   - '[ "$TRAVIS_PYTHON_VERSION" = "3.4" ] && travis_retry conda install --yes python=3.4 pip numpy scipy || true'
 install:
   - travis_retry pip install -e .
