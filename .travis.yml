@@ -13,6 +13,7 @@ before_install:
   - ./miniconda.sh -b
   - '[ "$TRAVIS_PYTHON_VERSION" = "3.4" ] && export PATH=/home/travis/miniconda3/bin:$PATH || true'
   - '[ "$TRAVIS_PYTHON_VERSION" = "2.7_with_system_site_packages" ] && export PATH=/home/travis/miniconda/bin:$PATH || true'
+  - ls /home/travis
   - env
   - which conda
   - conda update --yes conda
