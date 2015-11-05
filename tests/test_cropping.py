@@ -200,8 +200,18 @@ def test_non_rgb(client):
 def test_image_js(settings, client):
     settings.BETTY_WIDTHS = [100, 200]
     settings.BETTY_CLIENT_ONLY_WIDTHS = [2, 1]
+    settings.BETTY_IMAGE_URL = 'http://test.example.org/images'
     res = client.get("/images/image.js")
     assert res.status_code == 200
     assert res['Content-Type'] == 'application/javascript'
     # Sorted + appends '0' if missing
     assert res.context['BETTY_WIDTHS'] == [0, 1, 2, 100, 200]
+    assert res.context['BETTY_IMAGE_URL'] == '//test.example.org/images'
+
+
+def test_image_js_use_request_host(settings, client):
+    settings.BETTY_IMAGE_URL = 'http://test.example.org/images'
+    settings.BETTY_IMAGE_URL_USE_REQUEST_HOST = True
+    res = client.get("/images/image.js", SERVER_NAME='alt.example.org')
+    assert res.status_code == 200
+    assert res.context['BETTY_IMAGE_URL'] == '//alt.example.org/images'

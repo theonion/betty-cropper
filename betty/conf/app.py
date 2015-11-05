@@ -22,6 +22,7 @@ PACKAGE_DIR = os.path.dirname(os.path.dirname(__file__))
 DEFAULTS = {
     "BETTY_IMAGE_ROOT": os.path.join(_settings.MEDIA_ROOT, "images"),
     "BETTY_IMAGE_URL": urljoin(_settings.MEDIA_URL, "images/"),
+    "BETTY_IMAGE_URL_USE_REQUEST_HOST": False,
     "BETTY_RATIOS": ("1x1", "2x1", "3x1", "3x4", "4x3", "16x9"),
     "BETTY_WIDTHS": [],
     "BETTY_CLIENT_ONLY_WIDTHS": [],
