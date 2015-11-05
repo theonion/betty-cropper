@@ -31,6 +31,10 @@ def image_js(request):
     # make the url protocol-relative
     url_parts = list(urllib.parse.urlparse(betty_image_url))
     url_parts[0] = ""
+    if settings.BETTY_IMAGE_URL_USE_REQUEST_HOST:
+        # Prefer requested host (allows serving against multiple domains).
+        # Make sure settings.ALLOWED_HOSTS is set to avoid spoofing.
+        url_parts[1] = request.get_host()
     betty_image_url = urllib.parse.urlunparse(url_parts)
     if betty_image_url.endswith("/"):
         betty_image_url = betty_image_url[:-1]
