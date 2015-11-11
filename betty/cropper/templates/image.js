@@ -33,9 +33,9 @@
     };
   }
 
-  w.picturefill = function (elements, forceRerender) {
+  w.picturefill = function picturefill (elements, forceRerender) {
     // It is sometimes desirable to scroll without loading images as we go.
-    if (w.picturefill.paused()) {
+    if (picturefill.paused()) {
       return;
     }
     // get elements to picturefill
@@ -169,16 +169,16 @@
    * the reading list.
    */
   var isPaused = false;
-  w.picturefill.pause = function () {
+  picturefill.pause = function () {
     isPaused = true;
   };
 
-  w.picturefill.resume = function () {
+  picturefill.resume = function () {
    isPaused = false;
    picturefill();
   };
 
-  w.picturefill.paused = function () {
+  picturefill.paused = function () {
    return isPaused;
   };
 
@@ -217,9 +217,9 @@
   // Run on resize and domready (w.load as a fallback)
   if (!w.IMAGE_LISTENERS_DISABLED) {
 
-    addEventListener(w, "load", w.picturefill);
+    addEventListener(w, "load", picturefill);
     addEventListener(w, "DOMContentLoaded", function () {
-      w.picturefill();
+      picturefill();
       removeEventListener(w, "load");
     });
 
@@ -227,11 +227,11 @@
     addEventListener(w, "resize", function () {
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(function () {
-        w.picturefill(null, true);
+        picturefill(null, true);
       }, 100);
     });
 
-    addEventListener(w, "scroll", throttle(w.picturefill, 100));
+    addEventListener(w, "scroll", throttle(picturefill, 100));
 
   }
 
