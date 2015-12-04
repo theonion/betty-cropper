@@ -94,6 +94,9 @@ def test_bad_extension(client):
     res = client.get('/images/666/1x1/500.gif')
     assert res.status_code == 404
 
+    res = client.get('/images/666/1x1/500.pngbutts')
+    assert res.status_code == 404
+
 
 def test_too_large(client):
     res = client.get("/images/666/1x1/{}.jpg".format(settings.BETTY_MAX_WIDTH + 1))
