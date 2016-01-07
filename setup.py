@@ -31,7 +31,7 @@ dev_requires = [
 ]
 
 install_requires = [
-    "Django>=1.7",
+    "Django>=1.7,<1.9",
     "six==1.9.0",
     "slimit==0.8.1",
     "jsonfield==0.9.20",
