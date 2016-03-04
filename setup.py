@@ -20,7 +20,7 @@ setup_requires = []
 
 dev_requires = [
     "flake8<3",
-    "pytest==2.6.4",
+    "pytest==2.9.0",
     "pytest-django==2.8.0",
     "pytest-cov>=1.4",
     "coveralls==0.4.1",

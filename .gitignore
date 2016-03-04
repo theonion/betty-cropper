@@ -7,6 +7,7 @@ dist
 include
 .Python
 .DS_Store
+.cache/
 betty.conf.py
 betty.db
 share/
