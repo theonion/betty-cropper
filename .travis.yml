@@ -1,4 +1,5 @@
 language: python
+sudo: false  # Use new Travis build environment
 python:
   - '2.7'
   - '3.5'
