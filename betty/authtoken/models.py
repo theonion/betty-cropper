@@ -35,16 +35,16 @@ class BettyCropperUser(object):
         return 1  # instances always return the same hash value
 
     def save(self):
-        raise NotImplementedError("Django doesn't provide a DB representation for BettyCropperUser.")
+        raise NotImplementedError("Django doesn't provide DB representation for BettyCropperUser.")
 
     def delete(self):
-        raise NotImplementedError("Django doesn't provide a DB representation for BettyCropperUser.")
+        raise NotImplementedError("Django doesn't provide DB representation for BettyCropperUser.")
 
     def set_password(self, raw_password):
-        raise NotImplementedError("Django doesn't provide a DB representation for BettyCropperUser.")
+        raise NotImplementedError("Django doesn't provide DB representation for BettyCropperUser.")
 
     def check_password(self, raw_password):
-        raise NotImplementedError("Django doesn't provide a DB representation for BettyCropperUser.")
+        raise NotImplementedError("Django doesn't provide DB representation for BettyCropperUser.")
 
     def _get_groups(self):
         return self._groups

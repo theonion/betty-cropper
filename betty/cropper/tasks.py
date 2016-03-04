@@ -10,8 +10,9 @@ from betty.conf.app import settings
 
 from .dssim import detect_optimal_quality
 try:
-    import numpy
-    import scipy
+    # Legacy check: Try import here to determine if we should enable IMGMIN
+    import numpy  # NOQA
+    import scipy  # NOQA
     IMGMIN_DISABLED = False
 except ImportError:
     IMGMIN_DISABLED = True

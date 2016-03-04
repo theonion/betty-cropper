@@ -19,7 +19,7 @@ license = 'MIT'
 setup_requires = []
 
 dev_requires = [
-    "flake8>=2.0,<2.1",
+    "flake8<3",
     "pytest==2.6.4",
     "pytest-django==2.8.0",
     "pytest-cov>=1.4",
@@ -91,7 +91,7 @@ class PyTest(TestCommand):
         self.test_suite = True
 
     def run_tests(self):
-        #import here, cause outside the eggs aren't loaded
+        # import here, cause outside the eggs aren't loaded
         import pytest
         errno = pytest.main(self.test_args)
         sys.exit(errno)

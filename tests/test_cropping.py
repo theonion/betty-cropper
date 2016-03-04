@@ -1,15 +1,14 @@
 import os
 import shutil
 
+import pytest
+
 from django.core.files import File
 
 from betty.conf.app import settings
 from betty.cropper.models import Image, Ratio
 
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'images')
-
-
-import pytest
 
 
 @pytest.mark.django_db

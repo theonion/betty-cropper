@@ -1,6 +1,4 @@
 import json
-import os
-import shutil
 
 from django.core.cache import cache
 from django.http import (

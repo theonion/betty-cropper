@@ -44,7 +44,8 @@ def image_js(request):
         "BETTY_MAX_WIDTH": settings.BETTY_MAX_WIDTH
     }
     BETTY_RATIOS = []
-    ratios_sorted = sorted(settings.BETTY_RATIOS, key=lambda r: Ratio(r).width / float(Ratio(r).height))
+    ratios_sorted = sorted(settings.BETTY_RATIOS,
+                           key=lambda r: Ratio(r).width / float(Ratio(r).height))
     for ratio_string in ratios_sorted:
         ratio = Ratio(ratio_string)
         BETTY_RATIOS.append((ratio_string, ratio.width / float(ratio.height)))
@@ -63,7 +64,8 @@ def redirect_crop(request, id, ratio_slug, width, extension):
     """
     image = Image(id=image_id)
 
-    return HttpResponseRedirect(image.get_absolute_url(ratio=ratio_slug, width=width, format=extension))
+    return HttpResponseRedirect(image.get_absolute_url(ratio=ratio_slug, width=width,
+                                                       format=extension))
 
 
 @cache_control(max_age=300)

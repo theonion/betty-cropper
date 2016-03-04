@@ -1,10 +1,11 @@
-from django.conf.global_settings import *  # NOQA
-
 import hashlib
 import os
 import os.path
 import socket
 import sys
+
+import django
+from django.conf.global_settings import *  # NOQA
 
 socket.setdefaulttimeout(5)
 
@@ -107,7 +108,6 @@ INSTALLED_APPS = (
 )
 
 # Only use south with django < 1.7
-import django
 if django.VERSION < (1, 7):
     INSTALLED_APPS = INSTALLED_APPS + ('south',)
 

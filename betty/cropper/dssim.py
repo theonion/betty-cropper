@@ -63,7 +63,8 @@ def compute_ssim(im1, im2, l=255):
     sigma_12 -= mu_1_mu_2
 
     if (c_1 > 0) & (c_2 > 0):
-        ssim_map = ((2 * mu_1_mu_2 + c_1) * (2 * sigma_12 + c_2)) / ((mu_1_sq + mu_2_sq + c_1) * (sigma_1_sq + sigma_2_sq + c_2))
+        ssim_map = (((2 * mu_1_mu_2 + c_1) * (2 * sigma_12 + c_2)) /
+                    ((mu_1_sq + mu_2_sq + c_1) * (sigma_1_sq + sigma_2_sq + c_2)))
     else:
         numerator1 = 2 * mu_1_mu_2 + c_1
         numerator2 = 2 * sigma_12 + c_2
@@ -75,7 +76,8 @@ def compute_ssim(im1, im2, l=255):
 
         index = (denominator1 * denominator2 > 0)
 
-        ssim_map[index] = (numerator1[index] * numerator2[index]) / (denominator1[index] * denominator2[index])
+        ssim_map[index] = ((numerator1[index] * numerator2[index]) /
+                           (denominator1[index] * denominator2[index]))
         index = (denominator1 != 0) & (denominator2 == 0)
         ssim_map[index] = numerator1[index] / denominator1[index]
 
@@ -88,7 +90,8 @@ def compute_ssim(im1, im2, l=255):
 def unique_colors(img):
     # For RGB, we need to get unique "rows" basically, as the color dimesion is an array.
     # This is taken from: http://stackoverflow.com/a/16973510
-    color_view = np.ascontiguousarray(img).view(np.dtype((np.void, img.dtype.itemsize * img.shape[2])))
+    color_view = np.ascontiguousarray(img).view(np.dtype((np.void,
+                                                          img.dtype.itemsize * img.shape[2])))
     unique = np.unique(color_view)
     return unique.size
 

@@ -3,14 +3,12 @@ import json
 import shutil
 
 from mock import patch
+import pytest
 
 from betty.conf.app import settings
 from betty.cropper.models import Image
 
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'images')
-
-
-import pytest
 
 
 def test_no_api_key(client):
