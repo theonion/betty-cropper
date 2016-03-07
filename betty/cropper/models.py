@@ -291,6 +291,7 @@ class Image(models.Model):
                         full_url = self.get_absolute_url(ratio=ratio, width=width, format=format)
                         settings.BETTY_CACHE_FLUSHER(full_url)
 
+                if settings.BETTY_SAVE_CROPS:
                 shutil.rmtree(ratio_path)
 
     def get_jpeg_quality(self, width):
@@ -357,6 +358,7 @@ class Image(models.Model):
         if icc_profile:
             pillow_kwargs["icc_profile"] = icc_profile
 
+        if settings.BETTY_SAVE_CROPS:
         if width in settings.BETTY_WIDTHS or len(settings.BETTY_WIDTHS) == 0:
             ratio_dir = os.path.join(self.path(), ratio.string)
             # We only want to save this to the filesystem if it's one of our usual widths.

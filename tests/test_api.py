@@ -5,6 +5,8 @@ import shutil
 from mock import patch
 import pytest
 
+from django.test import override_settings
+
 from betty.conf.app import settings
 from betty.cropper.models import Image
 
@@ -28,15 +30,21 @@ def test_no_api_key(client):
     assert res.status_code == 403
 
 
-@pytest.mark.django_db
-def test_image_upload(admin_client):
-
+def create_test_image(admin_client):
     lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
     with open(lenna_path, "rb") as lenna:
         data = {"image": lenna, "name": "LENNA DOT PNG", "credit": "Playboy"}
         res = admin_client.post('/images/api/new', data)
     assert res.status_code == 200
-    response_json = json.loads(res.content.decode("utf-8"))
+
+    return json.loads(res.content.decode("utf-8"))
+
+
+@pytest.mark.django_db
+def test_image_upload(admin_client):
+
+    response_json = create_test_image(admin_client)
+
     del response_json["selections"]  # We don't care about selections in this test
     assert response_json == {
         "id": 1,
@@ -117,14 +125,9 @@ def test_image_selection_source(admin_client):
 
 
 @pytest.mark.django_db
-def test_crop_clearing(admin_client):
-    lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
-    with open(lenna_path, "rb") as lenna:
-        data = {"image": lenna, "name": "LENNA DOT PNG", "credit": "Playboy"}
-        res = admin_client.post('/images/api/new', data)
-    assert res.status_code == 200
-
-    response_json = json.loads(res.content.decode("utf-8"))
+@override_settings(BETTY_SAVE_CROPS=True)
+def test_crop_clearing_enable_save_crops(admin_client):
+    response_json = create_test_image(admin_client)
     image_id = response_json['id']
 
     # Now let's generate a couple crops
@@ -157,6 +160,23 @@ def test_crop_clearing(admin_client):
 
 
 @pytest.mark.django_db
+@override_settings(BETTY_SAVE_CROPS=False)
+def test_crop_clearing_disable_save_crops(admin_client):
+
+    response_json = create_test_image(admin_client)
+    image_id = response_json['id']
+
+    # Generate a crop
+    admin_client.get("/images/{}/1x1/240.jpg".format(image_id))
+
+    image = Image.objects.get(id=image_id)
+
+    # Verify no crop file saved to disk
+    assert not os.path.exists(os.path.join(image.path(), "1x1", "240.jpg"))
+
+
+@pytest.mark.django_db
+@override_settings(BETTY_SAVE_CROPS=True)
 def test_image_delete(admin_client):
     image = Image.objects.create(name="Testing", width=512, height=512)
     path = image.path()  # Save path before deletion
@@ -219,13 +239,9 @@ def test_image_search(admin_client):
 def test_bad_image_data(admin_client):
     shutil.rmtree(settings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
-    lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
-    with open(lenna_path, "rb") as lenna:
-        res = admin_client.post('/images/api/new', {"image": lenna})
+    response_json = create_test_image(admin_client)
 
-    assert res.status_code == 200
-    response_json = json.loads(res.content.decode("utf-8"))
-    assert response_json.get("name") == "Lenna.png"
+    assert response_json.get("name") == "LENNA DOT PNG"
     assert response_json.get("width") == 512
     assert response_json.get("height") == 512
 
