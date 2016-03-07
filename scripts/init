@@ -1,0 +1,6 @@
+#!/bin/sh
+#
+# Install + update project environment
+
+pip install -e .
+pip install "file://$(pwd)#egg=betty-cropper[dev]"

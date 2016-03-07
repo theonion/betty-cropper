@@ -1,10 +1,10 @@
-## Betty Cropper
+# Betty Cropper
 
 [![Build Status](https://travis-ci.org/theonion/betty-cropper.svg?branch=master)](https://travis-ci.org/theonion/betty-cropper)
 [![Coverage Status](https://coveralls.io/repos/theonion/betty-cropper/badge.svg?branch=master)](https://coveralls.io/r/theonion/betty-cropper?branch=master)
 [![Latest Version](https://pypip.in/version/betty-cropper/badge.svg)](https://pypi.python.org/pypi/betty-cropper/)
 
-### Get started developing:
+## Get started developing:
 
     > git clone git@github.com:theonion/betty-cropper.git
     > cd betty-cropper
@@ -17,7 +17,7 @@ To run the tests:
 
     > py.test tests/
 
-### To run an instance of the server
+## To run an instance of the server
 
 First, make sure that you've installed the development packages for JPEG, PNG, etc.
 
@@ -27,16 +27,16 @@ First, make sure that you've installed the development packages for JPEG, PNG, e
 Then edit the settings in `betty.conf.py` (if you want to use the dev server, you'll want to set DEBUG=True).
 
     > betty-cropper syncdb        # Do the intial django sync
-    > betty-cropper migrate       # Migrate with south 
+    > betty-cropper migrate       # Migrate with south
     > betty-cropper create_token  # Create an auth token, to use the API
     > betty-cropper runserver
 
-### API
+## API
 
 Currently, authentication means sending an `X-Betty-Api-Key` header with a value of your public token. This will likely change to something more mature in future versions.
 
 `POST` an image (using the key "image") to /api/new, for example:
-    
+
     > curl -H "X-Betty-Api-Key: YOUR_PUBLIC_TOKEN" --form "image=@Lenna.png" http://localhost:8000/api/new
 
 This should return JSON representing that image and its crops, for instance:
@@ -75,8 +75,19 @@ To update the selections used for a crop, you can `POST` to /api/id/ratio, for e
     > curl -H "X-Betty-Api-Key: YOUR_PUBLIC_TOKEN" \
            -H "Content-Type: application/json" \
            -XPOST http://localhost:8000/api/1/1x1 \
-           -d '{"x0":1,"y0":1,"x1":510,"y1":510}' 
+           -d '{"x0":1,"y0":1,"x1":510,"y1":510}'
 
 `GET` /api/search, with an option "q" parameter in order to get a list of files matching that description. For example:
 
     > curl -H "X-Betty-Api-Key: YOUR_PUBLIC_TOKEN" -XGET http://localhost:8000/api/search?q=lenna
+
+
+## Installation Notes
+
+### OSX
+
+To avoid "*encoder/decoder zlib unavailble*" errors w/ Pillow library (OSX 10.11.2, Python 3.5.1), install zlib via homebrew before installing Pillow
+
+    brew tap homebrew/dupes
+    brew install zlib
+    brew link --force zlib

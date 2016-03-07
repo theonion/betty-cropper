@@ -1,22 +1,23 @@
 language: python
+sudo: false  # Use new Travis build environment
 python:
   - '2.7'
-  - '3.4'
+  - '3.5'
 matrix:
   allow_failures:
-    - python: '3.4'
+    - python: '3.5'
 cache: apt
 before_install:
   # Miniconda workaround for installing scipy in Travis
   - '[ "$TRAVIS_PYTHON_VERSION" = "2.7" ] && wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh || true'
-  - '[ "$TRAVIS_PYTHON_VERSION" = "3.4" ] && wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh || true'
+  - '[ "$TRAVIS_PYTHON_VERSION" = "3.5" ] && wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh || true'
   - chmod +x miniconda.sh
   - ./miniconda.sh -b
   - '[ "$TRAVIS_PYTHON_VERSION" = "2.7" ] && export PATH=/home/travis/miniconda2/bin:$PATH || true'
-  - '[ "$TRAVIS_PYTHON_VERSION" = "3.4" ] && export PATH=/home/travis/miniconda3/bin:$PATH || true'
+  - '[ "$TRAVIS_PYTHON_VERSION" = "3.5" ] && export PATH=/home/travis/miniconda3/bin:$PATH || true'
   - conda update --yes conda
   - '[ "$TRAVIS_PYTHON_VERSION" = "2.7" ] && travis_retry conda install --yes python=2.7 pip numpy scipy || true'
-  - '[ "$TRAVIS_PYTHON_VERSION" = "3.4" ] && travis_retry conda install --yes python=3.4 pip numpy scipy || true'
+  - '[ "$TRAVIS_PYTHON_VERSION" = "3.5" ] && travis_retry conda install --yes python=3.5 pip numpy scipy || true'
 install:
   - travis_retry pip install -e .
   - travis_retry pip install file://$(pwd)#egg=betty-cropper[dev]
@@ -25,11 +26,6 @@ script:
   - scripts/lint
 after_success:
   - coveralls
-notifications:
-  email:
-    - csinchok@theonion.com
-  on_failure: change
-  on_success: change
 deploy:
   provider: pypi
   user: csinchok
