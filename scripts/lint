@@ -1,4 +1,4 @@
-#!/bin/sh3
+#!/bin/sh
 #
 # Run linter(s) over project
 
