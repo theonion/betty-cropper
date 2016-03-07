@@ -363,7 +363,7 @@ class Image(models.Model):
             try:
                 os.makedirs(ratio_dir)
             except OSError as e:
-                if e.errno != 17:
+                    if e.errno != errno.EEXIST:
                     raise e
 
             with open(os.path.join(ratio_dir, "%d.%s" % (width, extension)), 'wb+') as out:
