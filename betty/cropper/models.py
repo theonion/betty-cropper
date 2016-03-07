@@ -291,7 +291,8 @@ class Image(models.Model):
                         full_url = self.get_absolute_url(ratio=ratio, width=width, format=format)
                         settings.BETTY_CACHE_FLUSHER(full_url)
 
-                shutil.rmtree(ratio_path)
+                if settings.BETTY_SAVE_CROPS:
+                    shutil.rmtree(ratio_path)
 
     def get_jpeg_quality(self, width):
         quality = None
@@ -357,17 +358,18 @@ class Image(models.Model):
         if icc_profile:
             pillow_kwargs["icc_profile"] = icc_profile
 
-        if width in settings.BETTY_WIDTHS or len(settings.BETTY_WIDTHS) == 0:
-            ratio_dir = os.path.join(self.path(), ratio.string)
-            # We only want to save this to the filesystem if it's one of our usual widths.
-            try:
-                os.makedirs(ratio_dir)
-            except OSError as e:
-                if e.errno != 17:
-                    raise e
+        if settings.BETTY_SAVE_CROPS:
+            if width in settings.BETTY_WIDTHS or len(settings.BETTY_WIDTHS) == 0:
+                ratio_dir = os.path.join(self.path(), ratio.string)
+                # We only want to save this to the filesystem if it's one of our usual widths.
+                try:
+                    os.makedirs(ratio_dir)
+                except OSError as e:
+                    if e.errno != errno.EEXIST:
+                        raise e
 
-            with open(os.path.join(ratio_dir, "%d.%s" % (width, extension)), 'wb+') as out:
-                img.save(out, **pillow_kwargs)
+                with open(os.path.join(ratio_dir, "%d.%s" % (width, extension)), 'wb+') as out:
+                    img.save(out, **pillow_kwargs)
 
         tmp = io.BytesIO()
         img.save(tmp, **pillow_kwargs)
