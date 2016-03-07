@@ -156,8 +156,10 @@ class Image(models.Model):
     name = models.CharField(max_length=255)
     credit = models.CharField(max_length=120, null=True, blank=True)
 
-    source = models.FileField(upload_to=source_upload_to, storage=betty_storage, max_length=255, null=True, blank=True)
-    optimized = models.FileField(upload_to=optimized_upload_to, storage=betty_storage, max_length=255, null=True, blank=True)
+    source = models.FileField(upload_to=source_upload_to, storage=betty_storage,
+                              max_length=255, null=True, blank=True)
+    optimized = models.FileField(upload_to=optimized_upload_to, storage=betty_storage,
+                                 max_length=255, null=True, blank=True)
 
     height = models.IntegerField(null=True, blank=True)
     width = models.IntegerField(null=True, blank=True)
