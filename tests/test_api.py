@@ -5,8 +5,6 @@ import shutil
 from mock import patch
 import pytest
 
-from django.test import override_settings
-
 from betty.conf.app import settings
 from betty.cropper.models import Image
 
@@ -125,8 +123,9 @@ def test_image_selection_source(admin_client):
 
 
 @pytest.mark.django_db
-@override_settings(BETTY_SAVE_CROPS=True)
-def test_crop_clearing_enable_save_crops(admin_client):
+def test_crop_clearing_enable_save_crops(admin_client, settings):
+    settings.BETTY_SAVE_CROPS = True
+
     response_json = create_test_image(admin_client)
     image_id = response_json['id']
 
@@ -160,8 +159,9 @@ def test_crop_clearing_enable_save_crops(admin_client):
 
 
 @pytest.mark.django_db
-@override_settings(BETTY_SAVE_CROPS=False)
-def test_crop_clearing_disable_save_crops(admin_client):
+def test_crop_clearing_disable_save_crops(admin_client, settings):
+
+    settings.BETTY_SAVE_CROPS = False
 
     response_json = create_test_image(admin_client)
     image_id = response_json['id']
@@ -176,8 +176,8 @@ def test_crop_clearing_disable_save_crops(admin_client):
 
 
 @pytest.mark.django_db
-@override_settings(BETTY_SAVE_CROPS=True)
-def test_image_delete(admin_client):
+def test_image_delete(admin_client, settings):
+    settings.BETTY_SAVE_CROPS = True
     image = Image.objects.create(name="Testing", width=512, height=512)
     path = image.path()  # Save path before deletion
 
