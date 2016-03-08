@@ -11,6 +11,16 @@ from betty.cropper.models import Image, Ratio
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'images')
 
 
+@pytest.fixture()
+def clean_image_root(request):
+    # Also does it on startup too, until we cleanup all test cased to cleanup properly
+    shutil.rmtree(settings.BETTY_IMAGE_ROOT, ignore_errors=True)
+
+    def cleanup():
+        shutil.rmtree(settings.BETTY_IMAGE_ROOT, ignore_errors=True)
+    request.addfinalizer(cleanup)
+
+
 @pytest.mark.django_db
 def test_image_selections():
 
@@ -138,8 +148,8 @@ def test_missing_file(client):
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_image_save(client):
-    shutil.rmtree(settings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
     image = Image.objects.create(
         name="Lenna.png",
@@ -175,8 +185,29 @@ def test_image_save(client):
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
+def test_disable_crop_save(client, settings):
+    settings.BETTY_SAVE_CROPS = False
+
+    image = Image.objects.create(
+        name="Lenna.png",
+        width=512,
+        height=512
+    )
+    lenna = File(open(os.path.join(TEST_DATA_PATH, "Lenna.png"), "rb"))
+    image.source.save("Lenna.png", lenna)
+
+    # Now let's test that a JPEG crop will return properly.
+    res = client.get('/images/{}/1x1/240.jpg'.format(image.id))
+    assert res['Content-Type'] == 'image/jpeg'
+    assert res.status_code == 200
+    # Verify crop not saved to disk
+    assert not os.path.exists(os.path.join(image.path(), '1x1', '240.jpg'))
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_non_rgb(client):
-    shutil.rmtree(settings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
     image = Image.objects.create(
         name="animated.gif",
