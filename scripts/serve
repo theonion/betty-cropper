@@ -1,0 +1,5 @@
+#!/bin/sh -euo pipefail
+#
+# Run local betty server
+
+betty-cropper runserver

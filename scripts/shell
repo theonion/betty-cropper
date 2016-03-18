@@ -1,0 +1,5 @@
+#!/bin/sh
+#
+# Open a Django shell
+
+betty-cropper shell
