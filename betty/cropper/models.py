@@ -441,4 +441,4 @@ def auto_flush_and_delete_files_on_delete(sender, instance, **kwargs):
     instance.clear_crops()
     for file_field in [instance.source, instance.optimized]:
         if file_field:
-            file_field.delete()
+            file_field.delete(save=False)

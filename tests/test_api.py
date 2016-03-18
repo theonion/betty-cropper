@@ -192,6 +192,7 @@ def test_image_delete(admin_client, settings):
                 REQUEST_METHOD="DELETE",
             )
             assert res.status_code == 200
+            assert not Image.objects.filter(id=image_id)
             assert mock_clear_crops.called
             image_dir = os.path.join(settings.MEDIA_ROOT, str(image_id))
             mock_remove.assert_has_calls([call(os.path.join(image_dir, 'Lenna.png')),
