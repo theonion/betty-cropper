@@ -1,9 +1,7 @@
 import os
 import psutil
-import shutil
 
 from betty.cropper.models import Image
-from betty.conf.app import settings as bettysettings
 
 import pytest
 
@@ -20,8 +18,8 @@ def get_open_files(process):
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_imgmin_upload(settings):
-    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
     settings.BETTY_JPEG_QUALITY_RANGE = (60, 92)
 
@@ -39,8 +37,8 @@ def test_imgmin_upload(settings):
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_imgmin_cartoon(settings):
-    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
     settings.BETTY_JPEG_QUALITY_RANGE = (60, 92)
 
@@ -62,8 +60,8 @@ def test_imgmin_cartoon(settings):
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_imgmin_upload_lowquality(settings):
-    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
     settings.BETTY_JPEG_QUALITY_RANGE = (60, 92)
 

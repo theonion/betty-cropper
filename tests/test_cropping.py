@@ -1,5 +1,4 @@
 import os
-import shutil
 
 import pytest
 
@@ -138,8 +137,8 @@ def test_missing_file(client):
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_image_save(client):
-    shutil.rmtree(settings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
     image = Image.objects.create(
         name="Lenna.png",
@@ -175,8 +174,8 @@ def test_image_save(client):
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_non_rgb(client):
-    shutil.rmtree(settings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
     image = Image.objects.create(
         name="animated.gif",
