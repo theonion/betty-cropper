@@ -1,0 +1,5 @@
+#!/bin/sh -euo pipefail
+#
+# Open a Django shell
+
+betty-cropper shell
