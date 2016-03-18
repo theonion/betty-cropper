@@ -5,7 +5,7 @@ import shutil
 
 from django.db import models
 from django.dispatch import receiver
-from django.core.files.storage import FileSystemStorage
+from django.core.files import File
 from django.core.urlresolvers import reverse
 
 from PIL import Image as PILImage
@@ -17,24 +17,18 @@ from betty.cropper.tasks import search_image_quality
 from jsonfield import JSONField
 
 
-betty_storage = FileSystemStorage(
-    location=settings.BETTY_IMAGE_ROOT,
-    base_url=settings.BETTY_IMAGE_URL
-)
-
-
 def source_upload_to(instance, filename):
     return os.path.join(instance.path(), filename)
 
 
 def optimized_upload_to(instance, filename):
-    path, ext = os.path.splitext(filename)
+    _path, ext = os.path.splitext(filename)
     return os.path.join(instance.path(), "optimized{}".format(ext))
 
 
-def optimize_image(image):
+def optimize_image(path, name, image):
 
-    im = PILImage.open(image.source.path)
+    im = PILImage.open(path)
 
     # Let's cache some important stuff
     format = im.format
@@ -44,22 +38,24 @@ def optimize_image(image):
     if format == "JPEG":
         try:
             subsampling = JpegImagePlugin.get_sampling(im)
+        # TODO: Handle a specific exception
         except:
             pass  # Sometimes, crazy images exist.
 
-    filename = os.path.split(image.source.path)[1]
+    # filename = os.path.split(path)[1]
 
-    image.optimized.name = optimized_upload_to(image, filename)
+    # image.optimized.name = optimized_upload_to(image, filename)
     if im.size[0] > settings.BETTY_MAX_WIDTH:
         # If the image is really large, we'll save a more reasonable version as the "original"
         height = settings.BETTY_MAX_WIDTH * float(im.size[1]) / float(im.size[0])
         im = im.resize((settings.BETTY_MAX_WIDTH, int(round(height))), PILImage.ANTIALIAS)
 
+        out_buffer = io.BytesIO()
         if format == "JPEG" and im.mode == "RGB":
             # For JPEG files, we need to make sure that we keep the quantization profile
             try:
                 im.save(
-                    image.optimized.name,
+                    out_buffer,
                     icc_profile=icc_profile,
                     qtables=quantization,
                     subsampling=subsampling,
@@ -67,21 +63,28 @@ def optimize_image(image):
             except (TypeError, ValueError) as e:
                 # Maybe the image already had an invalid quant table?
                 if e.message.startswith("Not a valid numbers of quantization tables"):
+                    out_buffer = io.BytesIO()  # Make sure it's empty after failed save attempt
                     im.save(
-                        image.optimized.name,
+                        out_buffer,
                         icc_profile=icc_profile
                     )
                 else:
                     raise
         else:
-            im.save(image.optimized.name, icc_profile=icc_profile)
+            im.save(out_buffer, icc_profile=icc_profile)
+
+        image.optimized.save(name, File(out_buffer))
+
     else:
-        shutil.copy2(image.source.path, image.optimized.name)
+        # No modifications, just save original as optimized
+        image.optimized.save(name, File(open(path, 'rb')))
+        # shutil.copy2(image.source.path, image.optimized.name)
 
     image.save()
 
 
 class Ratio(object):
+
     def __init__(self, ratio):
         self.string = ratio
         self.height = 0
@@ -112,38 +115,38 @@ class ImageManager(models.Manager):
             height=im.size[1]
         )
 
-        try:
-            os.makedirs(image.path())
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                raise
-
-        # Let's make sure we copy the temp file to the source location
-        source_path = source_upload_to(image, filename)
-        shutil.copy(path, source_path)
-        image.source.name = source_path
+        # Copy temp image file to S3
+        # TODO: Just pass image file?
+        image.source.save(name, File(open(path, 'rb')))
 
         # If the image is a GIF, we need to do some special stuff
         if im.format == "GIF":
+            assert "TODO: Handle GIFs"
+
             image.animated = True
 
             os.makedirs(os.path.join(image.path(), "animated"))
 
             # First, let's copy the original
             animated_path = os.path.join(image.path(), "animated/original.gif")
-            shutil.copy(path, animated_path)
-            os.chmod(animated_path, 744)
+            from django.core.files.storage import default_storage
+            with default_storage.open(animated_path) as animated_file:
+                animated_file.write(animated_path, File(open(path, 'rb')))
+            # shutil.copy(path, animated_path)
+            # os.chmod(animated_path, 744)
 
             # Next, we'll make a thumbnail of the original
             still_path = os.path.join(image.path(), "animated/original.jpg")
-            if im.mode != "RGB":
+            if im.mode == "RGB":
+                im.save(still_path, "JPEG")
+            else:
                 jpeg = im.convert("RGB")
                 jpeg.save(still_path, "JPEG")
-            else:
-                im.save(still_path, "JPEG")
 
         image.save()
-        optimize_image(image)
+
+        # Use temp image path (instead of pulling from S3)
+        optimize_image(path=path, name=name, image=image)
 
         if settings.BETTY_JPEG_QUALITY_RANGE:
             search_image_quality.apply_async(args=(image.id,))
@@ -156,9 +159,9 @@ class Image(models.Model):
     name = models.CharField(max_length=255)
     credit = models.CharField(max_length=120, null=True, blank=True)
 
-    source = models.FileField(upload_to=source_upload_to, storage=betty_storage,
+    source = models.FileField(upload_to=source_upload_to, #storage=betty_storage,
                               max_length=255, null=True, blank=True)
-    optimized = models.FileField(upload_to=optimized_upload_to, storage=betty_storage,
+    optimized = models.FileField(upload_to=optimized_upload_to, #storage=betty_storage,
                                  max_length=255, null=True, blank=True)
 
     height = models.IntegerField(null=True, blank=True)
@@ -317,10 +320,12 @@ class Image(models.Model):
 
     def crop(self, ratio, width, extension, fp=None):
         if self.optimized:
-            img = PILImage.open(self.optimized.path)
+            source_image = self.optimized
         else:
-            img = PILImage.open(self.source.path)
-        icc_profile = img.info.get("icc_profile")
+            source_image = self.source
+
+        img = PILImage.open(io.BytesIO(source_image.read()))
+
         if ratio.string == 'original':
             ratio.width = img.size[0]
             ratio.height = img.size[1]
@@ -355,8 +360,9 @@ class Image(models.Model):
         if extension == "png":
             pillow_kwargs = {"format": "png"}
 
-        if icc_profile:
-            pillow_kwargs["icc_profile"] = icc_profile
+        # TODO: Not defined!!
+        # if icc_profile:
+        #     pillow_kwargs["icc_profile"] = icc_profile
 
         if settings.BETTY_SAVE_CROPS:
             if width in settings.BETTY_WIDTHS or len(settings.BETTY_WIDTHS) == 0:
@@ -418,4 +424,9 @@ class Image(models.Model):
 @receiver(models.signals.post_delete, sender=Image)
 def auto_flush_and_delete_files_on_delete(sender, instance, **kwargs):
     instance.clear_crops()
-    shutil.rmtree(instance.path(), ignore_errors=True)
+    # shutil.rmtree(instance.path(), ignore_errors=True)
+    # TODO: Verify
+    import ipdb; ipdb.set_trace()  # XXX BREAKPOINT
+    for file_field in [instance.source, instance.optimized]:
+        if file_field:
+            file_field.delete()

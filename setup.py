@@ -38,7 +38,10 @@ install_requires = [
     "Pillow==2.5.3",
     "South==0.8.4",
     "logan==0.6.0",
-    "celery==3.1.11"
+    "celery==3.1.11",
+    # New S3 support -- maybe don't make this a required install?
+    "boto==2.39.0",
+    "django-storages==1.4",
 ]
 
 imgmin_requires = [
