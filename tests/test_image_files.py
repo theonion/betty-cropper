@@ -1,5 +1,4 @@
 import os
-import stat
 
 from PIL import Image as PILImage
 from PIL import JpegImagePlugin
@@ -28,6 +27,7 @@ def test_png():
     assert image.jpeg_quality is None
     assert os.path.exists(image.optimized.path)
     assert os.path.exists(image.source.path)
+    assert not image.animated
 
     # Since this image is 512x512, it shouldn't end up getting changed by the optimization process
     assert os.stat(image.optimized.path).st_size == os.stat(image.source.path).st_size
@@ -49,6 +49,7 @@ def test_jpeg():
     assert image.jpeg_quality is None
     assert os.path.exists(image.optimized.path)
     assert os.path.exists(image.source.path)
+    assert not image.animated
 
     source = PILImage.open(image.source.path)
     optimized = PILImage.open(image.optimized.path)
@@ -73,6 +74,7 @@ def test_jpeg_noext():
     assert image.jpeg_quality is None
     assert os.path.exists(image.optimized.path)
     assert os.path.exists(image.source.path)
+    assert not image.animated
 
     source = PILImage.open(image.source.path)
     optimized = PILImage.open(image.optimized.path)
@@ -98,6 +100,7 @@ def test_huge_jpeg():
     assert image.jpeg_quality is None
     assert os.path.exists(image.optimized.path)
     assert os.path.exists(image.source.path)
+    assert not image.animated
 
     assert image.to_native()["width"] == 3200
 
@@ -122,6 +125,7 @@ def test_l_mode():
     assert image.jpeg_quality is None
     assert os.path.exists(image.optimized.path)
     assert os.path.exists(image.source.path)
+    assert not image.animated
 
 
 @pytest.mark.django_db
@@ -154,10 +158,8 @@ def test_gif_upload():
     assert os.path.exists(image.path())
     assert os.path.exists(image.source.path)
     assert os.path.basename(image.source.path) == "animated.gif"
+    assert image.animated
 
-    original_gif = os.path.join(image.path(), "animated/original.gif")
-
-    assert stat.S_IMODE(os.lstat(original_gif).st_mode) == 744
-
-    assert os.path.exists(os.path.join(image.path(), "animated/original.gif"))
-    assert os.path.exists(os.path.join(image.path(), "animated/original.jpg"))
+    # mparent(2016-03-18): These are now created on demand
+    assert not os.path.exists(os.path.join(image.path(), "animated/original.gif"))
+    assert not os.path.exists(os.path.join(image.path(), "animated/original.jpg"))

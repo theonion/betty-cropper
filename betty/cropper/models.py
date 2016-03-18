@@ -121,27 +121,7 @@ class ImageManager(models.Manager):
 
         # If the image is a GIF, we need to do some special stuff
         if im.format == "GIF":
-            # assert False, "TODO: Handle GIFs"
-
             image.animated = True
-
-            os.makedirs(os.path.join(image.path(), "animated"))
-
-            # First, let's copy the original
-            animated_path = os.path.join(image.path(), "animated/original.gif")
-            # from django.core.files.storage import default_storage
-            # with default_storage.open(animated_path) as animated_file:
-                # animated_file.write(animated_path, File(open(path, 'rb')))
-            shutil.copy(path, animated_path)
-            os.chmod(animated_path, 744)
-
-            # Next, we'll make a thumbnail of the original
-            still_path = os.path.join(image.path(), "animated/original.jpg")
-            if im.mode != "RGB":
-                jpeg = im.convert("RGB")
-                jpeg.save(still_path, "JPEG")
-            else:
-                im.save(still_path, "JPEG")
 
         image.save()
 
@@ -152,6 +132,18 @@ class ImageManager(models.Manager):
             search_image_quality.apply_async(args=(image.id,))
 
         return image
+
+
+def save_crop_to_disk(image_data, path):
+
+    try:
+        os.makedirs(os.path.dirname(path))
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise e
+
+    with open(path, 'wb+') as out:
+        out.write(image_data)
 
 
 class Image(models.Model):
@@ -189,6 +181,13 @@ class Image(models.Model):
                 id_string += "/"
             id_string += char
         return id_string
+
+    @property
+    def best_source(self):
+        if self.optimized:
+            return self.optimized
+        else:
+            return self.source
 
     def get_height(self):
         """Lazily returns the height of the image
@@ -319,13 +318,34 @@ class Image(models.Model):
             id_string += char
         return os.path.join(settings.BETTY_IMAGE_ROOT, id_string[1:])
 
-    def crop(self, ratio, width, extension, fp=None):
-        if self.optimized:
-            source_image = self.optimized
-        else:
-            source_image = self.source
+    def get_animated(self, extension):
+        """Legacy (Pre v0.4) animated behavior.
+        Originally betty just wrote these to disk on image creation and let NGINX try-files
+        automatically serve these animated GIF + JPG.
+        """
 
-        img = PILImage.open(io.BytesIO(source_image.read()))
+        assert self.animated
+
+        img_bytes = io.BytesIO(self.best_source.read())
+        if extension == "jpg":
+            # Thumbnail
+            img = PILImage.open(img_bytes)
+            if img.mode != "RGB":
+                img = img.convert("RGB")
+            img_bytes = io.BytesIO()
+            img.save(img_bytes, "JPEG")
+        elif extension != "gif":
+            raise Exception('Unsupported extension')
+
+        if settings.BETTY_SAVE_CROPS:
+            save_crop_to_disk(img_bytes.getvalue(), os.path.join(self.path(),
+                                                                 'animated',
+                                                                 'original.{}'.format(extension)))
+
+        return img_bytes.getvalue()
+
+    def crop(self, ratio, width, extension):
+        img = PILImage.open(io.BytesIO(self.best_source.read()))
 
         if ratio.string == 'original':
             ratio.width = img.size[0]
@@ -365,21 +385,15 @@ class Image(models.Model):
         # if icc_profile:
         #     pillow_kwargs["icc_profile"] = icc_profile
 
-        if settings.BETTY_SAVE_CROPS:
-            if width in settings.BETTY_WIDTHS or len(settings.BETTY_WIDTHS) == 0:
-                ratio_dir = os.path.join(self.path(), ratio.string)
-                # We only want to save this to the filesystem if it's one of our usual widths.
-                try:
-                    os.makedirs(ratio_dir)
-                except OSError as e:
-                    if e.errno != errno.EEXIST:
-                        raise e
-
-                with open(os.path.join(ratio_dir, "%d.%s" % (width, extension)), 'wb+') as out:
-                    img.save(out, **pillow_kwargs)
-
         tmp = io.BytesIO()
         img.save(tmp, **pillow_kwargs)
+
+        if settings.BETTY_SAVE_CROPS:
+            # We only want to save this to the filesystem if it's one of our usual widths.
+            if width in settings.BETTY_WIDTHS or len(settings.BETTY_WIDTHS) == 0:
+                ratio_dir = os.path.join(self.path(), ratio.string)
+                save_crop_to_disk(tmp.getvalue(),
+                                  os.path.join(ratio_dir, "%d.%s" % (width, extension)))
 
         return tmp.getvalue()
 

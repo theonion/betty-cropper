@@ -9,7 +9,14 @@ from six.moves import urllib
 from .models import Image, Ratio
 from .utils.placeholder import placeholder
 
+logger = __import__('logging').getLogger(__name__)
+
+
 EXTENSION_MAP = {
+    "gif": {
+        "format": "gif",
+        "mime_type": "image/gif"
+    },
     "jpg": {
         "format": "jpeg",
         "mime_type": "image/jpeg"
@@ -102,7 +109,34 @@ def crop(request, id, ratio_slug, width, extension):
     try:
         image_blob = image.crop(ratio, width, extension)
     except Exception:
+        logger.exception("Cropping error")
         return HttpResponseServerError("Cropping error")
+
+    resp = HttpResponse(image_blob)
+    resp["Content-Type"] = EXTENSION_MAP[extension]["mime_type"]
+    return resp
+
+
+# Legacy behavior -- originally these were just dropped on filesystem and let NGINX frontend serve
+# automatically via try-files.
+@cache_control(max_age=300)
+def animated(request, id, extension):
+
+    image_id = int(id.replace("/", ""))
+
+    try:
+        image = Image.objects.get(id=image_id)
+    except Image.DoesNotExist:
+        raise Http404
+
+    if not image.animated:
+        raise Http404
+
+    try:
+        image_blob = image.get_animated(extension=extension)
+    except Exception:
+        logger.exception("Animated error")
+        return HttpResponseServerError("Animated error")
 
     resp = HttpResponse(image_blob)
     resp["Content-Type"] = EXTENSION_MAP[extension]["mime_type"]
