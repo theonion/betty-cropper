@@ -1,11 +1,9 @@
 import os
 import json
-import shutil
 
-from mock import patch
+from mock import call, patch
 import pytest
 
-from betty.conf.app import settings
 from betty.cropper.models import Image
 
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'images')
@@ -39,6 +37,7 @@ def create_test_image(admin_client):
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_image_upload(admin_client):
 
     response_json = create_test_image(admin_client)
@@ -123,6 +122,7 @@ def test_image_selection_source(admin_client):
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_crop_clearing_enable_save_crops(admin_client, settings):
     settings.BETTY_SAVE_CROPS = True
 
@@ -159,6 +159,7 @@ def test_crop_clearing_enable_save_crops(admin_client, settings):
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_crop_clearing_disable_save_crops(admin_client, settings):
 
     settings.BETTY_SAVE_CROPS = False
@@ -176,25 +177,25 @@ def test_crop_clearing_disable_save_crops(admin_client, settings):
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_image_delete(admin_client, settings):
     settings.BETTY_SAVE_CROPS = True
-    image = Image.objects.create(name="Testing", width=512, height=512)
-    path = image.path()  # Save path before deletion
 
-    res = admin_client.get("/images/api/{0}".format(image.id))
-    assert res.status_code == 200
+    resp_json = create_test_image(admin_client)
+    image_id = resp_json['id']
 
-    with patch('betty.cropper.models.settings.BETTY_CACHE_FLUSHER') as mock_flusher:
-        with patch('shutil.rmtree') as mock_rmtree:
+    with patch.object(Image, 'clear_crops') as mock_clear_crops:
+        with patch('os.remove') as mock_remove:
             res = admin_client.post(
-                "/images/api/{0}".format(image.id),
+                "/images/api/{0}".format(image_id),
                 content_type="application/json",
                 REQUEST_METHOD="DELETE",
             )
             assert res.status_code == 200
-            assert not Image.objects.filter(id=image.id)
-            mock_flusher.assert_called_with('/images/1/16x9/640.png')
-            mock_rmtree.assert_called_with(path, ignore_errors=True)
+            assert mock_clear_crops.called
+            image_dir = os.path.join(settings.MEDIA_ROOT, str(image_id))
+            mock_remove.assert_has_calls([call(os.path.join(image_dir, 'Lenna.png')),
+                                          call(os.path.join(image_dir, 'optimized.png'))])
 
 
 @pytest.mark.django_db
@@ -236,8 +237,8 @@ def test_image_search(admin_client):
     assert results["results"][0]["id"] == image.id
 
 
+@pytest.mark.usefixtures("clean_image_root")
 def test_bad_image_data(admin_client):
-    shutil.rmtree(settings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
     response_json = create_test_image(admin_client)
 

@@ -26,7 +26,7 @@ def optimized_upload_to(instance, filename):
     return os.path.join(instance.path(), "optimized{}".format(ext))
 
 
-def optimize_image(path, name, image):
+def optimize_image(path, filename, image):
 
     im = PILImage.open(path)
 
@@ -73,11 +73,11 @@ def optimize_image(path, name, image):
         else:
             im.save(out_buffer, icc_profile=icc_profile)
 
-        image.optimized.save(name, File(out_buffer))
+        image.optimized.save(filename, File(out_buffer))
 
     else:
         # No modifications, just save original as optimized
-        image.optimized.save(name, File(open(path, 'rb')))
+        image.optimized.save(filename, File(open(path, 'rb')))
         # shutil.copy2(image.source.path, image.optimized.name)
 
     image.save()
@@ -117,11 +117,11 @@ class ImageManager(models.Manager):
 
         # Copy temp image file to S3
         # TODO: Just pass image file?
-        image.source.save(name, File(open(path, 'rb')))
+        image.source.save(filename, File(open(path, 'rb')))
 
         # If the image is a GIF, we need to do some special stuff
         if im.format == "GIF":
-            assert "TODO: Handle GIFs"
+            # assert False, "TODO: Handle GIFs"
 
             image.animated = True
 
@@ -129,24 +129,24 @@ class ImageManager(models.Manager):
 
             # First, let's copy the original
             animated_path = os.path.join(image.path(), "animated/original.gif")
-            from django.core.files.storage import default_storage
-            with default_storage.open(animated_path) as animated_file:
-                animated_file.write(animated_path, File(open(path, 'rb')))
-            # shutil.copy(path, animated_path)
-            # os.chmod(animated_path, 744)
+            # from django.core.files.storage import default_storage
+            # with default_storage.open(animated_path) as animated_file:
+                # animated_file.write(animated_path, File(open(path, 'rb')))
+            shutil.copy(path, animated_path)
+            os.chmod(animated_path, 744)
 
             # Next, we'll make a thumbnail of the original
             still_path = os.path.join(image.path(), "animated/original.jpg")
-            if im.mode == "RGB":
-                im.save(still_path, "JPEG")
-            else:
+            if im.mode != "RGB":
                 jpeg = im.convert("RGB")
                 jpeg.save(still_path, "JPEG")
+            else:
+                im.save(still_path, "JPEG")
 
         image.save()
 
         # Use temp image path (instead of pulling from S3)
-        optimize_image(path=path, name=name, image=image)
+        optimize_image(path=path, filename=filename, image=image)
 
         if settings.BETTY_JPEG_QUALITY_RANGE:
             search_image_quality.apply_async(args=(image.id,))
@@ -284,6 +284,7 @@ class Image(models.Model):
             ratios = list(settings.BETTY_RATIOS)
             ratios.append("original")
 
+        # TODO: Fix me -- doesn't flush if not saving crops to disk
         for ratio_slug in ratios:
             ratio_path = os.path.join(self.path(), ratio_slug)
             if os.path.exists(ratio_path):
@@ -424,9 +425,6 @@ class Image(models.Model):
 @receiver(models.signals.post_delete, sender=Image)
 def auto_flush_and_delete_files_on_delete(sender, instance, **kwargs):
     instance.clear_crops()
-    # shutil.rmtree(instance.path(), ignore_errors=True)
-    # TODO: Verify
-    import ipdb; ipdb.set_trace()  # XXX BREAKPOINT
     for file_field in [instance.source, instance.optimized]:
         if file_field:
             file_field.delete()

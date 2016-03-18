@@ -1,5 +1,4 @@
 import os
-import shutil
 import stat
 
 from PIL import Image as PILImage
@@ -14,8 +13,8 @@ TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'images')
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_png():
-    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
     path = os.path.join(TEST_DATA_PATH, "Lenna.png")
     image = Image.objects.create_from_path(path)
@@ -35,8 +34,8 @@ def test_png():
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_jpeg():
-    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
     path = os.path.join(TEST_DATA_PATH, "Sam_Hat1.jpg")
     image = Image.objects.create_from_path(path)
@@ -59,8 +58,8 @@ def test_jpeg():
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_jpeg_noext():
-    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
     path = os.path.join(TEST_DATA_PATH, "Sam_Hat1_noext")
     image = Image.objects.create_from_path(path)
@@ -84,8 +83,8 @@ def test_jpeg_noext():
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_huge_jpeg():
-    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
     path = os.path.join(TEST_DATA_PATH, "huge.jpg")
     image = Image.objects.create_from_path(path)
@@ -108,8 +107,8 @@ def test_huge_jpeg():
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_l_mode():
-    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
     path = os.path.join(TEST_DATA_PATH, "Header-Just_How.jpg")
     image = Image.objects.create_from_path(path)
@@ -126,8 +125,8 @@ def test_l_mode():
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_fucked_up_quant_tables():
-    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
     path = os.path.join(TEST_DATA_PATH, "tumblr.jpg")
     image = Image.objects.create_from_path(path)
@@ -141,8 +140,8 @@ def test_fucked_up_quant_tables():
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_gif_upload():
-    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
     path = os.path.join(TEST_DATA_PATH, "animated.gif")
     image = Image.objects.create_from_path(path)
