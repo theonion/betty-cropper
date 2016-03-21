@@ -7,6 +7,12 @@ from django.core.files import File
 from betty.conf.app import settings
 from betty.cropper.models import Image, Ratio
 
+try:
+    from unittest.mock import patch
+except ImportError:
+    from mock import patch
+
+
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'images')
 
 
@@ -130,10 +136,12 @@ def test_placeholder(settings, client):
 
 @pytest.mark.django_db
 def test_missing_file(client):
-    image = Image.objects.create(name="Lenna.gif", width=512, height=512)
+    with patch('betty.cropper.views.logger') as mock_logger:
+        image = Image.objects.create(name="Lenna.gif", width=512, height=512)
 
-    res = client.get('/images/{0}/1x1/256.jpg'.format(image.id))
-    assert res.status_code == 500
+        res = client.get('/images/{0}/1x1/256.jpg'.format(image.id))
+        assert res.status_code == 500
+        assert mock_logger.exception.call_args[0][0].startswith('Cropping error')
 
 
 @pytest.mark.django_db
