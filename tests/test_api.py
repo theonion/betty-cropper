@@ -1,7 +1,7 @@
 import os
 import json
 
-from mock import call, patch
+from mock import patch
 import pytest
 
 from betty.conf.app import settings
@@ -241,8 +241,3 @@ def test_bad_image_data(admin_client):
         id_string += char
     res = admin_client.get('/images/{0}/1x1/400.jpg'.format(id_string))
     assert res.status_code == 200
-
-
-def test_clear_crops(admin_client):
-    image = Image.objects.create(name="Testing", width=512, height=512)
-    image.clear_crops()
