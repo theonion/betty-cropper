@@ -1,5 +1,4 @@
 import os
-import shutil
 import stat
 
 from PIL import Image as PILImage
@@ -14,8 +13,8 @@ TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'images')
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_png():
-    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
     path = os.path.join(TEST_DATA_PATH, "Lenna.png")
     image = Image.objects.create_from_path(path)
@@ -29,14 +28,15 @@ def test_png():
     assert image.jpeg_quality is None
     assert os.path.exists(image.optimized.path)
     assert os.path.exists(image.source.path)
+    assert not image.animated
 
     # Since this image is 512x512, it shouldn't end up getting changed by the optimization process
     assert os.stat(image.optimized.path).st_size == os.stat(image.source.path).st_size
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_jpeg():
-    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
     path = os.path.join(TEST_DATA_PATH, "Sam_Hat1.jpg")
     image = Image.objects.create_from_path(path)
@@ -50,6 +50,7 @@ def test_jpeg():
     assert image.jpeg_quality is None
     assert os.path.exists(image.optimized.path)
     assert os.path.exists(image.source.path)
+    assert not image.animated
 
     source = PILImage.open(image.source.path)
     optimized = PILImage.open(image.optimized.path)
@@ -59,8 +60,8 @@ def test_jpeg():
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_jpeg_noext():
-    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
     path = os.path.join(TEST_DATA_PATH, "Sam_Hat1_noext")
     image = Image.objects.create_from_path(path)
@@ -74,6 +75,7 @@ def test_jpeg_noext():
     assert image.jpeg_quality is None
     assert os.path.exists(image.optimized.path)
     assert os.path.exists(image.source.path)
+    assert not image.animated
 
     source = PILImage.open(image.source.path)
     optimized = PILImage.open(image.optimized.path)
@@ -84,8 +86,8 @@ def test_jpeg_noext():
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_huge_jpeg():
-    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
     path = os.path.join(TEST_DATA_PATH, "huge.jpg")
     image = Image.objects.create_from_path(path)
@@ -99,6 +101,7 @@ def test_huge_jpeg():
     assert image.jpeg_quality is None
     assert os.path.exists(image.optimized.path)
     assert os.path.exists(image.source.path)
+    assert not image.animated
 
     assert image.to_native()["width"] == 3200
 
@@ -108,8 +111,8 @@ def test_huge_jpeg():
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_l_mode():
-    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
     path = os.path.join(TEST_DATA_PATH, "Header-Just_How.jpg")
     image = Image.objects.create_from_path(path)
@@ -123,11 +126,12 @@ def test_l_mode():
     assert image.jpeg_quality is None
     assert os.path.exists(image.optimized.path)
     assert os.path.exists(image.source.path)
+    assert not image.animated
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_fucked_up_quant_tables():
-    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
     path = os.path.join(TEST_DATA_PATH, "tumblr.jpg")
     image = Image.objects.create_from_path(path)
@@ -141,8 +145,8 @@ def test_fucked_up_quant_tables():
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_gif_upload():
-    shutil.rmtree(bettysettings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
     path = os.path.join(TEST_DATA_PATH, "animated.gif")
     image = Image.objects.create_from_path(path)
@@ -155,6 +159,7 @@ def test_gif_upload():
     assert os.path.exists(image.path())
     assert os.path.exists(image.source.path)
     assert os.path.basename(image.source.path) == "animated.gif"
+    assert image.animated
 
     original_gif = os.path.join(image.path(), "animated/original.gif")
 

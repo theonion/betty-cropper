@@ -1,5 +1,4 @@
 import os
-import shutil
 
 import pytest
 
@@ -9,16 +8,6 @@ from betty.conf.app import settings
 from betty.cropper.models import Image, Ratio
 
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'images')
-
-
-@pytest.fixture()
-def clean_image_root(request):
-    # Also does it on startup too, until we cleanup all test cased to cleanup properly
-    shutil.rmtree(settings.BETTY_IMAGE_ROOT, ignore_errors=True)
-
-    def cleanup():
-        shutil.rmtree(settings.BETTY_IMAGE_ROOT, ignore_errors=True)
-    request.addfinalizer(cleanup)
 
 
 @pytest.mark.django_db

@@ -1,0 +1,6 @@
+#!/bin/sh -euo pipefail
+#
+# Install dependencies. Recommened to run this from inside a virtual env.
+
+pip install -e .
+pip install "file://$(pwd)#egg=betty-cropper[dev]"
