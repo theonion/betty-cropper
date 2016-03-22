@@ -146,6 +146,15 @@ def save_crop_to_disk(image_data, path):
         out.write(image_data)
 
 
+def _read_from_storage(file_field):
+    if file_field:
+        # Documentation is sparse, but seems safest to wrap reads inside open/close
+        file_field.open()
+        tmp = io.BytesIO(file_field.read())
+        file_field.close()
+        return tmp
+
+
 class Image(models.Model):
 
     name = models.CharField(max_length=255)
@@ -183,11 +192,20 @@ class Image(models.Model):
         return id_string
 
     @property
-    def best_source(self):
+    def best(self):
         if self.optimized:
             return self.optimized
         else:
             return self.source
+
+    def read_best_bytes(self):
+        return _read_from_storage(self.best)
+
+    def read_source_bytes(self):
+        return _read_from_storage(self.source)
+
+    def read_optimized_bytes(self):
+        return _read_from_storage(self.optimized)
 
     def get_height(self):
         """Lazily returns the height of the image
@@ -326,7 +344,7 @@ class Image(models.Model):
 
         assert self.animated
 
-        img_bytes = io.BytesIO(self.best_source.read())
+        img_bytes = self.read_best_bytes()
         if extension == "jpg":
             # Thumbnail
             img = PILImage.open(img_bytes)
@@ -345,7 +363,7 @@ class Image(models.Model):
         return img_bytes.getvalue()
 
     def crop(self, ratio, width, extension):
-        img = PILImage.open(io.BytesIO(self.best_source.read()))
+        img = PILImage.open(self.read_best_bytes())
 
         if ratio.string == 'original':
             ratio.width = img.size[0]
