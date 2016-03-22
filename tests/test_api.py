@@ -2,7 +2,7 @@ import os
 import json
 import shutil
 
-from mock import patch
+from mock import call, patch
 import pytest
 
 from betty.conf.app import settings
@@ -178,6 +178,10 @@ def test_crop_clearing_disable_save_crops(admin_client, settings):
 @pytest.mark.django_db
 def test_image_delete(admin_client, settings):
     settings.BETTY_SAVE_CROPS = True
+
+    settings.BETTY_RATIOS = ["1x1", "3x1", "16x9"]
+    settings.BETTY_WIDTHS = [200, 400, 600]
+
     image = Image.objects.create(name="Testing", width=512, height=512)
     path = image.path()  # Save path before deletion
 
@@ -193,7 +197,19 @@ def test_image_delete(admin_client, settings):
             )
             assert res.status_code == 200
             assert not Image.objects.filter(id=image.id)
-            mock_flusher.assert_called_with('/images/1/16x9/640.png')
+
+            # Flushes all supported widths (until BETTY_CACHE_FLUSHER supports wildcards)
+            assert sorted(mock_flusher.call_args_list) == sorted(
+                call('/images/{image_id}/{ratio}/{width}.{extension}'.format(image_id=image.id,
+                                                                             width=width,
+                                                                             ratio=ratio,
+                                                                             extension=extension))
+                for extension in ['png', 'jpg']
+                for width in [200, 400, 600]
+                for ratio in ['1x1', '3x1', '16x9', 'original']
+            )
+
+            # Filesystem deletes entire directories if they exist
             mock_rmtree.assert_called_with(path, ignore_errors=True)
 
 
