@@ -37,7 +37,8 @@ def is_optimized(image_field):
             quality=settings.BETTY_DEFAULT_JPEG_QUALITY,
             icc_profile=icc_profile,
             optimize=True)
-        if source_buffer.getbuffer().nbytes < optimized_buffer.getbuffer().nbytes:
+        # Note: .getbuffer().nbytes is preferred, but not supported in Python 2.7
+        if len(source_buffer.getvalue()) < len(optimized_buffer.getvalue()):
             # Looks like the original was already compressed, let's bail.
             return True
 
