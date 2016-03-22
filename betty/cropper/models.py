@@ -303,16 +303,19 @@ class Image(models.Model):
 
         # TODO: Fix me -- doesn't flush if not saving crops to disk
         for ratio_slug in ratios:
-            ratio_path = os.path.join(self.path(), ratio_slug)
-            if os.path.exists(ratio_path):
-                if settings.BETTY_CACHE_FLUSHER:
-                    for crop in os.listdir(ratio_path):
-                        width, format = crop.split(".")
-                        ratio = os.path.basename(ratio_path)
-                        full_url = self.get_absolute_url(ratio=ratio, width=width, format=format)
-                        settings.BETTY_CACHE_FLUSHER(full_url)
+            if settings.BETTY_CACHE_FLUSHER:
+                # Since might now know which formats to flush (since maybe not saving crops to
+                # disk), need to flush all possible crops.
+                # TODO: BETTY_CACHE_FLUSHER should support wildcards
+                for width in settings.BETTY_WIDTHS:
+                    for format in ["png", "jpg"]:
+                        url = self.get_absolute_url(ratio=ratio_slug, width=width, format=format)
+                        settings.BETTY_CACHE_FLUSHER(url)
 
-                if settings.BETTY_SAVE_CROPS:
+            # Delete entire crop ratio directory
+            if settings.BETTY_SAVE_CROPS:
+                ratio_path = os.path.join(self.path(), ratio_slug)
+                if os.path.exists(ratio_path):
                     shutil.rmtree(ratio_path)
 
     def get_jpeg_quality(self, width):
