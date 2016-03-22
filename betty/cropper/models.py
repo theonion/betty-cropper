@@ -283,9 +283,11 @@ class Image(models.Model):
 
         for ratio_slug in ratios:
             if settings.BETTY_CACHE_FLUSHER:
+                # Since might now know which formats to flush (since maybe not saving crops to
+                # disk), need to flush all possible crops.
                 # TODO: BETTY_CACHE_FLUSHER should support wildcards
                 for width in settings.BETTY_WIDTHS:
-                    for format in ['png', 'jpg']:
+                    for format in ["png", "jpg"]:
                         url = self.get_absolute_url(ratio=ratio_slug, width=width, format=format)
                         settings.BETTY_CACHE_FLUSHER(url)
 
