@@ -292,7 +292,7 @@ class Image(models.Model):
                         settings.BETTY_CACHE_FLUSHER(url)
 
             # Delete entire crop ratio directory
-            if settings.BETTY_SAVE_CROPS:
+            if settings.BETTY_SAVE_CROPS_TO_DISK:
                 ratio_path = os.path.join(self.path(), ratio_slug)
                 if os.path.exists(ratio_path):
                     shutil.rmtree(ratio_path)
@@ -361,7 +361,7 @@ class Image(models.Model):
         if icc_profile:
             pillow_kwargs["icc_profile"] = icc_profile
 
-        if settings.BETTY_SAVE_CROPS:
+        if settings.BETTY_SAVE_CROPS_TO_DISK:
             if width in settings.BETTY_WIDTHS or len(settings.BETTY_WIDTHS) == 0:
                 ratio_dir = os.path.join(self.path(), ratio.string)
                 # We only want to save this to the filesystem if it's one of our usual widths.

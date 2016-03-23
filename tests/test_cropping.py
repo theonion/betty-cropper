@@ -176,7 +176,7 @@ def test_image_save(client):
 @pytest.mark.django_db
 @pytest.mark.usefixtures("clean_image_root")
 def test_disable_crop_save(client, settings):
-    settings.BETTY_SAVE_CROPS = False
+    settings.BETTY_SAVE_CROPS_TO_DISK = False
 
     image = Image.objects.create(
         name="Lenna.png",

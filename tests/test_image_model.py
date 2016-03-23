@@ -34,7 +34,7 @@ def make_some_crops(settings):
 @pytest.mark.usefixtures("clean_image_root")
 def test_image_clear_crops_save_disabled(settings):
 
-    settings.BETTY_SAVE_CROPS = False
+    settings.BETTY_SAVE_CROPS_TO_DISK = False
 
     image = make_some_crops(settings)
 
@@ -62,7 +62,7 @@ def test_image_clear_crops_save_disabled(settings):
 @pytest.mark.usefixtures("clean_image_root")
 def test_image_clear_crops_save_enabled(settings):
 
-    settings.BETTY_SAVE_CROPS = True
+    settings.BETTY_SAVE_CROPS_TO_DISK = True
 
     image = make_some_crops(settings)
 
