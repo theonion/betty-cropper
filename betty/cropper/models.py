@@ -42,9 +42,6 @@ def optimize_image(path, filename, image):
         except:
             pass  # Sometimes, crazy images exist.
 
-    # filename = os.path.split(path)[1]
-
-    # image.optimized.name = optimized_upload_to(image, filename)
     if im.size[0] > settings.BETTY_MAX_WIDTH:
         # If the image is really large, we'll save a more reasonable version as the "original"
         height = settings.BETTY_MAX_WIDTH * float(im.size[1]) / float(im.size[0])
@@ -78,7 +75,6 @@ def optimize_image(path, filename, image):
     else:
         # No modifications, just save original as optimized
         image.optimized.save(filename, File(open(path, 'rb')))
-        # shutil.copy2(image.source.path, image.optimized.name)
 
     image.save()
 
@@ -147,8 +143,8 @@ def save_crop_to_disk(image_data, path):
 
 
 def _read_from_storage(file_field):
+    """Convenience wrapper to ensure entire file is read and properly closed."""
     if file_field:
-        # Documentation is sparse, but seems safest to wrap reads inside open/close
         file_field.open()
         tmp = io.BytesIO(file_field.read())
         file_field.close()
@@ -193,6 +189,7 @@ class Image(models.Model):
 
     @property
     def best(self):
+        """Convenience method to prefer optimzied over source image, if available."""
         if self.optimized:
             return self.optimized
         else:
@@ -301,7 +298,6 @@ class Image(models.Model):
             ratios = list(settings.BETTY_RATIOS)
             ratios.append("original")
 
-        # TODO: Fix me -- doesn't flush if not saving crops to disk
         for ratio_slug in ratios:
             if settings.BETTY_CACHE_FLUSHER:
                 # Since might now know which formats to flush (since maybe not saving crops to
