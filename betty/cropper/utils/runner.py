@@ -12,8 +12,7 @@ def generate_settings():
     settings file.
     """
     return """
-MEDIA_ROOT = "{0}"
-BETTY_IMAGE_ROOT = MEDIA_ROOT
+BETTY_IMAGE_ROOT = "{0}"
 BETTY_IMAGE_URL = "/"
 BETTY_RATIOS = ("1x1", "2x1", "3x1", "3x4", "4x3", "16x9")
 BETTY_PLACEHOLDER = True

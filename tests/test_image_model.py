@@ -83,7 +83,7 @@ def test_image_clear_crops_save_enabled(settings):
             )
 
             # Filesystem deletes entire directories if they exist
-            image_dir = os.path.join(settings.MEDIA_ROOT, str(image.id))
+            image_dir = os.path.join(settings.BETTY_IMAGE_ROOT, str(image.id))
             assert sorted(mock_rmtree.call_args_list) == sorted(
                 [call(os.path.join(image_dir, '1x1')),
                  call(os.path.join(image_dir, '16x9'))])

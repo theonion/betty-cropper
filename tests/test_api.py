@@ -194,7 +194,7 @@ def test_image_delete(admin_client, settings):
             assert res.status_code == 200
             assert not Image.objects.filter(id=image_id)
             assert mock_clear_crops.called
-            image_dir = os.path.join(settings.MEDIA_ROOT, str(image_id))
+            image_dir = os.path.join(settings.BETTY_IMAGE_ROOT, str(image_id))
             mock_remove.assert_has_calls([call(os.path.join(image_dir, 'Lenna.png')),
                                           call(os.path.join(image_dir, 'optimized.png'))])
 

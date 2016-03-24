@@ -20,8 +20,8 @@ class BettyConfConfig(AppConfig):
 PACKAGE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 DEFAULTS = {
-    "BETTY_IMAGE_ROOT": _settings.MEDIA_ROOT,
-    "BETTY_IMAGE_URL": urljoin(_settings.MEDIA_URL, "/"),
+    "BETTY_IMAGE_ROOT": os.path.join(_settings.MEDIA_ROOT, "images"),
+    "BETTY_IMAGE_URL": urljoin(_settings.MEDIA_URL, "images/"),
     "BETTY_IMAGE_URL_USE_REQUEST_HOST": False,
     "BETTY_RATIOS": ("1x1", "2x1", "3x1", "3x4", "4x3", "16x9"),
     "BETTY_WIDTHS": [],
@@ -49,6 +49,7 @@ DEFAULTS = {
     "BETTY_JPEG_MAX_ERROR": 3.5,
     "BETTY_JPEG_QUALITY_RANGE": None,
     "BETTY_SAVE_CROPS_TO_DISK": True,  # On by default (per legacy behavior)
+    "BETTY_SAVE_CROPS_TO_DISK_ROOT": None,   # If not set, will use BETTY_IMAGE_ROOT
 }
 
 

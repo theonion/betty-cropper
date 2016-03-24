@@ -327,13 +327,13 @@ class Image(models.Model):
 
         return quality
 
-    def path(self):
+    def path(self, root=None):
         id_string = ""
         for index, char in enumerate(str(self.id)):
             if index % 4 == 0:
                 id_string += "/"
             id_string += char
-        return os.path.join(settings.BETTY_IMAGE_ROOT, id_string[1:])
+        return os.path.join((root or settings.BETTY_IMAGE_ROOT), id_string[1:])
 
     def get_animated(self, extension):
         """Legacy (Pre v0.4) animated behavior.
@@ -355,7 +355,7 @@ class Image(models.Model):
             raise Exception('Unsupported extension')
 
         if settings.BETTY_SAVE_CROPS_TO_DISK:
-            save_crop_to_disk(img_bytes.getvalue(), os.path.join(self.path(),
+            save_crop_to_disk(img_bytes.getvalue(), os.path.join(self.path(self.BETTY_SAVE_CROPS_TO_DISK_ROOT),
                                                                  'animated',
                                                                  'original.{}'.format(extension)))
 
@@ -408,7 +408,8 @@ class Image(models.Model):
         if settings.BETTY_SAVE_CROPS_TO_DISK:
             # We only want to save this to the filesystem if it's one of our usual widths.
             if width in settings.BETTY_WIDTHS or len(settings.BETTY_WIDTHS) == 0:
-                ratio_dir = os.path.join(self.path(), ratio.string)
+                ratio_dir = os.path.join(self.path(settings.BETTY_SAVE_CROPS_TO_DISK_ROOT),
+                                         ratio.string)
                 save_crop_to_disk(tmp.getvalue(),
                                   os.path.join(ratio_dir, "%d.%s" % (width, extension)))
 
