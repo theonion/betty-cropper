@@ -124,7 +124,7 @@ def test_image_selection_source(admin_client):
 @pytest.mark.django_db
 @pytest.mark.usefixtures("clean_image_root")
 def test_crop_clearing_enable_save_crops(admin_client, settings):
-    settings.BETTY_SAVE_CROPS = True
+    settings.BETTY_SAVE_CROPS_TO_DISK = True
 
     response_json = create_test_image(admin_client)
     image_id = response_json['id']
