@@ -162,7 +162,7 @@ def test_crop_clearing_enable_save_crops(admin_client, settings):
 @pytest.mark.usefixtures("clean_image_root")
 def test_crop_clearing_disable_save_crops(admin_client, settings):
 
-    settings.BETTY_SAVE_CROPS = False
+    settings.BETTY_SAVE_CROPS_TO_DISK = False
 
     response_json = create_test_image(admin_client)
     image_id = response_json['id']
@@ -179,7 +179,7 @@ def test_crop_clearing_disable_save_crops(admin_client, settings):
 @pytest.mark.django_db
 @pytest.mark.usefixtures("clean_image_root")
 def test_image_delete(admin_client, settings):
-    settings.BETTY_SAVE_CROPS = True
+    settings.BETTY_SAVE_CROPS_TO_DISK = True
 
     resp_json = create_test_image(admin_client)
     image_id = resp_json['id']

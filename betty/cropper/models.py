@@ -358,7 +358,7 @@ class Image(models.Model):
         elif extension != "gif":
             raise Exception('Unsupported extension')
 
-        if settings.BETTY_SAVE_CROPS:
+        if settings.BETTY_SAVE_CROPS_TO_DISK:
             save_crop_to_disk(img_bytes.getvalue(), os.path.join(self.path(),
                                                                  'animated',
                                                                  'original.{}'.format(extension)))
