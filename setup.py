@@ -39,9 +39,6 @@ install_requires = [
     "South==0.8.4",
     "logan==0.6.0",
     "celery==3.1.11",
-    # New S3 support -- maybe don't make this a required install?
-    "boto==2.39.0",
-    "django-storages==1.4",
 ]
 
 imgmin_requires = [
@@ -49,6 +46,11 @@ imgmin_requires = [
     "scipy>=0.10.0"
 ]
 
+# Optional S3 storage, included for convenience
+s3_requires = [
+    "boto==2.39.0",
+    "django-storages==1.4",
+]
 
 if 'test' in sys.argv:
     setup_requires.extend(dev_requires)
@@ -116,7 +118,8 @@ setup(
     tests_require=dev_requires,
     extras_require={
         'dev': dev_requires,
-        'imgmin': imgmin_requires
+        'imgmin': imgmin_requires,
+        's3': s3_requires,
     },
     entry_points={
         "console_scripts": [
