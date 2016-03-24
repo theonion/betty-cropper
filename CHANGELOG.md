@@ -10,7 +10,7 @@
 
 ### Upgrade Notes:
 
-This new version can be dropped into an existing Betty environment without any settings or behavior changes (legacy image + crop writes to local filesystem) so long as `BETTY_IMAGE_ROOT` is an absolute path. Else you need to set `MEDIA_URL = BETTY_IMAGE_ROOT` (as this is used by default `FileSystemStorage` backend).
+This new version can be dropped into an existing Betty environment without any settings or behavior changes (legacy image + crop writes to local filesystem) so long as `BETTY_IMAGE_ROOT` is an absolute path. Else you need to set `MEDIA_ROOT = BETTY_IMAGE_ROOT` (as this is used by default `FileSystemStorage` backend).
 
 ## Version less than 2.0.0
 
