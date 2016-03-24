@@ -333,7 +333,9 @@ class Image(models.Model):
             if index % 4 == 0:
                 id_string += "/"
             id_string += char
-        return os.path.join((root or settings.BETTY_IMAGE_ROOT), id_string[1:])
+        if root is None:
+            root = settings.BETTY_IMAGE_ROOT
+        return os.path.join(root, id_string[1:])
 
     def get_animated(self, extension):
         """Legacy (Pre v0.4) animated behavior.
@@ -355,9 +357,10 @@ class Image(models.Model):
             raise Exception('Unsupported extension')
 
         if settings.BETTY_SAVE_CROPS_TO_DISK:
-            save_crop_to_disk(img_bytes.getvalue(), os.path.join(self.path(self.BETTY_SAVE_CROPS_TO_DISK_ROOT),
-                                                                 'animated',
-                                                                 'original.{}'.format(extension)))
+            save_crop_to_disk(img_bytes.getvalue(),
+                              os.path.join(self.path(settings.BETTY_SAVE_CROPS_TO_DISK_ROOT),
+                                           'animated',
+                                           'original.{}'.format(extension)))
 
         return img_bytes.getvalue()
 
