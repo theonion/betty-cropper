@@ -123,8 +123,8 @@ def test_image_selection_source(admin_client):
 
 
 @pytest.mark.django_db
-@pytest.mark.usefixtures("clean_image_root")
-def test_crop_clearing(admin_client):
+def test_crop_clearing_enable_save_crops(admin_client, settings):
+    settings.BETTY_SAVE_CROPS_TO_DISK = True
 
     response_json = create_test_image(admin_client)
     image_id = response_json['id']
@@ -175,6 +175,7 @@ def test_image_delete(admin_client):
             assert res.status_code == 200
             assert not Image.objects.filter(id=image_id)
             assert mock_clear_crops.called
+            # Deletes entire image
             path = os.path.join(settings.BETTY_IMAGE_ROOT, str(image_id))
             mock_rmtree.assert_called_with(path, ignore_errors=True)
 

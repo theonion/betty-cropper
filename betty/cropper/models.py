@@ -282,16 +282,20 @@ class Image(models.Model):
             ratios.append("original")
 
         for ratio_slug in ratios:
-            ratio_path = os.path.join(self.path(), ratio_slug)
-            if os.path.exists(ratio_path):
-                if settings.BETTY_CACHE_FLUSHER:
-                    for crop in os.listdir(ratio_path):
-                        width, format = crop.split(".")
-                        ratio = os.path.basename(ratio_path)
-                        full_url = self.get_absolute_url(ratio=ratio, width=width, format=format)
-                        settings.BETTY_CACHE_FLUSHER(full_url)
+            if settings.BETTY_CACHE_FLUSHER:
+                # Since might now know which formats to flush (since maybe not saving crops to
+                # disk), need to flush all possible crops.
+                # TODO: BETTY_CACHE_FLUSHER should support wildcards
+                for width in settings.BETTY_WIDTHS:
+                    for format in ["png", "jpg"]:
+                        url = self.get_absolute_url(ratio=ratio_slug, width=width, format=format)
+                        settings.BETTY_CACHE_FLUSHER(url)
 
-                shutil.rmtree(ratio_path)
+            # Delete entire crop ratio directory
+            if settings.BETTY_SAVE_CROPS_TO_DISK:
+                ratio_path = os.path.join(self.path(), ratio_slug)
+                if os.path.exists(ratio_path):
+                    shutil.rmtree(ratio_path)
 
     def get_jpeg_quality(self, width):
         quality = None
@@ -357,17 +361,18 @@ class Image(models.Model):
         if icc_profile:
             pillow_kwargs["icc_profile"] = icc_profile
 
-        if width in settings.BETTY_WIDTHS or len(settings.BETTY_WIDTHS) == 0:
-            ratio_dir = os.path.join(self.path(), ratio.string)
-            # We only want to save this to the filesystem if it's one of our usual widths.
-            try:
-                os.makedirs(ratio_dir)
-            except OSError as e:
-                if e.errno != 17:
-                    raise e
+        if settings.BETTY_SAVE_CROPS_TO_DISK:
+            if width in settings.BETTY_WIDTHS or len(settings.BETTY_WIDTHS) == 0:
+                ratio_dir = os.path.join(self.path(), ratio.string)
+                # We only want to save this to the filesystem if it's one of our usual widths.
+                try:
+                    os.makedirs(ratio_dir)
+                except OSError as e:
+                    if e.errno != errno.EEXIST:
+                        raise e
 
-            with open(os.path.join(ratio_dir, "%d.%s" % (width, extension)), 'wb+') as out:
-                img.save(out, **pillow_kwargs)
+                with open(os.path.join(ratio_dir, "%d.%s" % (width, extension)), 'wb+') as out:
+                    img.save(out, **pillow_kwargs)
 
         tmp = io.BytesIO()
         img.save(tmp, **pillow_kwargs)
