@@ -29,7 +29,7 @@ def optimized_upload_to(instance, filename):
     return os.path.join(instance.path(), "optimized{}".format(ext))
 
 
-def optimize_image(path, filename, image):
+def optimize_image(path, filename, image_model):
 
     im = PILImage.open(path)
 
@@ -43,7 +43,7 @@ def optimize_image(path, filename, image):
             subsampling = JpegImagePlugin.get_sampling(im)
         except IndexError:
             # Ignore if sampling fails
-            logger.debug('JPEG sampling failed')
+            logger.debug('JPEG sampling failed, ignoring')
         except:
             # mparent(2016-03-25): Eventually eliminate "catch all", but need to log errors to see
             # if we're missing any other exception types in the wild
@@ -77,13 +77,13 @@ def optimize_image(path, filename, image):
         else:
             im.save(out_buffer, icc_profile=icc_profile)
 
-        image.optimized.save(filename, File(out_buffer))
+        image_model.optimized.save(filename, File(out_buffer))
 
     else:
         # No modifications, just save original as optimized
-        image.optimized.save(filename, File(open(path, 'rb')))
+        image_model.optimized.save(filename, File(open(path, 'rb')))
 
-    image.save()
+    image_model.save()
 
 
 class Ratio(object):
@@ -105,7 +105,9 @@ class ImageManager(models.Manager):
     def create_from_path(self, path, filename=None, name=None, credit=None):
         """Creates an image object from a TemporaryUploadedFile insance"""
 
-        im = PILImage.open(path)
+        image_buffer = io.BytesIO(open(path, 'rb').read())
+
+        im = PILImage.open(image_buffer)
         if filename is None:
             filename = os.path.split(path)[1]
         if name is None:
@@ -119,8 +121,8 @@ class ImageManager(models.Manager):
         )
 
         # Copy temp image file to S3
-        # TODO: Just pass image file?
-        image.source.save(filename, File(open(path, 'rb')))
+        image_buffer.seek(0)
+        image.source.save(filename, File(image_buffer))
 
         # If the image is a GIF, we need to do some special stuff
         if im.format == "GIF":
@@ -129,7 +131,7 @@ class ImageManager(models.Manager):
         image.save()
 
         # Use temp image path (instead of pulling from S3)
-        optimize_image(path=path, filename=filename, image=image)
+        optimize_image(path=path, filename=filename, image_model=image)
 
         if settings.BETTY_JPEG_QUALITY_RANGE:
             search_image_quality.apply_async(args=(image.id,))
@@ -215,23 +217,24 @@ class Image(models.Model):
         """Lazily returns the height of the image
 
         If the width exists in the database, that value will be returned,
-        otherwise the width will be read from the filesystem."""
-        if self.height in (None, 0):
-            img = PILImage.open(self.source.path)
-            self.height = img.size[1]
-            self.width = img.size[0]
+        otherwise the width will be read source image."""
+        if not self.height:
+            self._refresh_dimensions()
         return self.height
 
     def get_width(self):
         """Lazily returns the width of the image
 
         If the width exists in the database, that value will be returned,
-        otherwise the width will be read from the filesystem."""
-        if self.width in (None, 0):
-            img = PILImage.open(self.source.path)
-            self.height = img.size[1]
-            self.width = img.size[0]
+        otherwise the width will be read source image."""
+        if not self.width:
+            self._refresh_dimensions()
         return self.width
+
+    def _refresh_dimensions(self):
+        img = PILImage.open(self.read_source_bytes())
+        self.height = img.size[1]
+        self.width = img.size[0]
 
     def get_selection(self, ratio):
         """Returns the image selection for a given ratio
