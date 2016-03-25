@@ -19,7 +19,7 @@ def test_alternate_storage(admin_client, settings):
     with patch('django.db.models.fields.files.default_storage._wrapped', storage):
 
         # Create Image
-        path = os.path.join(TEST_DATA_PATH, 'lenna.png')
+        path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
         with open(path, "rb") as image:
 
             resp = admin_client.post('/images/api/new', {"image": image})
@@ -28,7 +28,7 @@ def test_alternate_storage(admin_client, settings):
 
             image.seek(0)
             image_data = image.read()
-            storage_data = storage.filesystem.open('images/{}/lenna.png'.format(image_id)).read()
+            storage_data = storage.filesystem.open('images/{}/Lenna.png'.format(image_id)).read()
             assert image_data == storage_data
             assert storage.filesystem.exists('images/{}/optimized.png'.format(image_id))
 
@@ -36,5 +36,5 @@ def test_alternate_storage(admin_client, settings):
         resp = admin_client.post("/images/api/{0}".format(image_id),
                                  REQUEST_METHOD="DELETE")
 
-        assert not storage.filesystem.exists('images/{}/lenna.png'.format(image_id))
+        assert not storage.filesystem.exists('images/{}/Lenna.png'.format(image_id))
         assert not storage.filesystem.exists('images/{}/optimized.png'.format(image_id))
