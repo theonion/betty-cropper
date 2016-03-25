@@ -13,10 +13,6 @@ TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'images')
 
 @pytest.fixture()
 def image(request):
-    return make_image()
-
-
-def make_image(path='Lenna.jpg'):
     image = Image.objects.create(name="Testing", width=512, height=512)
     lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
     with open(lenna_path, "rb") as lenna:

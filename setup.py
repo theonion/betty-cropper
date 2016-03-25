@@ -27,7 +27,8 @@ dev_requires = [
     "mock>=1.0.1",
     "numpy>=1.6.0",
     "scipy>=0.10.0",
-    "psutil==2.2.1"
+    "psutil==2.2.1",
+    "dj-inmemorystorage=1.4.0",
 ]
 
 install_requires = [
