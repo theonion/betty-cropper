@@ -29,9 +29,9 @@ def optimized_upload_to(instance, filename):
     return os.path.join(instance.path(), "optimized{}".format(ext))
 
 
-def optimize_image(path, filename, image_model):
+def optimize_image(image_model, image_buffer, filename):
 
-    im = PILImage.open(path)
+    im = PILImage.open(image_buffer)
 
     # Let's cache some important stuff
     format = im.format
@@ -81,7 +81,8 @@ def optimize_image(path, filename, image_model):
 
     else:
         # No modifications, just save original as optimized
-        image_model.optimized.save(filename, File(open(path, 'rb')))
+        image_buffer.seek(0)
+        image_model.optimized.save(filename, File(image_buffer))
 
     image_model.save()
 
@@ -131,7 +132,8 @@ class ImageManager(models.Manager):
         image.save()
 
         # Use temp image path (instead of pulling from S3)
-        optimize_image(path=path, filename=filename, image_model=image)
+        image_buffer.seek(0)
+        optimize_image(image_model=image, image_buffer=image_buffer, filename=filename)
 
         if settings.BETTY_JPEG_QUALITY_RANGE:
             search_image_quality.apply_async(args=(image.id,))
