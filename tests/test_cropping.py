@@ -7,10 +7,7 @@ from django.core.files import File
 from betty.conf.app import settings
 from betty.cropper.models import Image, Ratio
 
-try:
-    from unittest.mock import patch
-except ImportError:
-    from mock import patch
+from mock import patch
 
 
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'images')
