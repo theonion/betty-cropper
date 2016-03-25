@@ -8,4 +8,4 @@ else
     ARGS="$@"
 fi
 
-py.test $ARGS
+py.test -s $ARGS
