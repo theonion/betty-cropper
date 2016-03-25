@@ -28,7 +28,7 @@ dev_requires = [
     "numpy>=1.6.0",
     "scipy>=0.10.0",
     "psutil==2.2.1",
-    "dj-inmemorystorage=1.4.0",
+    "dj-inmemorystorage==1.4.0",
 ]
 
 install_requires = [
