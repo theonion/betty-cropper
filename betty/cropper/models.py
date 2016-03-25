@@ -17,6 +17,9 @@ from betty.cropper.tasks import search_image_quality
 from jsonfield import JSONField
 
 
+logger = __import__('logging').getLogger(__name__)
+
+
 def source_upload_to(instance, filename):
     return os.path.join(instance.path(), filename)
 
@@ -38,9 +41,13 @@ def optimize_image(path, filename, image):
     if format == "JPEG":
         try:
             subsampling = JpegImagePlugin.get_sampling(im)
-        # TODO: Handle a specific exception
+        except IndexError:
+            # Ignore if sampling fails
+            logger.debug('JPEG sampling failed')
         except:
-            pass  # Sometimes, crazy images exist.
+            # mparent(2016-03-25): Eventually eliminate "catch all", but need to log errors to see
+            # if we're missing any other exception types in the wild
+            logger.exception('JPEG sampling error')
 
     if im.size[0] > settings.BETTY_MAX_WIDTH:
         # If the image is really large, we'll save a more reasonable version as the "original"
