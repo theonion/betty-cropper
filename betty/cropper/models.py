@@ -367,6 +367,8 @@ class Image(models.Model):
     def crop(self, ratio, width, extension):
         img = PILImage.open(self.read_best_bytes())
 
+        icc_profile = img.info.get("icc_profile")
+
         if ratio.string == 'original':
             ratio.width = img.size[0]
             ratio.height = img.size[1]
@@ -401,9 +403,8 @@ class Image(models.Model):
         if extension == "png":
             pillow_kwargs = {"format": "png"}
 
-        # TODO: Not defined!!
-        # if icc_profile:
-        #     pillow_kwargs["icc_profile"] = icc_profile
+        if icc_profile:
+            pillow_kwargs["icc_profile"] = icc_profile
 
         tmp = io.BytesIO()
         img.save(tmp, **pillow_kwargs)
