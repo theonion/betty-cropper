@@ -350,7 +350,7 @@ class Image(models.Model):
         return os.path.join(root, id_string[1:])
 
     def get_animated(self, extension):
-        """Legacy (Pre v0.4) animated behavior.
+        """Legacy (Pre-v2.0) animated behavior.
         Originally betty just wrote these to disk on image creation and let NGINX try-files
         automatically serve these animated GIF + JPG.
         """
@@ -423,7 +423,7 @@ class Image(models.Model):
 
         if settings.BETTY_SAVE_CROPS_TO_DISK:
             # We only want to save this to the filesystem if it's one of our usual widths.
-            if width in settings.BETTY_WIDTHS or len(settings.BETTY_WIDTHS) == 0:
+            if width in settings.BETTY_WIDTHS or not settings.BETTY_WIDTHS:
                 ratio_dir = os.path.join(self.path(settings.BETTY_SAVE_CROPS_TO_DISK_ROOT),
                                          ratio.string)
                 save_crop_to_disk(tmp.getvalue(),
