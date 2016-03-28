@@ -1,0 +1,8 @@
+Django>=1.7,<1.9
+six==1.9.0
+slimit==0.8.1
+jsonfield==0.9.20
+Pillow==2.5.3
+South==0.8.4
+logan==0.6.0
+celery==3.1.11

@@ -18,40 +18,20 @@ license = 'MIT'
 
 setup_requires = []
 
-dev_requires = [
-    "flake8<3",
-    "pytest==2.9.0",
-    "pytest-django==2.8.0",
-    "pytest-cov>=1.4",
-    "coveralls==0.4.1",
-    "mock>=1.0.1",
-    "numpy>=1.6.0",
-    "scipy>=0.10.0",
-    "psutil==2.2.1",
-    "dj-inmemorystorage==1.4.0",
-]
 
-install_requires = [
-    "Django>=1.7,<1.9",
-    "six==1.9.0",
-    "slimit==0.8.1",
-    "jsonfield==0.9.20",
-    "Pillow==2.5.3",
-    "South==0.8.4",
-    "logan==0.6.0",
-    "celery==3.1.11",
-]
+def read_requirements(name):
+    return open(os.path.join('requirements', name + '.txt')).readlines()
 
-imgmin_requires = [
-    "numpy>=1.6.0",
-    "scipy>=0.10.0"
-]
+
+imgmin_requires = read_requirements('imgmin')
+
+dev_requires = read_requirements('dev') + imgmin_requires
+
+install_requires = read_requirements('common')
 
 # Optional S3 storage, included for convenience
-s3_requires = [
-    "boto==2.39.0",
-    "django-storages==1.4",
-]
+s3_requires = read_requirements('s3')
+
 
 if 'test' in sys.argv:
     setup_requires.extend(dev_requires)

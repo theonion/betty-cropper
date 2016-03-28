@@ -1,3 +1,5 @@
+# Betty-Cropper Django server
+#
 FROM python:3.5
 MAINTAINER Onion Tech <webtech@theonion.com>
 
@@ -5,8 +7,6 @@ MAINTAINER Onion Tech <webtech@theonion.com>
 RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y \
-        libmemcached-dev \
-        libpq-dev \
         libfreetype6-dev \
         libjpeg-dev \
         libtiff5-dev \
@@ -15,33 +15,22 @@ RUN apt-get update \
         liblapack-dev \
         libatlas-base-dev \
         gfortran \
-        vim \
-    && rm -rf /var/lib/apt/lists/*
-
-# Deployment requirementsl. Docker-py used for assigned port detection workaround.
-RUN pip install "uwsgi>=2.0.11.1,<=2.1" \
-                "docker-py==1.4.0"
-
-RUN pip install "numpy>=1.6.0" \
-                "scipy>=0.10.0"
-
-# TODO: Need to work these out, as they are currently installed on deployment
-RUN pip install psycopg2 \
-                pylibmc \
-                "raven==4.2.1"
-
-# Fixed settings we always want (and simplifies uWSGI invocation)
-ENV UWSGI_MODULE=betty.wsgi:application \
-    UWSGI_MASTER=1
+        vim
 
 # Setup app directory
-#RUN mkdir -p /webapp
+RUN mkdir -p /webapp
 WORKDIR /webapp
+
+COPY requirements/ /webapp/requirements/
+
+RUN cd requirements && pip install -r common.txt \
+                                   -r dev.txt 
+                                   #-r imgmin.txt
 
 # Add app as late as possibly (will always trigger cache miss and rebuild from here)
 ADD . /webapp
 
-# TODO: Is this the best way to install? Wnat to be able to run tests too.
-# This way doesn't allow for caching, better to install some requirements files before ADD-ing base dir
-RUN pip install . \
-    && pip install "file://$(pwd)#egg=betty-cropper[dev,s3]"
+# TODO: Necessary for uWSGI app?
+RUN pip install .
+#RUN pip install . \
+#RUN pip install "file://$(pwd)#egg=betty-cropper[dev]"

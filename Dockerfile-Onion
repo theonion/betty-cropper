@@ -1,0 +1,26 @@
+# Onion-flavored Betty Cropper adds support for
+#   - uWSGI
+#   - Postgres
+#   - Memcached
+#   - AWS S3 storage
+#   - Sentry
+#
+FROM betty-cropper
+MAINTAINER Onion Tech <webtech@theonion.com>
+
+# Grab packages and then cleanup (to minimize image size)
+RUN apt-get install -y \
+        libmemcached-dev \
+        libpq-dev
+
+# Fixed settings we always want (and simplifies uWSGI invocation)
+ENV UWSGI_MODULE=betty.wsgi:application \
+    UWSGI_MASTER=1
+
+RUN pip install "boto==2.39.0" \
+                "django-storages==1.4" \
+                "psycopg2==2.6.1" \
+                "pylibmc==1.5.1" \
+                "raven==4.2.1" \
+                "uwsgi>=2.0.11.1,<=2.1" \
+                "docker-py==1.4.0"
