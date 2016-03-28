@@ -5,7 +5,7 @@ import shutil
 
 from django.db import models
 from django.dispatch import receiver
-from django.core.files.storage import FileSystemStorage
+from django.core.files import File
 from django.core.urlresolvers import reverse
 
 from PIL import Image as PILImage
@@ -17,10 +17,7 @@ from betty.cropper.tasks import search_image_quality
 from jsonfield import JSONField
 
 
-betty_storage = FileSystemStorage(
-    location=settings.BETTY_IMAGE_ROOT,
-    base_url=settings.BETTY_IMAGE_URL
-)
+logger = __import__('logging').getLogger(__name__)
 
 
 def source_upload_to(instance, filename):
@@ -28,13 +25,13 @@ def source_upload_to(instance, filename):
 
 
 def optimized_upload_to(instance, filename):
-    path, ext = os.path.splitext(filename)
+    _path, ext = os.path.splitext(filename)
     return os.path.join(instance.path(), "optimized{}".format(ext))
 
 
-def optimize_image(image):
+def optimize_image(image_model, image_buffer, filename):
 
-    im = PILImage.open(image.source.path)
+    im = PILImage.open(image_buffer)
 
     # Let's cache some important stuff
     format = im.format
@@ -44,22 +41,25 @@ def optimize_image(image):
     if format == "JPEG":
         try:
             subsampling = JpegImagePlugin.get_sampling(im)
+        except IndexError:
+            # Ignore if sampling fails
+            logger.debug('JPEG sampling failed, ignoring')
         except:
-            pass  # Sometimes, crazy images exist.
+            # mparent(2016-03-25): Eventually eliminate "catch all", but need to log errors to see
+            # if we're missing any other exception types in the wild
+            logger.exception('JPEG sampling error')
 
-    filename = os.path.split(image.source.path)[1]
-
-    image.optimized.name = optimized_upload_to(image, filename)
     if im.size[0] > settings.BETTY_MAX_WIDTH:
         # If the image is really large, we'll save a more reasonable version as the "original"
         height = settings.BETTY_MAX_WIDTH * float(im.size[1]) / float(im.size[0])
         im = im.resize((settings.BETTY_MAX_WIDTH, int(round(height))), PILImage.ANTIALIAS)
 
+        out_buffer = io.BytesIO()
         if format == "JPEG" and im.mode == "RGB":
             # For JPEG files, we need to make sure that we keep the quantization profile
             try:
                 im.save(
-                    image.optimized.name,
+                    out_buffer,
                     icc_profile=icc_profile,
                     qtables=quantization,
                     subsampling=subsampling,
@@ -67,21 +67,28 @@ def optimize_image(image):
             except (TypeError, ValueError) as e:
                 # Maybe the image already had an invalid quant table?
                 if e.message.startswith("Not a valid numbers of quantization tables"):
+                    out_buffer = io.BytesIO()  # Make sure it's empty after failed save attempt
                     im.save(
-                        image.optimized.name,
+                        out_buffer,
                         icc_profile=icc_profile
                     )
                 else:
                     raise
         else:
-            im.save(image.optimized.name, icc_profile=icc_profile)
-    else:
-        shutil.copy2(image.source.path, image.optimized.name)
+            im.save(out_buffer, icc_profile=icc_profile)
 
-    image.save()
+        image_model.optimized.save(filename, File(out_buffer))
+
+    else:
+        # No modifications, just save original as optimized
+        image_buffer.seek(0)
+        image_model.optimized.save(filename, File(image_buffer))
+
+    image_model.save()
 
 
 class Ratio(object):
+
     def __init__(self, ratio):
         self.string = ratio
         self.height = 0
@@ -99,7 +106,9 @@ class ImageManager(models.Manager):
     def create_from_path(self, path, filename=None, name=None, credit=None):
         """Creates an image object from a TemporaryUploadedFile insance"""
 
-        im = PILImage.open(path)
+        image_buffer = io.BytesIO(open(path, 'rb').read())
+
+        im = PILImage.open(image_buffer)
         if filename is None:
             filename = os.path.split(path)[1]
         if name is None:
@@ -112,38 +121,19 @@ class ImageManager(models.Manager):
             height=im.size[1]
         )
 
-        try:
-            os.makedirs(image.path())
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                raise
-
-        # Let's make sure we copy the temp file to the source location
-        source_path = source_upload_to(image, filename)
-        shutil.copy(path, source_path)
-        image.source.name = source_path
+        # Copy temp image file to S3
+        image_buffer.seek(0)
+        image.source.save(filename, File(image_buffer))
 
         # If the image is a GIF, we need to do some special stuff
         if im.format == "GIF":
             image.animated = True
 
-            os.makedirs(os.path.join(image.path(), "animated"))
-
-            # First, let's copy the original
-            animated_path = os.path.join(image.path(), "animated/original.gif")
-            shutil.copy(path, animated_path)
-            os.chmod(animated_path, 744)
-
-            # Next, we'll make a thumbnail of the original
-            still_path = os.path.join(image.path(), "animated/original.jpg")
-            if im.mode != "RGB":
-                jpeg = im.convert("RGB")
-                jpeg.save(still_path, "JPEG")
-            else:
-                im.save(still_path, "JPEG")
-
         image.save()
-        optimize_image(image)
+
+        # Use temp image path (instead of pulling from S3)
+        image_buffer.seek(0)
+        optimize_image(image_model=image, image_buffer=image_buffer, filename=filename)
 
         if settings.BETTY_JPEG_QUALITY_RANGE:
             search_image_quality.apply_async(args=(image.id,))
@@ -151,14 +141,35 @@ class ImageManager(models.Manager):
         return image
 
 
+def save_crop_to_disk(image_data, path):
+
+    try:
+        os.makedirs(os.path.dirname(path))
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise e
+
+    with open(path, 'wb+') as out:
+        out.write(image_data)
+
+
+def _read_from_storage(file_field):
+    """Convenience wrapper to ensure entire file is read and properly closed."""
+    if file_field:
+        file_field.open()
+        tmp = io.BytesIO(file_field.read())
+        file_field.close()
+        return tmp
+
+
 class Image(models.Model):
 
     name = models.CharField(max_length=255)
     credit = models.CharField(max_length=120, null=True, blank=True)
 
-    source = models.FileField(upload_to=source_upload_to, storage=betty_storage,
+    source = models.FileField(upload_to=source_upload_to,
                               max_length=255, null=True, blank=True)
-    optimized = models.FileField(upload_to=optimized_upload_to, storage=betty_storage,
+    optimized = models.FileField(upload_to=optimized_upload_to,
                                  max_length=255, null=True, blank=True)
 
     height = models.IntegerField(null=True, blank=True)
@@ -187,27 +198,45 @@ class Image(models.Model):
             id_string += char
         return id_string
 
+    @property
+    def best(self):
+        """Convenience method to prefer optimzied over source image, if available."""
+        if self.optimized:
+            return self.optimized
+        else:
+            return self.source
+
+    def read_best_bytes(self):
+        return _read_from_storage(self.best)
+
+    def read_source_bytes(self):
+        return _read_from_storage(self.source)
+
+    def read_optimized_bytes(self):
+        return _read_from_storage(self.optimized)
+
     def get_height(self):
         """Lazily returns the height of the image
 
         If the width exists in the database, that value will be returned,
-        otherwise the width will be read from the filesystem."""
-        if self.height in (None, 0):
-            img = PILImage.open(self.source.path)
-            self.height = img.size[1]
-            self.width = img.size[0]
+        otherwise the width will be read source image."""
+        if not self.height:
+            self._refresh_dimensions()
         return self.height
 
     def get_width(self):
         """Lazily returns the width of the image
 
         If the width exists in the database, that value will be returned,
-        otherwise the width will be read from the filesystem."""
-        if self.width in (None, 0):
-            img = PILImage.open(self.source.path)
-            self.height = img.size[1]
-            self.width = img.size[0]
+        otherwise the width will be read source image."""
+        if not self.width:
+            self._refresh_dimensions()
         return self.width
+
+    def _refresh_dimensions(self):
+        img = PILImage.open(self.read_source_bytes())
+        self.height = img.size[1]
+        self.width = img.size[0]
 
     def get_selection(self, ratio):
         """Returns the image selection for a given ratio
@@ -282,16 +311,20 @@ class Image(models.Model):
             ratios.append("original")
 
         for ratio_slug in ratios:
-            ratio_path = os.path.join(self.path(), ratio_slug)
-            if os.path.exists(ratio_path):
-                if settings.BETTY_CACHE_FLUSHER:
-                    for crop in os.listdir(ratio_path):
-                        width, format = crop.split(".")
-                        ratio = os.path.basename(ratio_path)
-                        full_url = self.get_absolute_url(ratio=ratio, width=width, format=format)
-                        settings.BETTY_CACHE_FLUSHER(full_url)
+            if settings.BETTY_CACHE_FLUSHER:
+                # Since might now know which formats to flush (since maybe not saving crops to
+                # disk), need to flush all possible crops.
+                # TODO: BETTY_CACHE_FLUSHER should support wildcards
+                for width in settings.BETTY_WIDTHS:
+                    for format in ["png", "jpg"]:
+                        url = self.get_absolute_url(ratio=ratio_slug, width=width, format=format)
+                        settings.BETTY_CACHE_FLUSHER(url)
 
-                shutil.rmtree(ratio_path)
+            # Delete entire crop ratio directory
+            if settings.BETTY_SAVE_CROPS_TO_DISK:
+                ratio_path = os.path.join(self.path(), ratio_slug)
+                if os.path.exists(ratio_path):
+                    shutil.rmtree(ratio_path)
 
     def get_jpeg_quality(self, width):
         quality = None
@@ -306,20 +339,48 @@ class Image(models.Model):
 
         return quality
 
-    def path(self):
+    def path(self, root=None):
         id_string = ""
         for index, char in enumerate(str(self.id)):
             if index % 4 == 0:
                 id_string += "/"
             id_string += char
-        return os.path.join(settings.BETTY_IMAGE_ROOT, id_string[1:])
+        if root is None:
+            root = settings.BETTY_IMAGE_ROOT
+        return os.path.join(root, id_string[1:])
 
-    def crop(self, ratio, width, extension, fp=None):
-        if self.optimized:
-            img = PILImage.open(self.optimized.path)
-        else:
-            img = PILImage.open(self.source.path)
+    def get_animated(self, extension):
+        """Legacy (Pre-v2.0) animated behavior.
+        Originally betty just wrote these to disk on image creation and let NGINX try-files
+        automatically serve these animated GIF + JPG.
+        """
+
+        assert self.animated
+
+        img_bytes = self.read_best_bytes()
+        if extension == "jpg":
+            # Thumbnail
+            img = PILImage.open(img_bytes)
+            if img.mode != "RGB":
+                img = img.convert("RGB")
+            img_bytes = io.BytesIO()
+            img.save(img_bytes, "JPEG")
+        elif extension != "gif":
+            raise Exception('Unsupported extension')
+
+        if settings.BETTY_SAVE_CROPS_TO_DISK:
+            save_crop_to_disk(img_bytes.getvalue(),
+                              os.path.join(self.path(settings.BETTY_SAVE_CROPS_TO_DISK_ROOT),
+                                           'animated',
+                                           'original.{}'.format(extension)))
+
+        return img_bytes.getvalue()
+
+    def crop(self, ratio, width, extension):
+        img = PILImage.open(self.read_best_bytes())
+
         icc_profile = img.info.get("icc_profile")
+
         if ratio.string == 'original':
             ratio.width = img.size[0]
             ratio.height = img.size[1]
@@ -357,20 +418,16 @@ class Image(models.Model):
         if icc_profile:
             pillow_kwargs["icc_profile"] = icc_profile
 
-        if width in settings.BETTY_WIDTHS or len(settings.BETTY_WIDTHS) == 0:
-            ratio_dir = os.path.join(self.path(), ratio.string)
-            # We only want to save this to the filesystem if it's one of our usual widths.
-            try:
-                os.makedirs(ratio_dir)
-            except OSError as e:
-                if e.errno != 17:
-                    raise e
-
-            with open(os.path.join(ratio_dir, "%d.%s" % (width, extension)), 'wb+') as out:
-                img.save(out, **pillow_kwargs)
-
         tmp = io.BytesIO()
         img.save(tmp, **pillow_kwargs)
+
+        if settings.BETTY_SAVE_CROPS_TO_DISK:
+            # We only want to save this to the filesystem if it's one of our usual widths.
+            if width in settings.BETTY_WIDTHS or not settings.BETTY_WIDTHS:
+                ratio_dir = os.path.join(self.path(settings.BETTY_SAVE_CROPS_TO_DISK_ROOT),
+                                         ratio.string)
+                save_crop_to_disk(tmp.getvalue(),
+                                  os.path.join(ratio_dir, "%d.%s" % (width, extension)))
 
         return tmp.getvalue()
 
@@ -416,4 +473,6 @@ class Image(models.Model):
 @receiver(models.signals.post_delete, sender=Image)
 def auto_flush_and_delete_files_on_delete(sender, instance, **kwargs):
     instance.clear_crops()
-    shutil.rmtree(instance.path(), ignore_errors=True)
+    for file_field in [instance.source, instance.optimized]:
+        if file_field:
+            file_field.delete(save=False)

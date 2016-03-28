@@ -1,4 +1,6 @@
 #!/bin/sh
+#
+# Run automated tests
 
 if [ $# -eq 0 ]; then
     ARGS=tests/
@@ -6,4 +8,4 @@ else
     ARGS="$@"
 fi
 
-py.test $ARGS
+py.test -s $ARGS

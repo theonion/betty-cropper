@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
-import os
-import tempfile
+import io
 
 from celery import shared_task
 from PIL import Image as PILImage
@@ -18,26 +17,28 @@ except ImportError:
     IMGMIN_DISABLED = True
 
 
-def is_optimized(image):
+def is_optimized(image_field):
     """Checks if the image is already optimized
 
     For our purposes, we check to see if the existing file will be smaller than
     a version saved at the default quality (80)."""
 
-    im = PILImage.open(image.source.path)
+    source_buffer = image_field.read_source_bytes()
+
+    im = PILImage.open(source_buffer)
     icc_profile = im.info.get("icc_profile")
 
     # First, let's check to make sure that this image isn't already an optimized JPEG
     if im.format == "JPEG":
-        fd, optimized_path = tempfile.mkstemp()
+        optimized_buffer = io.BytesIO()
         im.save(
-            optimized_path,
+            optimized_buffer,
             format="JPEG",
             quality=settings.BETTY_DEFAULT_JPEG_QUALITY,
             icc_profile=icc_profile,
             optimize=True)
-        os.close(fd)
-        if os.stat(image.source.path).st_size < os.stat(optimized_path).st_size:
+        # Note: .getbuffer().nbytes is preferred, but not supported in Python 2.7
+        if len(source_buffer.getvalue()) < len(optimized_buffer.getvalue()):
             # Looks like the original was already compressed, let's bail.
             return True
 
@@ -57,6 +58,8 @@ def search_image_quality(image_id):
         # If the image is already optimized, let's leave this alone...
         return
 
+    # Read buffer from storage once and reset on each iteration
+    optimized_buffer = image.read_optimized_bytes()
     image.jpeg_quality_settings = {}
     last_width = 0
     for width in sorted(settings.BETTY_WIDTHS, reverse=True):
@@ -66,7 +69,8 @@ def search_image_quality(image_id):
             continue
 
         if width > 0:
-            quality = detect_optimal_quality(image.optimized.path, width)
+            optimized_buffer.seek(0)
+            quality = detect_optimal_quality(optimized_buffer, width)
             image.jpeg_quality_settings[width] = quality
 
             if quality == settings.BETTY_JPEG_QUALITY_RANGE[-1]:

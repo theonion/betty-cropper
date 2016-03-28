@@ -1,5 +1,4 @@
 import os
-import shutil
 
 import pytest
 
@@ -7,6 +6,9 @@ from django.core.files import File
 
 from betty.conf.app import settings
 from betty.cropper.models import Image, Ratio
+
+from mock import patch
+
 
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'images')
 
@@ -131,15 +133,17 @@ def test_placeholder(settings, client):
 
 @pytest.mark.django_db
 def test_missing_file(client):
-    image = Image.objects.create(name="Lenna.gif", width=512, height=512)
+    with patch('betty.cropper.views.logger') as mock_logger:
+        image = Image.objects.create(name="Lenna.gif", width=512, height=512)
 
-    res = client.get('/images/{0}/1x1/256.jpg'.format(image.id))
-    assert res.status_code == 500
+        res = client.get('/images/{0}/1x1/256.jpg'.format(image.id))
+        assert res.status_code == 500
+        assert mock_logger.exception.call_args[0][0].startswith('Cropping error')
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_image_save(client):
-    shutil.rmtree(settings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
     image = Image.objects.create(
         name="Lenna.png",
@@ -175,8 +179,29 @@ def test_image_save(client):
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
+def test_disable_crop_save(client, settings):
+    settings.BETTY_SAVE_CROPS_TO_DISK = False
+
+    image = Image.objects.create(
+        name="Lenna.png",
+        width=512,
+        height=512
+    )
+    lenna = File(open(os.path.join(TEST_DATA_PATH, "Lenna.png"), "rb"))
+    image.source.save("Lenna.png", lenna)
+
+    # Now let's test that a JPEG crop will return properly.
+    res = client.get('/images/{}/1x1/240.jpg'.format(image.id))
+    assert res['Content-Type'] == 'image/jpeg'
+    assert res.status_code == 200
+    # Verify crop not saved to disk
+    assert not os.path.exists(os.path.join(image.path(), '1x1', '240.jpg'))
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_non_rgb(client):
-    shutil.rmtree(settings.BETTY_IMAGE_ROOT, ignore_errors=True)
 
     image = Image.objects.create(
         name="animated.gif",
