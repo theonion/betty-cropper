@@ -49,6 +49,7 @@ DEFAULTS = {
     "BETTY_JPEG_MAX_ERROR": 3.5,
     "BETTY_JPEG_QUALITY_RANGE": None,
     "BETTY_SAVE_CROPS_TO_DISK": True,  # On by default (per legacy behavior)
+    "BETTY_SAVE_CROPS_TO_DISK_ROOT": None,   # If not set, will use BETTY_IMAGE_ROOT
 }
 
 

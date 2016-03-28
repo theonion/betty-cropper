@@ -5,8 +5,7 @@ except ImportError:
     pass
 
 from betty.conf.app import settings
-import os
-import tempfile
+import io
 import math
 
 from PIL import Image
@@ -127,11 +126,11 @@ def get_distortion(one, two):
     return (1 / np.mean(ssims) - 1) * 20
 
 
-def detect_optimal_quality(path, width=None, verbose=False):
+def detect_optimal_quality(image_buffer, width=None, verbose=False):
     """Returns the optimal quality for a given image, at a given width"""
 
     # Open the image...
-    pil_original = Image.open(path)
+    pil_original = Image.open(image_buffer)
     icc_profile = pil_original.info.get("icc_profile")
 
     if pil_original.format != "JPEG":
@@ -143,10 +142,10 @@ def detect_optimal_quality(path, width=None, verbose=False):
         }
         if icc_profile:
             pillow_kwargs["icc_profile"] = icc_profile
-        fd, tmppath = tempfile.mkstemp(prefix="imgmin")
-        pil_original.save(tmppath, **pillow_kwargs)
-        pil_original = Image.open(tmppath)
-        os.close(fd)
+        tmp = io.BytesIO()
+        pil_original.save(tmp, **pillow_kwargs)
+        tmp.seek(0)
+        pil_original = Image.open(tmp)
 
     if width:
         height = int(math.ceil((pil_original.size[1] * width) / float(pil_original.size[0])))
@@ -167,7 +166,7 @@ def detect_optimal_quality(path, width=None, verbose=False):
     while qmax > qmin + 1:
         quality = int(round((qmax + qmin) / 2.0))
 
-        fd, tmppath = tempfile.mkstemp(prefix="imgmin{}".format(quality))
+        tmp = io.BytesIO()
         pillow_kwargs = {
             "format": "jpeg",
             "quality": quality,
@@ -176,8 +175,9 @@ def detect_optimal_quality(path, width=None, verbose=False):
 
         if icc_profile:
             pillow_kwargs["icc_profile"] = icc_profile
-        pil_original.save(tmppath, **pillow_kwargs)
-        pil_compressed = Image.open(tmppath)
+        pil_original.save(tmp, **pillow_kwargs)
+        tmp.seek(0)
+        pil_compressed = Image.open(tmp)
 
         np_compressed = np.asarray(pil_compressed)
         density_ratio = abs(color_density(np_compressed) - original_density) / original_density
@@ -191,9 +191,6 @@ def detect_optimal_quality(path, width=None, verbose=False):
             qmin = quality
         else:
             qmax = quality
-
-        os.close(fd)
-        os.remove(tmppath)
 
         if verbose:
             print("{:.2f}/{:.2f}@{}".format(error, density_ratio, quality))

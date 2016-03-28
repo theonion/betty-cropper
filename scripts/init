@@ -2,5 +2,11 @@
 #
 # Install + update project environment
 
-pip install -e .
-pip install "file://$(pwd)#egg=betty-cropper[dev]"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+$SCRIPT_DIR/clean
+$SCRIPT_DIR/install
+
+betty-cropper syncdb
+betty-cropper migrate
+betty-cropper create_token

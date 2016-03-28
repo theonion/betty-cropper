@@ -1,5 +1,4 @@
 import os
-import stat
 
 from PIL import Image as PILImage
 from PIL import JpegImagePlugin
@@ -161,9 +160,6 @@ def test_gif_upload():
     assert os.path.basename(image.source.path) == "animated.gif"
     assert image.animated
 
-    original_gif = os.path.join(image.path(), "animated/original.gif")
-
-    assert stat.S_IMODE(os.lstat(original_gif).st_mode) == 744
-
-    assert os.path.exists(os.path.join(image.path(), "animated/original.gif"))
-    assert os.path.exists(os.path.join(image.path(), "animated/original.jpg"))
+    # mparent(2016-03-18): These are now created on demand
+    assert not os.path.exists(os.path.join(image.path(), "animated/original.gif"))
+    assert not os.path.exists(os.path.join(image.path(), "animated/original.jpg"))

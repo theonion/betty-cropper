@@ -1,10 +1,9 @@
 import os
 import json
 
-from mock import patch
+from mock import call, patch
 import pytest
 
-from betty.conf.app import settings
 from betty.cropper.models import Image
 
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'images')
@@ -123,6 +122,7 @@ def test_image_selection_source(admin_client):
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
 def test_crop_clearing_enable_save_crops(admin_client, settings):
     settings.BETTY_SAVE_CROPS_TO_DISK = True
 
@@ -160,13 +160,32 @@ def test_crop_clearing_enable_save_crops(admin_client, settings):
 
 @pytest.mark.django_db
 @pytest.mark.usefixtures("clean_image_root")
-def test_image_delete(admin_client):
+def test_crop_clearing_disable_save_crops(admin_client, settings):
+
+    settings.BETTY_SAVE_CROPS_TO_DISK = False
+
+    response_json = create_test_image(admin_client)
+    image_id = response_json['id']
+
+    # Generate a crop
+    admin_client.get("/images/{}/1x1/240.jpg".format(image_id))
+
+    image = Image.objects.get(id=image_id)
+
+    # Verify no crop file saved to disk
+    assert not os.path.exists(os.path.join(image.path(), "1x1", "240.jpg"))
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
+def test_image_delete(admin_client, settings):
+    settings.BETTY_SAVE_CROPS_TO_DISK = True
 
     resp_json = create_test_image(admin_client)
     image_id = resp_json['id']
 
     with patch.object(Image, 'clear_crops') as mock_clear_crops:
-        with patch('shutil.rmtree') as mock_rmtree:
+        with patch('os.remove') as mock_remove:
             res = admin_client.post(
                 "/images/api/{0}".format(image_id),
                 content_type="application/json",
@@ -175,9 +194,9 @@ def test_image_delete(admin_client):
             assert res.status_code == 200
             assert not Image.objects.filter(id=image_id)
             assert mock_clear_crops.called
-            # Deletes entire image
-            path = os.path.join(settings.BETTY_IMAGE_ROOT, str(image_id))
-            mock_rmtree.assert_called_with(path, ignore_errors=True)
+            image_dir = os.path.join(settings.BETTY_IMAGE_ROOT, str(image_id))
+            mock_remove.assert_has_calls([call(os.path.join(image_dir, 'Lenna.png')),
+                                          call(os.path.join(image_dir, 'optimized.png'))])
 
 
 @pytest.mark.django_db
