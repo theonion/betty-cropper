@@ -1,0 +1,9 @@
+#!/bin/sh -euo pipefail
+#
+# Cleanup local development environment
+
+# Delete local SQLite database
+rm -f betty.db
+
+# Delete image directory
+rm -rf images/
