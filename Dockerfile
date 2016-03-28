@@ -22,13 +22,16 @@ RUN apt-get update \
 RUN pip install "uwsgi>=2.0.11.1,<=2.1" \
                 "docker-py==1.4.0"
 
+RUN pip install "numpy>=1.6.0" \
+                "scipy>=0.10.0"
+
 # TODO: Need to work these out, as they are currently installed on deployment
 RUN pip install psycopg2 \
                 pylibmc \
                 "raven==4.2.1"
 
 # Fixed settings we always want (and simplifies uWSGI invocation)
-ENV UWSGI_MODULE=combine.wsgi:application \
+ENV UWSGI_MODULE=betty.wsgi:application \
     UWSGI_MASTER=1
 
 # Setup app directory
@@ -40,5 +43,5 @@ ADD . /webapp
 
 # TODO: Is this the best way to install? Wnat to be able to run tests too.
 # This way doesn't allow for caching, better to install some requirements files before ADD-ing base dir
-RUN pip install -e . \
-    && pip install "file://$(pwd)#egg=betty-cropper[dev]"
+RUN pip install . \
+    && pip install "file://$(pwd)#egg=betty-cropper[dev,s3]"
