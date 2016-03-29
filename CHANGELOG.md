@@ -8,6 +8,9 @@
     - Added `BETTY_SAVE_CROPS_TO_DISK_ROOT` to specify root directory on local disk for crops (else will use `BETTY_IMAGE_ROOT` path)
 - Animated images (`/animated/original.{gif,jpg}`) are now created on-demand like crops via a new view. Previously these were created on demand and leaned on nginx to serve cached files from disk. This new approach plays better with generic storage API.
 - Tighten up URL regexes for `/image.js` and `/api/` path matching (were missing start + end markers).
+- Added S3 migration support:
+    - `betty.cropper.storage.MigratedS3BotoStorage` allows parallel testing against filesystem + S3 storage by altering filesystem path to an S3 path at runtime.
+    - Management command `migrate_storage_name` applies final storage name changes once testing completed.
 
 ### Upgrade Notes
 
