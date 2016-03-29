@@ -6,3 +6,5 @@ coveralls==0.4.1
 mock>=1.0.1
 psutil==2.2.1
 dj-inmemorystorage==1.4.0
+ipython==4.1.1
+ipdb==0.8.1

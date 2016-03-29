@@ -24,8 +24,8 @@ WORKDIR /webapp
 COPY requirements/ /webapp/requirements/
 
 RUN cd requirements && pip install -r common.txt \
-                                   -r dev.txt 
-                                   #-r imgmin.txt
+                                   -r dev.txt \
+                                   -r imgmin.txt
 
 # Add app as late as possibly (will always trigger cache miss and rebuild from here)
 ADD . /webapp
@@ -33,4 +33,4 @@ ADD . /webapp
 # TODO: Necessary for uWSGI app?
 RUN pip install .
 #RUN pip install . \
-#RUN pip install "file://$(pwd)#egg=betty-cropper[dev]"
+#    && pip install "file://$(pwd)#egg=betty-cropper[dev]"
