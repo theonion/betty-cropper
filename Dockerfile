@@ -1,4 +1,9 @@
-# Betty-Cropper Django server
+# Betty Cropper Django server with support for
+#   - uWSGI
+#   - Postgres
+#   - Memcached
+#   - AWS S3 storage
+#   - Sentry
 #
 FROM python:3.5
 MAINTAINER Onion Tech <webtech@theonion.com>
@@ -15,7 +20,21 @@ RUN apt-get update \
         liblapack-dev \
         libatlas-base-dev \
         gfortran \
-        vim
+        libmemcached-dev \
+        libpq-dev \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Fixed settings we always want (and simplifies uWSGI invocation)
+ENV UWSGI_MODULE=betty.wsgi:application \
+    UWSGI_MASTER=1
+
+# Extra packages for Onion deployment
+RUN pip install "boto==2.39.0" \
+                "django-storages==1.4" \
+                "psycopg2==2.6.1" \
+                "pylibmc==1.5.1" \
+                "raven==4.2.1" \
+                "uwsgi>=2.0.11.1,<=2.1"
 
 # Setup app directory
 RUN mkdir -p /webapp
@@ -30,7 +49,4 @@ RUN cd requirements && pip install -r common.txt \
 # Add app as late as possibly (will always trigger cache miss and rebuild from here)
 ADD . /webapp
 
-# TODO: Necessary for uWSGI app?
 RUN pip install .
-#RUN pip install . \
-#    && pip install "file://$(pwd)#egg=betty-cropper[dev]"
