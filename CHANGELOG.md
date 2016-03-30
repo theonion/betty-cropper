@@ -8,7 +8,7 @@
 
 - Added S3 migration support:
     - `betty.cropper.storage.MigratedS3BotoStorage` allows parallel testing against filesystem + S3 storage by altering filesystem path to an S3 path at runtime.
-    - Management command `migrate_storage_name` applies final storage name changes once testing completed.
+    - New management command `change_storage_root` applies final storage name changes once testing completed.
 
 ## Version 2.0.0
 
