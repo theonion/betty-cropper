@@ -75,7 +75,7 @@ def redirect_crop(request, id, ratio_slug, width, extension):
                                                        format=extension))
 
 
-@cache_control(max_age=300)
+@cache_control(max_age=settings.BETTY_CACHE_CROP_SEC)
 def crop(request, id, ratio_slug, width, extension):
     if ratio_slug != "original" and ratio_slug not in settings.BETTY_RATIOS:
         raise Http404
@@ -119,7 +119,7 @@ def crop(request, id, ratio_slug, width, extension):
 
 # Legacy behavior -- originally these were just dropped on filesystem and let NGINX frontend serve
 # automatically via try-files.
-@cache_control(max_age=300)
+@cache_control(max_age=settings.BETTY_CACHE_CROP_SEC)
 def animated(request, id, extension):
 
     image_id = int(id.replace("/", ""))
