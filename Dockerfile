@@ -5,7 +5,8 @@
 #   - AWS S3 storage
 #   - Sentry
 #
-FROM python:3.5
+#FROM python:3.5
+FROM python:2.7
 MAINTAINER Onion Tech <webtech@theonion.com>
 
 # Grab packages and then cleanup (to minimize image size)
