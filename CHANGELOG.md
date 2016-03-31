@@ -1,6 +1,6 @@
 # Betty Cropper Change Log
 
-## Version 2.0.3
+## Version 2.0.4
 
 - Management command `change_storage_root` uses older option format for compatibility with Django 1.7
 
