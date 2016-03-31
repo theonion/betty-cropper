@@ -51,7 +51,7 @@ class Command(BaseCommand):
                             not field.name.startswith(options['new'])):  # Prevent re-migrating
 
                         name = (options['new'] + field.name[len(options['old']):])
-                        self.stdout.write('{}Update name: {} --> {}'.format(
+                        self.stdout.write(u'{}Update name: {} --> {}'.format(
                             '[CHECK] ' if options['check'] else '',
                             field.name,
                             name))
