@@ -2,7 +2,7 @@
 
 ## Version 2.0.5
 
-- Optional `BETTY_CAHCE_FLUSHER` callback now passed list of string URLS instead of individual strings. This allows for more efficient callback batching logic.
+- Optional `BETTY_CACHE_FLUSHER` callback now passed list of string URLS instead of individual strings. This allows for more efficient callback batching logic.
 
 ## Version 2.0.4
 
