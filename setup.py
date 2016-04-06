@@ -19,16 +19,17 @@ license = 'MIT'
 setup_requires = []
 
 dev_requires = [
-    "flake8<3",
-    "pytest==2.9.0",
-    "pytest-django==2.8.0",
-    "pytest-cov>=1.4",
     "coveralls==0.4.1",
+    "dj-inmemorystorage==1.4.0",
+    "flake8<3",
+    "httmock==1.2.5",
     "mock>=1.0.1",
     "numpy>=1.6.0",
-    "scipy>=0.10.0",
     "psutil==2.2.1",
-    "dj-inmemorystorage==1.4.0",
+    "pytest-cov>=1.4",
+    "pytest-django==2.8.0",
+    "pytest==2.9.0",
+    "scipy>=0.10.0",
 ]
 
 install_requires = [
