@@ -310,18 +310,20 @@ class Image(models.Model):
             ratios = list(settings.BETTY_RATIOS)
             ratios.append("original")
 
-        for ratio_slug in ratios:
-            if settings.BETTY_CACHE_FLUSHER:
+        if settings.BETTY_CACHE_FLUSHER:
+            # Optional cache flush support
+            urls = []
+            for ratio_slug in ratios:
                 # Since might now know which formats to flush (since maybe not saving crops to
                 # disk), need to flush all possible crops.
-                # TODO: BETTY_CACHE_FLUSHER should support wildcards
-                for width in settings.BETTY_WIDTHS:
-                    for format in ["png", "jpg"]:
-                        url = self.get_absolute_url(ratio=ratio_slug, width=width, format=format)
-                        settings.BETTY_CACHE_FLUSHER(url)
+                urls += [self.get_absolute_url(ratio=ratio_slug, width=width, format=format)
+                         for format in ["png", "jpg"]
+                         for width in settings.BETTY_WIDTHS]
+            settings.BETTY_CACHE_FLUSHER(urls)
 
+        if settings.BETTY_SAVE_CROPS_TO_DISK:
             # Delete entire crop ratio directory
-            if settings.BETTY_SAVE_CROPS_TO_DISK:
+            for ratio_slug in ratios:
                 ratio_path = os.path.join(self.path(), ratio_slug)
                 if os.path.exists(ratio_path):
                     shutil.rmtree(ratio_path)

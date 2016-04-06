@@ -1,5 +1,9 @@
 # Betty Cropper Change Log
 
+## Version 2.0.5
+
+- Optional `BETTY_CAHCE_FLUSHER` callback now passed list of string URLS instead of individual strings. This allows for more efficient callback batching logic.
+
 ## Version 2.0.4
 
 - Management command `change_storage_root` uses older option format for compatibility with Django 1.7
