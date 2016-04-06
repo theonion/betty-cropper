@@ -9,6 +9,7 @@ from betty.contrib.cacheflush import cachemaster
 
 def test_cachemaster_flush(settings):
 
+    settings.BETTY_IMAGE_URL = 'http://onion.local'
     settings.CACHEMASTER_URL = 'http://cachemaster.local/flush'
 
     @all_requests
@@ -16,11 +17,11 @@ def test_cachemaster_flush(settings):
         assert request.url == 'http://cachemaster.local/flush'
         assert request.method == 'POST'
         assert parse_qs(request.body) == {'urls': ['http://onion.local/path/one',
-                                                   'http://onion.local/two']}
+                                                   'http://onion.local/two/']}
         return response(200, 'YAY TEST WORKED')
 
     with HTTMock(response_content):
-        resp = cachemaster.flush(['http://onion.local/path/one',
-                                  'http://onion.local/two'])
+        resp = cachemaster.flush(['/path/one',
+                                  '/two/'])
 
     assert resp.text == 'YAY TEST WORKED'  # Ensures we actually hit the mock
