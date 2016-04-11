@@ -1,5 +1,14 @@
 # Betty Cropper Change Log
 
+## Version 2.0.5
+
+- Fixes max-width resize regression for cases other than "JPG mode=RGB". Switch to IO buffers requires passing
+  a `format` value since no longer a filename to auto-detect via extension.
+
+## Version 2.0.4
+
+- Management command `change_storage_root` uses older option format for compatibility with Django 1.7
+
 ## Version 2.0.2
 
 - Added `settings.BETTY_CACHE_CROP_SEC` to allow configurable crop (and animated) cache times. Defaults to original `300` seconds.
