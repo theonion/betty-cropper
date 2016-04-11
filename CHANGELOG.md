@@ -1,9 +1,14 @@
 # Betty Cropper Change Log
 
-## Version 2.0.5
+## Version 2.1.0
 
 - Optional `BETTY_CACHE_FLUSHER` callback now passed list of string URLS instead of individual strings. This allows for more efficient callback batching logic.
 - Added reference cache flusher `betty.contrib.cacheflush.cachemaster`
+
+## Version 2.0.5
+
+- Fixes max-width resize regression for cases other than "JPG mode=RGB". Switch to IO buffers requires passing
+  a `format` value since no longer a filename to auto-detect via extension.
 
 ## Version 2.0.4
 
