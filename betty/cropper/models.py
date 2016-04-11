@@ -64,18 +64,21 @@ def optimize_image(image_model, image_buffer, filename):
                     qtables=quantization,
                     subsampling=subsampling,
                     format="JPEG")
-            except (TypeError, ValueError) as e:
+            except ValueError as e:
                 # Maybe the image already had an invalid quant table?
-                if e.message.startswith("Not a valid numbers of quantization tables"):
+                if e.args[:1] == ('Invalid quantization table',):
                     out_buffer = io.BytesIO()  # Make sure it's empty after failed save attempt
                     im.save(
                         out_buffer,
-                        icc_profile=icc_profile
+                        icc_profile=icc_profile,
+                        format=format,
                     )
                 else:
                     raise
         else:
-            im.save(out_buffer, icc_profile=icc_profile)
+            im.save(out_buffer,
+                    icc_profile=icc_profile,
+                    format=format)
 
         image_model.optimized.save(filename, File(out_buffer))
 
