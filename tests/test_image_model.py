@@ -35,37 +35,10 @@ def make_some_crops(image, settings):
 
 @pytest.mark.django_db
 @pytest.mark.usefixtures("clean_image_root")
-def test_image_clear_crops_save_disabled(image, settings):
+@pytest.mark.parametrize('save_crops', [True, False])  # Test setting enabled + disabled
+def test_image_clear_crops(image, settings, save_crops):
 
-    settings.BETTY_SAVE_CROPS_TO_DISK = False
-
-    image = make_some_crops(image, settings)
-
-    with patch('betty.cropper.models.settings.BETTY_CACHE_FLUSHER') as mock_flusher:
-        with patch('shutil.rmtree') as mock_rmtree:
-
-            image.clear_crops()
-
-            # Flushes all supported widths (until BETTY_CACHE_FLUSHER supports wildcards)
-            assert sorted(mock_flusher.call_args_list) == sorted(
-                call('/images/{image_id}/{ratio}/{width}.{extension}'.format(image_id=image.id,
-                                                                             width=width,
-                                                                             ratio=ratio,
-                                                                             extension=extension))
-                for extension in ['png', 'jpg']
-                for width in [200, 400]
-                for ratio in ['1x1', '3x1', '16x9', 'original']
-            )
-
-            # No filesystem deletes (save disabled)
-            assert not mock_rmtree.called
-
-
-@pytest.mark.django_db
-@pytest.mark.usefixtures("clean_image_root")
-def test_image_clear_crops_save_enabled(image, settings):
-
-    settings.BETTY_SAVE_CROPS_TO_DISK = True
+    settings.BETTY_SAVE_CROPS_TO_DISK = save_crops
 
     make_some_crops(image, settings)
 
@@ -74,22 +47,23 @@ def test_image_clear_crops_save_enabled(image, settings):
 
             image.clear_crops()
 
-            # Flushes all supported widths (until BETTY_CACHE_FLUSHER supports wildcards)
-            assert sorted(mock_flusher.call_args_list) == sorted(
-                call('/images/{image_id}/{ratio}/{width}.{extension}'.format(image_id=image.id,
-                                                                             width=width,
-                                                                             ratio=ratio,
-                                                                             extension=extension))
-                for extension in ['png', 'jpg']
-                for width in [200, 400]
+            # Flushes all supported crop combinations
+            mock_flusher.assert_called_with([
+                '/images/{image_id}/{ratio}/{width}.{extension}'.format(image_id=image.id,
+                                                                        width=width,
+                                                                        ratio=ratio,
+                                                                        extension=extension)
                 for ratio in ['1x1', '3x1', '16x9', 'original']
-            )
+                for extension in ['png', 'jpg']
+                for width in [200, 400]])
 
-            # Filesystem deletes entire directories if they exist
-            image_dir = os.path.join(settings.BETTY_IMAGE_ROOT, str(image.id))
-            assert sorted(mock_rmtree.call_args_list) == sorted(
-                [call(os.path.join(image_dir, '1x1')),
-                 call(os.path.join(image_dir, '16x9'))])
+            assert mock_rmtree.called == save_crops
+            if save_crops:
+                # Filesystem deletes entire directories if they exist
+                image_dir = os.path.join(settings.BETTY_IMAGE_ROOT, str(image.id))
+                assert sorted(mock_rmtree.call_args_list) == sorted(
+                    [call(os.path.join(image_dir, '1x1')),
+                     call(os.path.join(image_dir, '16x9'))])
 
 
 @pytest.mark.django_db
