@@ -27,12 +27,15 @@ def flush(paths):
             if resp.ok:
                 return resp
             else:
-                logger.error('CacheMaster flush failed: %s %s %s',
+                logger.error('CacheMaster flush failed (%s/%s): %s %s %s %s',
+                             idx,
+                             len(settings.CACHEMASTER_URLS),
                              resp.url,
+                             urls,
                              resp.status_code,
                              resp.reason)
         except requests.RequestException:
-            logger.exception('CacheMaster flush failed ({}/{}): {} {}'.format(
+            logger.exception('CacheMaster flush failed (%s/%s): %s %s'.format(
                 idx,
                 len(settings.CACHEMASTER_URLS),
                 cm_url,
