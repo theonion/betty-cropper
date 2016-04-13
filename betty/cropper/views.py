@@ -28,7 +28,7 @@ EXTENSION_MAP = {
 }
 
 
-@cache_control(max_age=300)
+@cache_control(max_age=settings.BETTY_CACHE_IMAGEJS_SEC)
 def image_js(request):
     widths = set(settings.BETTY_WIDTHS + settings.BETTY_CLIENT_ONLY_WIDTHS)
     # Ensure '0' always present
@@ -61,7 +61,7 @@ def image_js(request):
     return render(request, "image.js", context, content_type="application/javascript")
 
 
-@cache_control(max_age=300)
+@cache_control(max_age=(60 * 60))
 def redirect_crop(request, id, ratio_slug, width, extension):
     image_id = int(id.replace("/", ""))
 

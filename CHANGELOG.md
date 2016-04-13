@@ -1,5 +1,10 @@
 # Betty Cropper Change Log
 
+## Version 2.0.6
+
+- Allow configurable "Image JS" cache time via `settings.BETTY_CACHE_IMAGEJS_SEC`. ImageJS requests are cheap but make up over 50% of current production requests, and only rarely changes on deploys.
+- Increase (rarely called) "crop redireect" cache times to 1 hour, a good balance good balance between fewer requests and not overcommitting in case this ever changes.
+
 ## Version 2.0.5
 
 - Fixes max-width resize regression for cases other than "JPG mode=RGB". Switch to IO buffers requires passing
