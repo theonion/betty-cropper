@@ -12,6 +12,7 @@ from PIL import Image as PILImage
 from PIL import JpegImagePlugin
 
 from betty.conf.app import settings
+from betty.cropper.flush import get_cache_flusher
 from betty.cropper.tasks import search_image_quality
 
 from jsonfield import JSONField
@@ -313,8 +314,9 @@ class Image(models.Model):
             ratios = list(settings.BETTY_RATIOS)
             ratios.append("original")
 
-        if settings.BETTY_CACHE_FLUSHER:
-            # Optional cache flush support
+        # Optional cache flush support
+        flusher = get_cache_flusher()
+        if flusher:
             urls = []
             for ratio_slug in ratios:
                 # Since might now know which formats to flush (since maybe not saving crops to
@@ -322,10 +324,10 @@ class Image(models.Model):
                 urls += [self.get_absolute_url(ratio=ratio_slug, width=width, format=format)
                          for format in ["png", "jpg"]
                          for width in settings.BETTY_WIDTHS]
-            settings.BETTY_CACHE_FLUSHER(urls)
+            flusher(urls)
 
+        # Optional disk crops support
         if settings.BETTY_SAVE_CROPS_TO_DISK:
-            # Delete entire crop ratio directory
             for ratio_slug in ratios:
                 ratio_path = os.path.join(self.path(), ratio_slug)
                 if os.path.exists(ratio_path):
