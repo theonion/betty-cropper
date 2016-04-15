@@ -23,7 +23,7 @@ def flush(paths):
     # Try multiple URLS (for redundancy)
     for idx, cm_url in enumerate(settings.CACHEMASTER_URLS, start=1):
         try:
-            resp = requests.post(cm_url, data=dict(urls=urls))
+            resp = requests.post(cm_url, json=dict(urls=urls))
             if resp.ok:
                 return resp
             else:

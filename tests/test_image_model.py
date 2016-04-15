@@ -39,6 +39,7 @@ def make_some_crops(image, settings):
 def test_image_clear_crops(image, settings, save_crops):
 
     settings.BETTY_SAVE_CROPS_TO_DISK = save_crops
+    settings.BETTY_CACHE_FLUSHER = 'tests.test_image_model.test_flush'
 
     make_some_crops(image, settings)
 
