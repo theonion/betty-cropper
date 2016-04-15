@@ -15,8 +15,7 @@ logger = __import__('logging').getLogger(__name__)
 def flush(paths):
 
     if not hasattr(settings, 'CACHEMASTER_URLS') or not isinstance(settings.CACHEMASTER_URLS, list):
-        logger.error('Invalid/missing setting: "CACHEMASTER_URLS" - list of string URLS')
-        return
+        raise KeyError('Invalid/missing setting: "CACHEMASTER_URLS" - list of string URLS')
 
     urls = [urljoin(settings.BETTY_IMAGE_URL, path) for path in paths]
 
