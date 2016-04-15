@@ -317,14 +317,14 @@ class Image(models.Model):
         # Optional cache flush support
         flusher = get_cache_flusher()
         if flusher:
-            urls = []
+            paths = []
             for ratio_slug in ratios:
                 # Since might now know which formats to flush (since maybe not saving crops to
                 # disk), need to flush all possible crops.
-                urls += [self.get_absolute_url(ratio=ratio_slug, width=width, format=format)
-                         for format in ["png", "jpg"]
-                         for width in settings.BETTY_WIDTHS]
-            flusher(urls)
+                paths += [self.get_absolute_url(ratio=ratio_slug, width=width, format=format)
+                          for format in ["png", "jpg"]
+                          for width in settings.BETTY_WIDTHS]
+            flusher(paths)
 
         # Optional disk crops support
         if settings.BETTY_SAVE_CROPS_TO_DISK:
