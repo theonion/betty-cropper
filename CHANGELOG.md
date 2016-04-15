@@ -2,8 +2,10 @@
 
 ## Version 2.1.0
 
-- Optional `BETTY_CACHE_FLUSHER` callback now passed list of string URLS instead of individual strings. This allows for more efficient callback batching logic.
-- Added reference cache flusher `betty.contrib.cacheflush.cachemaster`
+- Improvements to BETTY_CACHE_FLUSHER support:
+  - `BETTY_CACHE_FLUSHER` can either be set to a callable object or a string import path
+  - Flusher now passed list of string URLS instead of individual strings. This allows for more efficient callback batching logic.
+  - Added reference cache flusher `betty.contrib.cacheflush.cachemaster`
 
 ## Version 2.0.6
 
