@@ -324,11 +324,15 @@ class Image(models.Model):
                 paths += [self.get_absolute_url(ratio=ratio_slug, width=width, format=format)
                           for format in ["png", "jpg"]
                           for width in settings.BETTY_WIDTHS]
+            if self.animated:
+                for format in ['gif', 'jpg']:
+                    paths.append(self.get_animated_url(format=format))
+
             flusher(paths)
 
         # Optional disk crops support
         if settings.BETTY_SAVE_CROPS_TO_DISK:
-            for ratio_slug in ratios:
+            for ratio_slug in (ratios + ['animated']):
                 ratio_path = os.path.join(self.path(), ratio_slug)
                 if os.path.exists(ratio_path):
                     shutil.rmtree(ratio_path)
@@ -443,6 +447,12 @@ class Image(models.Model):
             "id": self.id_string,
             "ratio_slug": ratio,
             "width": width,
+            "extension": format
+        })
+
+    def get_animated_url(self, format="gif"):
+        return reverse("betty.cropper.views.animated", kwargs={
+            "id": self.id_string,
             "extension": format
         })
 

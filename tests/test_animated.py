@@ -61,6 +61,12 @@ def test_get_not_animated(client, image):
 
 @pytest.mark.django_db
 @pytest.mark.usefixtures("clean_image_root")
-def test_get_invalid_iamge(client):
+def test_get_invalid_image(client):
     res = client.get('/images/1/animated/original.gif')
     assert res.status_code == 404
+
+
+def test_get_animated_url():
+    image = Image(id=1)
+    assert '/images/1/animated/original.gif' == image.get_animated_url(format='gif')
+    assert '/images/1/animated/original.jpg' == image.get_animated_url(format='jpg')
