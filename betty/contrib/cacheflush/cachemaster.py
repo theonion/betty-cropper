@@ -29,13 +29,13 @@ def flush(paths):
                 logger.error('CacheMaster flush failed (%s/%s): %s %s %s %s',
                              idx,
                              len(settings.CACHEMASTER_URLS),
-                             resp.url,
+                             cm_url,
                              urls,
                              resp.status_code,
                              resp.reason)
         except requests.RequestException:
-            logger.exception('CacheMaster flush failed (%s/%s): %s %s'.format(
-                idx,
-                len(settings.CACHEMASTER_URLS),
-                cm_url,
-                urls))
+            logger.exception('CacheMaster flush failed (%s/%s): %s %s',
+                             idx,
+                             len(settings.CACHEMASTER_URLS),
+                             cm_url,
+                             urls)
