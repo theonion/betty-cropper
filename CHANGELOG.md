@@ -1,12 +1,12 @@
 # Betty Cropper Change Log
 
 ## Version 2.1.0
-
 - Improvements to BETTY_CACHE_FLUSHER support:
   - `BETTY_CACHE_FLUSHER` can either be set to a callable object or a string import path
   - Flusher now passed list of string URLS instead of individual strings. This allows for more efficient callback batching logic.
   - Added reference cache flusher `betty.contrib.cacheflush.cachemaster`
   - `Image.clear_crops()` now includes animated files (`.../animated/original.{gif,jpg}`)
+- Add optional Docker support
 
 ## Version 2.0.6
 
