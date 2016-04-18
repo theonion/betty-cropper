@@ -1,0 +1,14 @@
+*.py[co]
+__pycache__/
+
+.git*
+
+.dockerignore
+Dockerfile
+docker-compose.yml
+
+.travis.yml
+
+# IDE stuff
+.ropeproject
+.idea

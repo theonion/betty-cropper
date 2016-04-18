@@ -1,0 +1,25 @@
+web:
+  build: .
+  # FROM https://github.com/unbit/uwsgi-docker
+  # in bridged mode the class B network is allocated, so we can simply bind to the first address starting with 172
+  # so we use the very handy .* trick
+  # NOTE: If uWSGI "--python-autoreload" doesn't work / is too slow, could try Django handler: http://serverfault.com/a/642024
+  command: >
+      uwsgi
+      --socket "172.*:8000"
+      --subscribe-to "$$(FASTROUTER_PORT_8000_TCP_ADDR):$$(FASTROUTER_PORT_8000_TCP_PORT):betty.local"
+      --workers 1
+      --buffer-size 16384
+      --disable-sendfile
+      --python-autoreload 3
+      --honour-stdin
+  volumes:
+      - ./:/webapp/
+      ## Optional dotfiles
+      #- ~/.bash_history:/root/.bash_history
+      #- ~/.inputrc:/root/.inputrc:ro
+      #- ~/.ipython:/root/.ipython
+  external_links:
+      - onionservices_fastrouter_1:fastrouter
+  hostname: betty
+  domainname: local
