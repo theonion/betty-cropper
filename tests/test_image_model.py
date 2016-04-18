@@ -39,7 +39,6 @@ def make_some_crops(image, settings):
 def test_image_clear_crops(image, settings, save_crops):
 
     settings.BETTY_SAVE_CROPS_TO_DISK = save_crops
-    settings.BETTY_CACHE_FLUSHER = 'tests.test_image_model.test_flush'
 
     make_some_crops(image, settings)
 
@@ -65,6 +64,38 @@ def test_image_clear_crops(image, settings, save_crops):
                 assert sorted(mock_rmtree.call_args_list) == sorted(
                     [call(os.path.join(image_dir, '1x1')),
                      call(os.path.join(image_dir, '16x9'))])
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
+def test_animated_clear_crops(image, settings):
+
+    settings.BETTY_SAVE_CROPS_TO_DISK = True
+
+    make_some_crops(image, settings)
+
+    # Generate animated "crops" too
+    image.animated = True
+    image.save()
+    image.get_animated('gif')
+    image.get_animated('jpg')
+
+    with patch('betty.cropper.models.settings.BETTY_CACHE_FLUSHER') as mock_flusher:
+        with patch('shutil.rmtree') as mock_rmtree:
+
+            image.clear_crops()
+
+            cleared_paths = mock_flusher.call_args[0][0]
+            for ext in ['gif', 'jpg']:
+                expected = '/images/{image_id}/animated/original.{ext}'.format(image_id=image.id,
+                                                                               ext=ext)
+                assert expected in cleared_paths
+
+            # Filesystem deletes entire directories if they exist
+            assert mock_rmtree.called
+            removed_paths = [c[0][0] for c in mock_rmtree.call_args_list]
+            image_dir = os.path.join(settings.BETTY_IMAGE_ROOT, str(image.id))
+            assert os.path.join(image_dir, 'animated') in removed_paths
 
 
 @pytest.mark.django_db

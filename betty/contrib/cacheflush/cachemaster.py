@@ -15,8 +15,7 @@ logger = __import__('logging').getLogger(__name__)
 def flush(paths):
 
     if not hasattr(settings, 'CACHEMASTER_URLS') or not isinstance(settings.CACHEMASTER_URLS, list):
-        logger.error('Invalid/missing setting: "CACHEMASTER_URLS" - list of string URLS')
-        return
+        raise KeyError('Invalid/missing setting: "CACHEMASTER_URLS" - list of string URLS')
 
     urls = [urljoin(settings.BETTY_IMAGE_URL, path) for path in paths]
 
@@ -30,13 +29,13 @@ def flush(paths):
                 logger.error('CacheMaster flush failed (%s/%s): %s %s %s %s',
                              idx,
                              len(settings.CACHEMASTER_URLS),
-                             resp.url,
+                             cm_url,
                              urls,
                              resp.status_code,
                              resp.reason)
         except requests.RequestException:
-            logger.exception('CacheMaster flush failed (%s/%s): %s %s'.format(
-                idx,
-                len(settings.CACHEMASTER_URLS),
-                cm_url,
-                urls))
+            logger.exception('CacheMaster flush failed (%s/%s): %s %s',
+                             idx,
+                             len(settings.CACHEMASTER_URLS),
+                             cm_url,
+                             urls)

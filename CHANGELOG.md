@@ -2,14 +2,16 @@
 
 ## Version 2.1.0
 
-- Optional `BETTY_CACHE_FLUSHER` callback now passed list of string URLS instead of individual strings. This allows for more efficient callback batching logic.
-- Added reference cache flusher `betty.contrib.cacheflush.cachemaster`
+- Improvements to BETTY_CACHE_FLUSHER support:
+  - `BETTY_CACHE_FLUSHER` can either be set to a callable object or a string import path
+  - Flusher now passed list of string URLS instead of individual strings. This allows for more efficient callback batching logic.
+  - Added reference cache flusher `betty.contrib.cacheflush.cachemaster`
+  - `Image.clear_crops()` now includes animated files (`.../animated/original.{gif,jpg}`)
 
 ## Version 2.0.6
 
 - Allow configurable "Image JS" cache time via `settings.BETTY_CACHE_IMAGEJS_SEC`. ImageJS requests are cheap but make up over 50% of current production requests, and only rarely changes on deploys.
 - Increase (rarely called) "crop redireect" cache times to 1 hour, a good balance between fewer requests and not overcommitting in case this ever changes.
->>>>>>> increase-cache-times2
 
 ## Version 2.0.5
 
