@@ -21,6 +21,10 @@ from jsonfield import JSONField
 logger = __import__('logging').getLogger(__name__)
 
 
+ANIMATED_EXTENSIONS = ['gif', 'jpg']
+CROP_EXTENSIONS = ["png", "jpg"]
+
+
 def source_upload_to(instance, filename):
     return os.path.join(instance.path(), filename)
 
@@ -321,14 +325,18 @@ class Image(models.Model):
             for ratio_slug in ratios:
                 # Since might now know which formats to flush (since maybe not saving crops to
                 # disk), need to flush all possible crops.
-                paths += [self.get_absolute_url(ratio=ratio_slug, width=width, format=format)
-                          for format in ["png", "jpg"]
+                paths += [self.get_absolute_url(ratio=ratio_slug, width=width, extension=extension)
+                          for extension in CROP_EXTENSIONS
                           for width in settings.BETTY_WIDTHS]
+            if self.animated:
+                for extension in ANIMATED_EXTENSIONS:
+                    paths.append(self.get_animated_url(extension=extension))
+
             flusher(paths)
 
         # Optional disk crops support
         if settings.BETTY_SAVE_CROPS_TO_DISK:
-            for ratio_slug in ratios:
+            for ratio_slug in (ratios + ['animated']):
                 ratio_path = os.path.join(self.path(), ratio_slug)
                 if os.path.exists(ratio_path):
                     shutil.rmtree(ratio_path)
@@ -438,12 +446,18 @@ class Image(models.Model):
 
         return tmp.getvalue()
 
-    def get_absolute_url(self, ratio="original", width=600, format="jpg"):
+    def get_absolute_url(self, ratio="original", width=600, extension="jpg"):
         return reverse("betty.cropper.views.crop", kwargs={
             "id": self.id_string,
             "ratio_slug": ratio,
             "width": width,
-            "extension": format
+            "extension": extension
+        })
+
+    def get_animated_url(self, extension="gif"):
+        return reverse("betty.cropper.views.animated", kwargs={
+            "id": self.id_string,
+            "extension": extension
         })
 
     def to_native(self):

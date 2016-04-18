@@ -72,7 +72,7 @@ def redirect_crop(request, id, ratio_slug, width, extension):
     image = Image(id=image_id)
 
     return HttpResponseRedirect(image.get_absolute_url(ratio=ratio_slug, width=width,
-                                                       format=extension))
+                                                       extension=extension))
 
 
 @cache_control(max_age=settings.BETTY_CACHE_CROP_SEC)
