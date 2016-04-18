@@ -68,5 +68,5 @@ def test_get_invalid_image(client):
 
 def test_get_animated_url():
     image = Image(id=1)
-    assert '/images/1/animated/original.gif' == image.get_animated_url(format='gif')
-    assert '/images/1/animated/original.jpg' == image.get_animated_url(format='jpg')
+    assert '/images/1/animated/original.gif' == image.get_animated_url(extension='gif')
+    assert '/images/1/animated/original.jpg' == image.get_animated_url(extension='jpg')
