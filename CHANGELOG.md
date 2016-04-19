@@ -1,5 +1,9 @@
 # Betty Cropper Change Log
 
+## Version 2.1.1
+
+- Packaging/install fix
+
 ## Version 2.1.0
 - Improvements to BETTY_CACHE_FLUSHER support:
   - `BETTY_CACHE_FLUSHER` can either be set to a callable object or a string import path
