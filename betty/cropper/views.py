@@ -3,6 +3,7 @@ from betty.conf.app import settings
 
 from django.http import Http404, HttpResponse, HttpResponseServerError, HttpResponseRedirect
 from django.shortcuts import render
+from django.utils.cache import patch_cache_control
 from django.views.decorators.cache import cache_control
 from six.moves import urllib
 
@@ -75,7 +76,6 @@ def redirect_crop(request, id, ratio_slug, width, extension):
                                                        extension=extension))
 
 
-@cache_control(max_age=settings.BETTY_CACHE_CROP_SEC)
 def crop(request, id, ratio_slug, width, extension):
     if ratio_slug != "original" and ratio_slug not in settings.BETTY_RATIOS:
         raise Http404
@@ -114,6 +114,15 @@ def crop(request, id, ratio_slug, width, extension):
 
     resp = HttpResponse(image_blob)
     resp["Content-Type"] = EXTENSION_MAP[extension]["mime_type"]
+    # Optionally specify alternate cache duration for non-breakpoint widths.
+    # This is useful b/c cache flush callback only receives paths for known breakpoints, so this
+    # allows non-standard widths to have a shorter cache time. This wouldn't be necessary if cache
+    # flush used wildcards instead, or if you could guarantee/force only defined breakpoint widths.
+    max_age = settings.BETTY_CACHE_CROP_SEC
+    if settings.BETTY_CACHE_CROP_NON_BREAKPOINT_SEC is not None:
+        if width not in (settings.BETTY_WIDTHS + settings.BETTY_CLIENT_ONLY_WIDTHS):
+            max_age = settings.BETTY_CACHE_CROP_NON_BREAKPOINT_SEC
+    patch_cache_control(resp, max_age=max_age)
     return resp
 
 
