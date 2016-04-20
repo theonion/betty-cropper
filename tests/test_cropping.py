@@ -110,6 +110,53 @@ def test_image_redirect(client):
     assert res['Location'].endswith("/images/6666/66/1x1/100.jpg")
 
 
+@pytest.fixture()
+def image(request):
+    image = Image.objects.create(
+        name="Lenna.png",
+        width=512,
+        height=512
+    )
+
+    lenna = File(open(os.path.join(TEST_DATA_PATH, "Lenna.png"), "rb"))
+    image.source.save("Lenna.png", lenna)
+    return image
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
+def test_crop_caching(settings, client, image):
+
+    settings.BETTY_CACHE_CROP_SEC = 1234
+    settings.BETTY_CACHE_CROP_NON_BREAKPOINT_SEC = 456
+    settings.BETTY_WIDTHS = [100]
+    settings.BETTY_CLIENT_ONLY_WIDTHS = [200]
+
+    # Breakpoint
+    for width in [100, 200]:
+        res = client.get('/images/{image_id}/1x1/{width}.jpg'.format(image_id=image.id,
+                                                                     width=width))
+        assert res.status_code == 200
+        assert res['Cache-Control'] == 'max-age=1234'
+
+    # Non-Breakpoint
+    res = client.get('/images/{}/1x1/300.jpg'.format(image.id))
+    assert res.status_code == 200
+    assert res['Cache-Control'] == 'max-age=456'
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
+def test_crop_caching_default_non_breakpoint(settings, client, image):
+
+    settings.BETTY_CACHE_CROP_SEC = 1234
+
+    # BETTY_CACHE_CROP_NON_BREAKPOINT_SEC not set, uses BETTY_CACHE_CROP_SEC
+    res = client.get('/images/{}/1x1/100.jpg'.format(image.id))
+    assert res.status_code == 200
+    assert res['Cache-Control'] == 'max-age=1234'
+
+
 @pytest.mark.django_db
 def test_placeholder(settings, client):
     settings.BETTY_PLACEHOLDER = True
@@ -143,15 +190,7 @@ def test_missing_file(client):
 
 @pytest.mark.django_db
 @pytest.mark.usefixtures("clean_image_root")
-def test_image_save(client):
-
-    image = Image.objects.create(
-        name="Lenna.png",
-        width=512,
-        height=512
-    )
-    lenna = File(open(os.path.join(TEST_DATA_PATH, "Lenna.png"), "rb"))
-    image.source.save("Lenna.png", lenna)
+def test_image_save(client, image):
 
     # Now let's test that a JPEG crop will return properly.
     res = client.get('/images/{}/1x1/240.jpg'.format(image.id))
@@ -180,16 +219,8 @@ def test_image_save(client):
 
 @pytest.mark.django_db
 @pytest.mark.usefixtures("clean_image_root")
-def test_disable_crop_save(client, settings):
+def test_disable_crop_save(client, settings, image):
     settings.BETTY_SAVE_CROPS_TO_DISK = False
-
-    image = Image.objects.create(
-        name="Lenna.png",
-        width=512,
-        height=512
-    )
-    lenna = File(open(os.path.join(TEST_DATA_PATH, "Lenna.png"), "rb"))
-    image.source.save("Lenna.png", lenna)
 
     # Now let's test that a JPEG crop will return properly.
     res = client.get('/images/{}/1x1/240.jpg'.format(image.id))

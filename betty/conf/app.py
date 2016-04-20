@@ -51,6 +51,7 @@ DEFAULTS = {
     "BETTY_SAVE_CROPS_TO_DISK": True,  # On by default (per legacy behavior)
     "BETTY_SAVE_CROPS_TO_DISK_ROOT": None,   # If not set, will use BETTY_IMAGE_ROOT
     "BETTY_CACHE_CROP_SEC": 300,
+    "BETTY_CACHE_CROP_NON_BREAKPOINT_SEC": None,  # If not set, will use BETTY_CACHE_CROP_SEC
     "BETTY_CACHE_IMAGEJS_SEC": 300,
 }
 

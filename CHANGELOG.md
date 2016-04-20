@@ -1,5 +1,12 @@
 # Betty Cropper Change Log
 
+## Version 2.2.0
+
+- Allow optional alternate cache duration for non-breakpoint crop widths (i.e. width not in `settings.BETTY_WIDTHS` and
+  `settings.BETTY_CLIENT_ONLY_WIDTHS`) via new `settings.BETTY_CACHE_CROP_NON_BREAKPOINT_SEC`.
+      - This allows breakpoint-widths to set very long cache times because they will be included in the itemized cache flush callback.
+      - If `settings.BETTY_CACHE_CROP_NON_BREAKPOINT_SEC` not set, will use `settings.BETTY_CACHE_CROP_SEC`.
+
 ## Version 2.1.1
 
 - Packaging/install fix
@@ -47,7 +54,7 @@
 
 ### Upgrade Notes
 
-This new version can be dropped into an existing Betty environment, using same local disk filesystem as before, but may require a single settings change (see below). 
+This new version can be dropped into an existing Betty environment, using same local disk filesystem as before, but may require a single settings change (see below).
 
 #### FileSystemStorage (Default)
 
