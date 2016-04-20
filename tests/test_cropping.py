@@ -188,11 +188,6 @@ def test_missing_file(client):
         assert mock_logger.exception.call_args[0][0].startswith('Cropping error')
 
 
-def test_breakpoint_width_caching(client):
-    res = client.get('/images/abc/13x4/256.jpg')
-    assert res.status_code == 404
-
-
 @pytest.mark.django_db
 @pytest.mark.usefixtures("clean_image_root")
 def test_image_save(client, image):
