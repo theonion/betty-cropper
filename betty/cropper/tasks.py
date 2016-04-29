@@ -79,5 +79,5 @@ def search_image_quality(image_id):
 
         last_width = width
 
-    image.clear_crops()
     image.save()
+    image.clear_crops()
