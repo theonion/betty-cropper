@@ -1,5 +1,9 @@
 # Betty Cropper Change Log
 
+## Version 2.3.0
+
+- Added "If-Modified-Since" / 304 request header support to avoid accessing backend storage on cache re-validation.
+
 ## Version 2.2.0
 
 - Allow optional alternate cache duration for non-breakpoint crop widths (i.e. width not in `settings.BETTY_WIDTHS` and
