@@ -5,12 +5,13 @@ from django.http import (Http404, HttpResponse, HttpResponseNotModified,
                          HttpResponseServerError, HttpResponseRedirect)
 from django.shortcuts import render
 from django.utils.cache import patch_cache_control
-from django.utils.http import parse_http_date_safe
+from django.utils.http import http_date
 
 from django.views.decorators.cache import cache_control
 from six.moves import urllib
 
 from .models import Image, Ratio
+from .utils.http import check_not_modified
 from .utils.placeholder import placeholder
 
 logger = __import__('logging').getLogger(__name__)
@@ -30,17 +31,6 @@ EXTENSION_MAP = {
         "mime_type": "image/png"
     },
 }
-
-
-def check_not_modified(request, last_modified):
-    """Handle 304/If-Modified-Since
-
-    With Django v1.9.5+ could just use get_conditional_response, but v1.9 is not
-    supported by "logan" dependancy (yet).
-    """
-    logger.debug('HEADERS: %s', request.META.items())  # TEMP TESTING TO MAKE SURE RIGHT HEADERS
-    if_modified_since = parse_http_date_safe(request.META.get('HTTP_IF_MODIFIED_SINCE'))
-    return last_modified and if_modified_since and last_modified <= if_modified_since
 
 
 @cache_control(max_age=settings.BETTY_CACHE_IMAGEJS_SEC)
@@ -90,6 +80,13 @@ def redirect_crop(request, id, ratio_slug, width, extension):
                                                        extension=extension))
 
 
+def _image_response(image_blob, extension):
+    resp = HttpResponse(image_blob)
+    resp["Content-Type"] = EXTENSION_MAP[extension]["mime_type"]
+    resp['Last-Modified'] = http_date()
+    return resp
+
+
 def crop(request, id, ratio_slug, width, extension):
     if ratio_slug != "original" and ratio_slug not in settings.BETTY_RATIOS:
         raise Http404
@@ -120,7 +117,7 @@ def crop(request, id, ratio_slug, width, extension):
         else:
             raise Http404
 
-    if check_not_modified(request=request, last_modified=image.last_updated):
+    if check_not_modified(request=request, last_modified=image.last_modified):
         # Avoid hitting storage backend on cache update
         resp = HttpResponseNotModified()
     else:
@@ -130,8 +127,7 @@ def crop(request, id, ratio_slug, width, extension):
             logger.exception("Cropping error")
             return HttpResponseServerError("Cropping error")
 
-        resp = HttpResponse(image_blob)
-        resp["Content-Type"] = EXTENSION_MAP[extension]["mime_type"]
+        resp = _image_response(image_blob, extension=extension)
 
     # Optionally specify alternate cache duration for non-breakpoint widths.
     # This is useful b/c cache flush callback only receives paths for known breakpoints, so this
@@ -147,7 +143,6 @@ def crop(request, id, ratio_slug, width, extension):
 
 # Legacy behavior -- originally these were just dropped on filesystem and let NGINX frontend serve
 # automatically via try-files.
-@cache_control(max_age=settings.BETTY_CACHE_CROP_SEC)
 def animated(request, id, extension):
 
     image_id = int(id.replace("/", ""))
@@ -160,9 +155,9 @@ def animated(request, id, extension):
     if not image.animated:
         raise Http404
 
-    if check_not_modified(request=request, last_modified=image.last_updated):
+    if check_not_modified(request=request, last_modified=image.last_modified):
         # Avoid hitting storage backend on cache update
-        return HttpResponseNotModified()
+        resp = HttpResponseNotModified()
     else:
         try:
             image_blob = image.get_animated(extension=extension)
@@ -170,6 +165,7 @@ def animated(request, id, extension):
             logger.exception("Animated error")
             return HttpResponseServerError("Animated error")
 
-        resp = HttpResponse(image_blob)
-        resp["Content-Type"] = EXTENSION_MAP[extension]["mime_type"]
-        return resp
+        resp = _image_response(image_blob, extension=extension)
+
+    patch_cache_control(resp, max_age=settings.BETTY_CACHE_CROP_SEC)
+    return resp

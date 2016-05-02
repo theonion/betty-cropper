@@ -190,7 +190,7 @@ class Image(models.Model):
     animated = models.BooleanField(default=False)
 
     # Used for "If-Modified-Since/304" handling
-    last_updated = models.DateTimeField(auto_now=True)
+    last_modified = models.DateTimeField(auto_now=True)
 
     objects = ImageManager()
 

@@ -9,3 +9,4 @@ psutil==2.2.1
 dj-inmemorystorage==1.4.0
 ipython==4.1.1
 ipdb==0.8.1
+freezegun==0.3.7

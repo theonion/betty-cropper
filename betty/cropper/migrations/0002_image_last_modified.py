@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='image',
-            name='last_updated',
+            name='last_modified',
             field=models.DateTimeField(default=timezone.now(), auto_now=True),
             preserve_default=False,
         ),
