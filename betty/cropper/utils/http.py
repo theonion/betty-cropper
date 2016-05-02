@@ -1,5 +1,3 @@
-import time
-
 from django.utils.http import parse_http_date_safe
 
 from betty.cropper.utils import seconds_since_epoch

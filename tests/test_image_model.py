@@ -131,12 +131,16 @@ def test_refresh_dimensions(image):
         assert image.get_width() == 512
 
 
-@freeze_time('2016-05-02 01:02:03')
 @pytest.mark.django_db
-def test_last_modified_auto_now(image):
+def test_last_modified_auto_now():
+    with freeze_time('2016-05-02 01:02:03'):
+        image = Image.objects.create(
+            name="Lenna.gif",
+            width=512,
+            height=512
+        )
     assert image.last_modified == timezone.datetime(2016, 5, 2, 1, 2, 3, tzinfo=timezone.utc)
 
     with freeze_time('2016-12-02 01:02:03'):
         image.save()
-
     assert image.last_modified == timezone.datetime(2016, 12, 2, 1, 2, 3, tzinfo=timezone.utc)
