@@ -1,6 +1,8 @@
+import io
 import os
 
 from freezegun import freeze_time
+from PIL import Image as PILImage
 import pytest
 
 from django.core.files import File
@@ -23,6 +25,11 @@ def test_basic_cropping(settings, client, image):
     assert res.status_code == 200
     assert res['Cache-Control'] == 'max-age=600'
     assert res['Last-Modified'] == "Mon, 02 May 2016 01:02:03 GMT"
+    assert res['Content-Type'] == "image/jpeg"
+
+    image_buffer = io.BytesIO(res.content)
+    img = PILImage.open(image_buffer)
+    assert img.size == (200, 200)
 
 
 @pytest.mark.django_db

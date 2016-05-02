@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.http import HttpRequest
 from django.utils import timezone
@@ -26,8 +26,9 @@ def test_check_not_modified_has_if_modified_since_header():
     # Fails if "last_modified" invalid
     assert not check_not_modified(request, None)
     # Before
-    assert check_not_modified(request, datetime(1994, 11, 6, 8, 49, 36, tzinfo=timezone.utc))
+    when = datetime(1994, 11, 6, 8, 49, 37, tzinfo=timezone.utc)
+    assert check_not_modified(request, when - timedelta(seconds=1))
     # Identical
-    assert check_not_modified(request, datetime(1994, 11, 6, 8, 49, 37, tzinfo=timezone.utc))
+    assert check_not_modified(request, when)
     # After
-    assert not check_not_modified(request, datetime(1994, 11, 6, 8, 49, 38, tzinfo=timezone.utc))
+    assert not check_not_modified(request, when + timedelta(seconds=1))
