@@ -1,9 +1,11 @@
 import os
 
+from freezegun import freeze_time
 from mock import call, patch
 import pytest
 
 from django.core.files import File
+from django.utils import timezone
 
 from betty.cropper.models import Image, Ratio
 
@@ -127,3 +129,14 @@ def test_refresh_dimensions(image):
         image._refresh_dimensions()
         assert image.width == 512
         assert image.get_width() == 512
+
+
+@freeze_time('2016-05-02 01:02:03')
+@pytest.mark.django_db
+def test_last_modified_auto_now(image):
+    assert image.last_modified == timezone.datetime(2016, 5, 2, 1, 2, 3, tzinfo=timezone.utc)
+
+    with freeze_time('2016-12-02 01:02:03'):
+        image.save()
+
+    assert image.last_modified == timezone.datetime(2016, 12, 2, 1, 2, 3, tzinfo=timezone.utc)
