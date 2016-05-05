@@ -189,6 +189,9 @@ class Image(models.Model):
     jpeg_quality_settings = JSONField(null=True, blank=True)
     animated = models.BooleanField(default=False)
 
+    # Used for "If-Modified-Since/304" handling
+    last_modified = models.DateTimeField(auto_now=True)
+
     objects = ImageManager()
 
     class Meta:

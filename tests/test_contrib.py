@@ -1,6 +1,7 @@
 import json
 
 from httmock import all_requests, HTTMock, response, urlmatch
+from mock import patch
 import requests
 
 from betty.contrib.cacheflush import cachemaster
@@ -43,7 +44,10 @@ def test_cachemaster_first_flush_fails(settings):
         return response(200, 'YAY TEST WORKED')
 
     with HTTMock(error_500, error_connection, success):
-        resp = cachemaster.flush(['/path/one'])
+        with patch('betty.contrib.cacheflush.cachemaster.logger') as mock_log:
+            resp = cachemaster.flush(['/path/one'])
+            # Two errors
+            assert 2 == (mock_log.error.call_count + mock_log.exception.call_count)
 
     assert resp.text == 'YAY TEST WORKED'  # Ensures we actually hit the mock
 
@@ -57,6 +61,8 @@ def test_cachemaster_all_fail(settings):
         return response(500)
 
     with HTTMock(error_500):
-        resp = cachemaster.flush(['/path/one'])
+        with patch('betty.contrib.cacheflush.cachemaster.logger') as mock_log:
+            resp = cachemaster.flush(['/path/one'])
+            assert 2 == mock_log.error.call_count
 
     assert resp is None
