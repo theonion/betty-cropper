@@ -25,6 +25,7 @@ def image(request):
 def make_some_crops(image, settings):
     settings.BETTY_RATIOS = ["1x1", "3x1", "16x9"]
     settings.BETTY_WIDTHS = [200, 400]
+    settings.BETTY_CLIENT_ONLY_WIDTHS = [1200]
 
     # Crops that would be saved (if enabled)
     image.crop(ratio=Ratio('1x1'), width=200, extension='png')
@@ -57,7 +58,7 @@ def test_image_clear_crops(image, settings, save_crops):
                                                                         extension=extension)
                 for ratio in ['1x1', '3x1', '16x9', 'original']
                 for extension in ['png', 'jpg']
-                for width in [200, 400]])
+                for width in [200, 400, 1200]])
 
             assert mock_rmtree.called == save_crops
             if save_crops:
