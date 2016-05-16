@@ -1,0 +1,15 @@
+#!/bin/sh
+# Publish package to PyPi
+#
+# Requires you setup a PyPi account and setup your ~/.pypirc config
+
+# Make sure no local modifications
+if ! git diff-index --quiet HEAD --; then
+    echo "Error! Local directory has changes. Please revert, stash or commit!"
+    exit 1
+fi
+
+scripts/lint
+scripts/test
+
+python setup.py sdist upload

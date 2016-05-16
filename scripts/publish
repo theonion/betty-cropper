@@ -1,4 +1,0 @@
-#!/bin/sh
-# Publish package to PyPi
-
-python setup.py sdist upload
