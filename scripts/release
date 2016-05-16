@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 # Publish package to PyPi
 #
 # Requires you setup a PyPi account and setup your ~/.pypirc config
