@@ -1,10 +1,14 @@
 # Betty Cropper Change Log
 
+## Version 2.3.1
+
+- Fix: Cache flush callback now also includes CLIENT_ONLY_WIDTHS
+
 ## Version 2.3.0
 
 - Added "If-Modified-Since" / 304 request header support to avoid accessing backend storage on cache re-validation.
 
-** Requires migration (add column `Image.last_modified`)**
+**Requires migration (add column `Image.last_modified`)**
 
 ## Version 2.2.0
 

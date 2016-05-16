@@ -13,8 +13,9 @@ before_install:
   - '[ "$TRAVIS_PYTHON_VERSION" = "2.7" ] && export PATH=/home/travis/miniconda2/bin:$PATH || true'
   - '[ "$TRAVIS_PYTHON_VERSION" = "3.5" ] && export PATH=/home/travis/miniconda3/bin:$PATH || true'
   - conda update --yes conda
-  - '[ "$TRAVIS_PYTHON_VERSION" = "2.7" ] && travis_retry conda install --yes python=2.7 pip numpy scipy || true'
-  - '[ "$TRAVIS_PYTHON_VERSION" = "3.5" ] && travis_retry conda install --yes python=3.5 pip numpy scipy || true'
+  # mparent(2016-05-16): Pin scipy to 0.17.0, as 0.17.1 breaks on Python 2.7
+  - '[ "$TRAVIS_PYTHON_VERSION" = "2.7" ] && travis_retry conda install --yes python=2.7 pip numpy scipy=0.17.0 || true'
+  - '[ "$TRAVIS_PYTHON_VERSION" = "3.5" ] && travis_retry conda install --yes python=3.5 pip numpy scipy=0.17.0 || true'
 install:
   - travis_retry pip install -e .
   - travis_retry pip install file://$(pwd)#egg=betty-cropper[dev]

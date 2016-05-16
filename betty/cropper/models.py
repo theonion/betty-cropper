@@ -330,7 +330,8 @@ class Image(models.Model):
                 # disk), need to flush all possible crops.
                 paths += [self.get_absolute_url(ratio=ratio_slug, width=width, extension=extension)
                           for extension in CROP_EXTENSIONS
-                          for width in settings.BETTY_WIDTHS]
+                          for width in sorted(set(settings.BETTY_WIDTHS +
+                                                  settings.BETTY_CLIENT_ONLY_WIDTHS))]
             if self.animated:
                 for extension in ANIMATED_EXTENSIONS:
                     paths.append(self.get_animated_url(extension=extension))
