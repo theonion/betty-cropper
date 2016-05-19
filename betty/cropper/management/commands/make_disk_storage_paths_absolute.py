@@ -25,10 +25,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        for idx, image in enumerate(Image.objects.iterator()):
+        for idx, image in enumerate(Image.objects.order_by('pk').iterator()):
 
-            if options['limit'] and idx > options['limit']:
+            if options['limit'] and idx >= options['limit']:
                 self.stdout.write('Early exit (limit %s reached)'.format(options['limit']))
+                break
 
             for field in [image.source,
                           image.optimized]:
@@ -38,8 +39,9 @@ class Command(BaseCommand):
 
                         path = os.path.join(settings.MEDIA_ROOT, field.name)
 
-                        self.stdout.write(u'{}{} --> {}'.format(
+                        self.stdout.write(u'{}{}\t{} --> {}'.format(
                             '[CHECK] ' if options['check'] else '',
+                            image.id,
                             field.name,
                             path))
 
