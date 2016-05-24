@@ -48,10 +48,11 @@ class Command(BaseCommand):
                         # Sanity checks
                         assert os.path.exists(path)
                         assert path.startswith(settings.MEDIA_ROOT)
+                        assert path.endswith(field.name)
                         assert '//' not in path, "Guard against weird path joins"
 
                         if not options['check']:
                             field.name = path
                             image.save()
                     else:
-                        self.stdout.write('SKIP: %s', field.name)
+                        self.stdout.write('SKIP: {} {}'.format(image.id, field.name))
