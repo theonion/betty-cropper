@@ -1,5 +1,9 @@
 # Betty Cropper Change Log
 
+## Version 2.4.0
+
+- Added management command `make_disk_storage_paths_absolute` to convert legacy relative disk paths to absolute paths.
+
 ## Version 2.3.1
 
 - Fix: Cache flush callback now also includes CLIENT_ONLY_WIDTHS
