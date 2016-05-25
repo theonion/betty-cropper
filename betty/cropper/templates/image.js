@@ -68,7 +68,7 @@
 
       // this is a div to picturefill, start working on it if it hasn't been rendered yet
       if (el.getAttribute("data-image-id") !== null
-          && visible 
+          && visible
           && (forceRerender || !el.getAttribute("data-rendered"))) {
         var imageContainer = el.getElementsByTagName("div")[0],
             imageId = el.getAttribute("data-image-id"),
@@ -193,9 +193,9 @@
           return RATIOS[i][0];
         }
       }
-    } else {
-      return "16x9";
     }
+    // No suitable ratio, use default.
+    return "16x9";
   }
 
   function addEventListener(ele, event, callback) {
