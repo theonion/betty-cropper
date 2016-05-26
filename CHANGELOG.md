@@ -1,5 +1,10 @@
 # Betty Cropper Change Log
 
+## Version 2.4.1
+
+- Fix `image.js` function `computeAspectRatio` to always return a valid ratio. Previously there was an edge case where it would
+  return `undefined`, resulting in a bad image URL.
+
 ## Version 2.4.0
 
 - Added management command `make_disk_storage_paths_absolute` to convert legacy relative disk paths to absolute paths.
