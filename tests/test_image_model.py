@@ -4,6 +4,7 @@ from freezegun import freeze_time
 from mock import call, patch
 import pytest
 
+from django.core.cache import cache
 from django.core.files import File
 from django.utils import timezone
 
@@ -145,3 +146,20 @@ def test_last_modified_auto_now():
     with freeze_time('2016-12-02 01:02:03'):
         image.save()
     assert image.last_modified == timezone.datetime(2016, 12, 2, 1, 2, 3, tzinfo=timezone.utc)
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
+def test_read_from_storage_cache(image, settings):
+
+    with open(os.path.join(TEST_DATA_PATH, 'Lenna.png'), "rb") as lenna:
+        expected_bytes = lenna.read()
+
+    with patch('django.core.files.storage.open', create=True) as mock_open:
+        mock_open.side_effect = lambda path, mode: open(path, mode)
+
+        for _ in range(2):
+            assert image.read_source_bytes().getvalue() == expected_bytes
+            assert 1 == mock_open.call_count
+
+        assert cache.get('storage:' + image.source.name) == expected_bytes

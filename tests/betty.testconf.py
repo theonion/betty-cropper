@@ -3,7 +3,12 @@ import tempfile
 
 MODULE_ROOT = os.path.dirname(os.path.realpath(__file__))
 
-CACHES = {"default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}}
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'betty-test-cache',
+    }
+}
 BETTY_DEFAULT_IMAGE = 666
 BETTY_IMAGE_URL = "http://localhost:8081/images/"
 MEDIA_ROOT = tempfile.mkdtemp("bettycropper")

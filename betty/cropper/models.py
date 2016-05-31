@@ -3,10 +3,11 @@ import io
 import os
 import shutil
 
-from django.db import models
-from django.dispatch import receiver
+from django.core.cache import cache
 from django.core.files import File
 from django.core.urlresolvers import reverse
+from django.db import models
+from django.dispatch import receiver
 
 from PIL import Image as PILImage
 from PIL import JpegImagePlugin
@@ -162,12 +163,22 @@ def save_crop_to_disk(image_data, path):
 
 
 def _read_from_storage(file_field):
-    """Convenience wrapper to ensure entire file is read and properly closed."""
+    """Convenience wrapper to cache strorage backend and ensure entire file is read and properly
+    closed.
+    """
+
     if file_field:
-        file_field.open()
-        tmp = io.BytesIO(file_field.read())
-        file_field.close()
-        return tmp
+        cache_key = ':'.join(['storage', file_field.name])
+
+        raw_image = cache.get(cache_key)
+        if not raw_image:
+            file_field.open()
+            raw_image = file_field.read()
+            file_field.close()
+
+            cache.set(cache_key, raw_image, settings.BETTY_CACHE_STORAGE_SEC)
+
+        return io.BytesIO(raw_image)
 
 
 class Image(models.Model):
