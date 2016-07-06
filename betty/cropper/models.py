@@ -175,9 +175,8 @@ def _read_from_storage(file_field):
 
         raw_image = cache.get(cache_key)
         if not raw_image:
-            file_field.open()
-            raw_image = file_field.read()
-            file_field.close()
+            with file_field as f:
+                raw_image = f.read()
 
             cache.set(cache_key, raw_image, settings.BETTY_CACHE_STORAGE_SEC)
 
