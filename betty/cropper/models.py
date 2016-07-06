@@ -165,6 +165,9 @@ def save_crop_to_disk(image_data, path):
 def _read_from_storage(file_field):
     """Convenience wrapper to cache strorage backend and ensure entire file is read and properly
     closed.
+
+    Currently source images are never deleted, so there is no need for a cache.delete() call anywhere.
+    To be safe, cache expriation is set via BETTY_CACHE_STORAGE_SEC.
     """
 
     if file_field:
