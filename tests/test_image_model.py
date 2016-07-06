@@ -152,14 +152,24 @@ def test_last_modified_auto_now():
 @pytest.mark.usefixtures("clean_image_root")
 def test_read_from_storage_cache(image, settings):
 
+    settings.BETTY_CACHE_STORAGE_SEC = 3600
+
+    cache_key = 'storage:' + image.source.name
+
     with open(os.path.join(TEST_DATA_PATH, 'Lenna.png'), "rb") as lenna:
         expected_bytes = lenna.read()
 
     with patch('django.core.files.storage.open', create=True) as mock_open:
         mock_open.side_effect = lambda path, mode: open(path, mode)
 
-        for _ in range(2):
-            assert image.read_source_bytes().getvalue() == expected_bytes
-            assert 1 == mock_open.call_count
+        # Check cache miss + fill, then cache hit
+        with freeze_time('2016-07-06 00:00'):
+            for _ in range(2):
+                assert image.read_source_bytes().getvalue() == expected_bytes
+                assert 1 == mock_open.call_count
 
-        assert cache.get('storage:' + image.source.name) == expected_bytes
+            assert cache.get(cache_key) == expected_bytes
+
+        # Check Expiration
+        with freeze_time('2016-07-06 01:00'):
+            assert not cache.get(cache_key)
