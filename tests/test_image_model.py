@@ -173,3 +173,7 @@ def test_read_from_storage_cache(image, settings):
         # Check Expiration
         with freeze_time('2016-07-06 01:00'):
             assert not cache.get(cache_key)
+
+        # Check cache fill
+        assert image.read_source_bytes().getvalue() == expected_bytes
+        assert 2 == mock_open.call_count
