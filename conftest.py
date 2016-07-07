@@ -17,3 +17,10 @@ def clean_image_root(request):
 
     from betty.conf.app import settings
     shutil.rmtree(settings.BETTY_IMAGE_ROOT, ignore_errors=True)
+
+
+@pytest.fixture()
+def clear_cache(request):
+    """Clear test cache between runs"""
+    from django.core.cache import cache
+    cache.clear()

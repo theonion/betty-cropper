@@ -1,5 +1,10 @@
 # Betty Cropper Change Log
 
+## Version 2.5.0
+
+- Add storage caching layer (ex: memcached in front of S3 backend) to improve performance with slower storage backends.
+  Cache time controlled by new `BETTY_CACHE_STORAGE_SEC` setting (default: 1 hour).
+
 ## Version 2.4.1
 
 - Fix `image.js` function `computeAspectRatio` to always return a valid ratio. Previously there was an edge case where it would

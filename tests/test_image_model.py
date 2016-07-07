@@ -4,7 +4,9 @@ from freezegun import freeze_time
 from mock import call, patch
 import pytest
 
+from django.core.cache import cache
 from django.core.files import File
+from django.db.models.fields.files import FieldFile
 from django.utils import timezone
 
 from betty.cropper.models import Image, Ratio
@@ -145,3 +147,35 @@ def test_last_modified_auto_now():
     with freeze_time('2016-12-02 01:02:03'):
         image.save()
     assert image.last_modified == timezone.datetime(2016, 12, 2, 1, 2, 3, tzinfo=timezone.utc)
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
+def test_read_from_storage_cache(image, settings):
+
+    settings.BETTY_CACHE_STORAGE_SEC = 3600
+
+    cache_key = 'storage:' + image.source.name
+
+    lenna_path = os.path.join(TEST_DATA_PATH, 'Lenna.png')
+    with open(lenna_path, "rb") as lenna:
+        expected_bytes = lenna.read()
+
+    with patch.object(FieldFile, 'read') as mock_read:
+        mock_read.side_effect = lambda: expected_bytes[:]
+
+        # Check cache miss + fill, then cache hit
+        with freeze_time('2016-07-06 00:00'):
+            for _ in range(2):
+                assert image.read_source_bytes().getvalue() == expected_bytes
+                assert 1 == mock_read.call_count
+                assert cache.get(cache_key) == expected_bytes
+
+        # Check Expiration
+        with freeze_time('2016-07-06 01:00'):
+            assert not cache.get(cache_key)
+
+            # Check cache re-fill
+            assert image.read_source_bytes().getvalue() == expected_bytes
+            assert 2 == mock_read.call_count
+            assert cache.get(cache_key) == expected_bytes
