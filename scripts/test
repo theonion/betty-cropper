@@ -8,4 +8,4 @@ else
     ARGS="$@"
 fi
 
-py.test -s $ARGS
+docker-compose run web py.test -s $ARGS

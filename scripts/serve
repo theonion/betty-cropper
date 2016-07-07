@@ -2,4 +2,6 @@
 #
 # Run local betty server
 
-betty-cropper runserver
+docker-compose run --service-ports web
+#docker-compose run --service-ports web betty-cropper runserver 0.0.0.0:8080
+#docker-compose up --force-recreate

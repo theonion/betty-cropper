@@ -21,7 +21,7 @@ install:
   - travis_retry pip install file://$(pwd)#egg=betty-cropper[dev]
 script:
   - py.test --cov betty --cov-report term-missing
-  - scripts/lint
+  - flake8 .
 after_success:
   - coveralls
 deploy:

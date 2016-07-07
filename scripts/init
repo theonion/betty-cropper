@@ -7,6 +7,6 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 $SCRIPT_DIR/clean
 $SCRIPT_DIR/install
 
-betty-cropper syncdb
-betty-cropper migrate
-betty-cropper create_token
+docker-compose run web betty-cropper syncdb
+docker-compose run web betty-cropper migrate
+docker-compose run web betty-cropper create_token
