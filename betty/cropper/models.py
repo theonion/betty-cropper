@@ -174,7 +174,7 @@ def _read_from_storage(file_field):
     if file_field:
 
         try:
-            cache = caches['source-images']
+            cache = caches['storage']
         except InvalidCacheBackendError:
             cache = default_cache
 

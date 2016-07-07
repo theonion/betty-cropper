@@ -1,8 +1,8 @@
 # Betty Cropper Change Log
 
-## Version 2.5.1
+## Version 2.5.2
 
-- Image source caching attempts to use named cache "source-images", else "default".
+- Image source caching attempts to use named cache "storage", else "default".
 
 ## Version 2.5.0
 
