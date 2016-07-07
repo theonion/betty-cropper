@@ -1,5 +1,9 @@
 # Betty Cropper Change Log
 
+## Version 2.5.1
+
+- Image source caching attempts to use named cache "source-images", else "default".
+
 ## Version 2.5.0
 
 - Add storage caching layer (ex: memcached in front of S3 backend) to improve performance with slower storage backends.
