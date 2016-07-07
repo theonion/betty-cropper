@@ -13,6 +13,7 @@ web:
       --disable-sendfile
       --python-autoreload 3
       --honour-stdin
+  stdin_open: true
   volumes:
       - ./:/webapp/
       ## Optional dotfiles
