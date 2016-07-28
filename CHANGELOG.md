@@ -2,7 +2,7 @@
 
 ## Version 2.5.3
 
-- Fix `Image.clear_crops()` to handle when save crops path is different than image source path
+- Fix `Image.clear_crops()` to handle when save crops path is different than image source path. Previously was preventing saved-to-disk crops from being deleted.
 
 ## Version 2.5.2
 
