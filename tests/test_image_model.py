@@ -43,7 +43,10 @@ def make_some_crops(image, settings):
 @pytest.mark.parametrize('save_crops', [True, False])  # Test setting enabled + disabled
 def test_image_clear_crops(image, settings, save_crops):
 
+    local_crop_path = os.path.join(settings.BETTY_IMAGE_ROOT, 'local', 'crops')
+
     settings.BETTY_SAVE_CROPS_TO_DISK = save_crops
+    settings.BETTY_SAVE_CROPS_TO_DISK_ROOT = local_crop_path  # Different than source path
 
     make_some_crops(image, settings)
 
@@ -65,7 +68,7 @@ def test_image_clear_crops(image, settings, save_crops):
             assert mock_rmtree.called == save_crops
             if save_crops:
                 # Filesystem deletes entire directories if they exist
-                image_dir = os.path.join(settings.BETTY_IMAGE_ROOT, str(image.id))
+                image_dir = os.path.join(local_crop_path, str(image.id))
                 assert sorted(mock_rmtree.call_args_list) == sorted(
                     [call(os.path.join(image_dir, '1x1')),
                      call(os.path.join(image_dir, '16x9'))])

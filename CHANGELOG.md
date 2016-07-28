@@ -1,5 +1,9 @@
 # Betty Cropper Change Log
 
+## Version 2.5.3
+
+- Fix `Image.clear_crops()` to handle when save crops path is different than image source path
+
 ## Version 2.5.2
 
 - Image source caching attempts to use named cache "storage", else "default".
