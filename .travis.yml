@@ -24,12 +24,3 @@ script:
   - flake8 .
 after_success:
   - coveralls
-deploy:
-  provider: pypi
-  user: csinchok
-  password:
-    secure: XZlMTIFA8E4jDIbA8m81pH1owQlGLULJ2DXFRsFrKnvmZ/SJOv4F329y2aHW65qvaz67gcNbZg259biL6eZrKG8vIOMzdrC/D3fCgRZSR59tI7WxRj0vX40Pz3E2FzN6QDI8Jbv6+M7wqgHuBDgXWDyEiGRg4arVp1La/dQEg4Y=
-  on:
-    tags: true
-    repo: theonion/betty-cropper
-    python: 2.7

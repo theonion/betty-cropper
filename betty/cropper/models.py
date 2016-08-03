@@ -3,7 +3,8 @@ import io
 import os
 import shutil
 
-from django.core.cache import cache
+from django.core.cache import cache as default_cache, caches
+from django.core.cache.backends.base import InvalidCacheBackendError
 from django.core.files import File
 from django.core.urlresolvers import reverse
 from django.db import models
@@ -171,6 +172,12 @@ def _read_from_storage(file_field):
     """
 
     if file_field:
+
+        try:
+            cache = caches['storage']
+        except InvalidCacheBackendError:
+            cache = default_cache
+
         cache_key = ':'.join(['storage', file_field.name])
 
         raw_image = cache.get(cache_key)
@@ -354,7 +361,8 @@ class Image(models.Model):
         # Optional disk crops support
         if settings.BETTY_SAVE_CROPS_TO_DISK:
             for ratio_slug in (ratios + ['animated']):
-                ratio_path = os.path.join(self.path(), ratio_slug)
+                ratio_path = os.path.join(self.path(settings.BETTY_SAVE_CROPS_TO_DISK_ROOT),
+                                          ratio_slug)
                 if os.path.exists(ratio_path):
                     shutil.rmtree(ratio_path)
 
