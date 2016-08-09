@@ -1,0 +1,5 @@
+#!/bin/sh -euo pipefail
+#
+# Build Docker image
+
+docker-compose build "$@"

@@ -2,4 +2,4 @@
 #
 # Open a Django shell
 
-betty-cropper shell
+docker-compose run web betty-cropper shell
