@@ -15,8 +15,10 @@ def test_cachemaster_flush(settings):
     def success(url, request):
         assert request.url == 'http://cachemaster.local/flush'
         assert request.method == 'POST'
-        assert json.loads(request.body) == {'urls': ['http://onion.local/path/one',
-                                                     'http://onion.local/two/']}
+        assert json.loads(request.body.decode('utf-8')) == {
+            'urls': ['http://onion.local/path/one',
+                     'http://onion.local/two/']
+        }
         return response(200, 'YAY TEST WORKED')
 
     with HTTMock(success):
