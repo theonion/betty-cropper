@@ -7,12 +7,9 @@ services:
     - docker
 before_install:
     # Set base Python image version (leverages Travis build matrix)
-  - sed -i'' "s/^\(FROM python:\).*/\1${TRAVIS_PYTHON_VERSION}/" Dockerfile
+    - sed -i'' "s/^\(FROM python:\).*/\1${TRAVIS_PYTHON_VERSION}/" Dockerfile
 install:
-    - env
-    - docker --version
     - docker build --tag betty .
-    - docker run betty python --version
 script:
     - docker run --net=host betty py.test --cov betty --cov-report term-missing
     - docker run --net=host betty flake8 .
