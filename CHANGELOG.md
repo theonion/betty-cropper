@@ -1,5 +1,9 @@
 # Betty Cropper Change Log
 
+## Version 2.5.4
+
+- Make best effort to load corrupt images via Pillow's `ImageFile.LOAD_TRUNCATED_IMAGES` setting.
+
 ## Version 2.5.3
 
 - Fix `Image.clear_crops()` to handle when save crops path is different than image source path. Previously was preventing saved-to-disk crops from being deleted.

@@ -10,8 +10,9 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.dispatch import receiver
 
-from PIL import Image as PILImage
-from PIL import JpegImagePlugin
+from PIL import (Image as PILImage,
+                 ImageFile,
+                 JpegImagePlugin)
 
 from betty.conf.app import settings
 from betty.cropper.flush import get_cache_flusher
@@ -19,6 +20,8 @@ from betty.cropper.tasks import search_image_quality
 
 from jsonfield import JSONField
 
+# Make best effort to load corrupt images
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 logger = __import__('logging').getLogger(__name__)
 
