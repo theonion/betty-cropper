@@ -13,5 +13,3 @@ install:
 script:
     - docker run betty py.test --cov betty --cov-report term-missing
     - docker run betty flake8 .
-after_success:
-    - docker run betty coveralls
