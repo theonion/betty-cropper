@@ -1,26 +1,20 @@
 language: python
-sudo: false  # Use new Travis build environment
+sudo: required
 python:
-  - '2.7'
-  - '3.5'
-cache: apt
+    - '2.7'
+    - '3.5'
+services:
+    - docker
 before_install:
-  # Miniconda workaround for installing scipy in Travis
-  - '[ "$TRAVIS_PYTHON_VERSION" = "2.7" ] && wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh || true'
-  - '[ "$TRAVIS_PYTHON_VERSION" = "3.5" ] && wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh || true'
-  - chmod +x miniconda.sh
-  - ./miniconda.sh -b
-  - '[ "$TRAVIS_PYTHON_VERSION" = "2.7" ] && export PATH=/home/travis/miniconda2/bin:$PATH || true'
-  - '[ "$TRAVIS_PYTHON_VERSION" = "3.5" ] && export PATH=/home/travis/miniconda3/bin:$PATH || true'
-  - conda update --yes conda
-  # mparent(2016-05-16): Pin scipy to 0.17.0, as 0.17.1 breaks on Python 2.7
-  - '[ "$TRAVIS_PYTHON_VERSION" = "2.7" ] && travis_retry conda install --yes python=2.7 pip numpy scipy=0.17.0 || true'
-  - '[ "$TRAVIS_PYTHON_VERSION" = "3.5" ] && travis_retry conda install --yes python=3.5 pip numpy scipy=0.17.0 || true'
+    # Set base Python image version (leverages Travis build matrix)
+  - sed -i'' "s/^\(FROM python:\).*/\1${TRAVIS_PYTHON_VERSION}/" Dockerfile
 install:
-  - travis_retry pip install -e .
-  - travis_retry pip install file://$(pwd)#egg=betty-cropper[dev]
+    - env
+    - docker --version
+    - docker build --tag betty .
+    - docker run betty python --version
 script:
-  - py.test --cov betty --cov-report term-missing
-  - flake8 .
+    - docker run --net=host betty py.test --cov betty --cov-report term-missing
+    - docker run --net=host betty flake8 .
 after_success:
-  - coveralls
+    - coveralls
