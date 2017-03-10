@@ -88,6 +88,9 @@ def _image_response(image_blob, extension):
 
 
 def crop(request, id, ratio_slug, width, extension):
+
+    print('REQUEST HEADERS:', request.META)
+
     if ratio_slug != "original" and ratio_slug not in settings.BETTY_RATIOS:
         raise Http404
 
@@ -119,6 +122,7 @@ def crop(request, id, ratio_slug, width, extension):
 
     if check_not_modified(request=request, last_modified=image.last_modified):
         # Avoid hitting storage backend on cache update
+        print('Not Modified!')
         resp = HttpResponseNotModified()
     else:
         try:
