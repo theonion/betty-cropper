@@ -33,6 +33,19 @@
     };
   }
 
+  // Credit to http://ejohn.org/blog/getboundingclientrect-is-awesome/
+  function isInViewport(el) {
+    var rect = el.getBoundingClientRect(),
+    var docEl = document.documentElement;
+
+    return (
+      rect.top >= 0 &&
+        rect.left >= 0 &&
+          rect.bottom <= (window.innerHeight || docEl.clientHeight) &&
+            rect.right <= (window.innerWidth || docEl.clientWidth)
+    );
+  }
+
   w.picturefill = function picturefill (elements, forceRerender) {
     // It is sometimes desirable to scroll without loading images as we go.
     if (picturefill.paused()) {
@@ -45,7 +58,7 @@
     } else if (elements instanceof HTMLElement) {
       ps = [elements];
     } else {
-      ps = w.document.querySelectorAll(PICTUREFILL_SELECTOR);
+      ps = w.document.querySelectorAll(PICTUREFILL_SELECTOR).filter(isInViewport);
     }
 
     // loop through elements and fill them in
