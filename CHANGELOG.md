@@ -1,5 +1,9 @@
 # Betty Cropper Change Log
 
+## Version 2.5.5
+
+- Fix image metadata caching race conditions
+
 ## Version 2.5.4
 
 - Make best effort to load corrupt images via Pillow's `ImageFile.LOAD_TRUNCATED_IMAGES` setting.

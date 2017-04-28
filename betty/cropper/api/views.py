@@ -101,8 +101,8 @@ def update_selection(request, image_id, ratio_slug):
         image.selections = {}
 
     image.selections[ratio_slug] = selection
-    cache.delete(image.cache_key())
     image.save()
+    cache.delete(image.cache_key())
 
     image.clear_crops(ratios=[ratio_slug])
 
@@ -141,8 +141,9 @@ def detail(request, image_id):
             message = json.dumps({"message": "No such image!"})
             return HttpResponseNotFound(message, content_type="application/json")
 
-        cache.delete(image.cache_key())
+        cache_key = image.cache_key()
         image.delete()
+        cache.delete(cache_key)
 
         return HttpResponse(json.dumps({"message": "OK"}), content_type="application/json")
 
@@ -164,8 +165,8 @@ def detail(request, image_id):
         for field in ("name", "credit", "selections"):
             if field in request_json:
                 setattr(image, field, request_json[field])
-        cache.delete(image.cache_key())
         image.save()
+        cache.delete(image.cache_key())
 
         return HttpResponse(json.dumps(image.to_native()), content_type="application/json")
 
