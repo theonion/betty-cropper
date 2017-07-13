@@ -12,4 +12,6 @@ fi
 scripts/lint
 scripts/test
 
-python setup.py sdist upload
+# mparent(2017-07-13): Use legacy upload API, Betty Cropper is deprecated and don't want to figure out new API (though
+# might be simple).
+python setup.py sdist upload -r https://upload.pypi.org/legacy/
