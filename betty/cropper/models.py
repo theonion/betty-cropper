@@ -392,6 +392,14 @@ class Image(models.Model):
             root = settings.BETTY_IMAGE_ROOT
         return os.path.join(root, id_string[1:])
 
+    def get_source(self):
+        image_bytes = self.read_source_bytes()
+
+        # Detect format
+        img = PILImage.open(image_bytes)
+
+        return image_bytes.getvalue(), img.format.lower()
+
     def get_animated(self, extension):
         """Legacy (Pre-v2.0) animated behavior.
         Originally betty just wrote these to disk on image creation and let NGINX try-files
