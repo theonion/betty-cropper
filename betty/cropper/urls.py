@@ -9,5 +9,7 @@ urlpatterns = patterns(
         'crop'),
     url(r'^(?P<id>[0-9/]+)/animated/original\.(?P<extension>(jpg|gif))$',
         'animated'),
+    url(r'^(?P<id>[0-9/]+)/source$',
+        'source'),
     url(r'^api/', include("betty.cropper.api.urls")),
 )
