@@ -85,6 +85,7 @@ def redirect_crop(request, id, ratio_slug, width, extension):
 def _image_response(image_blob, image_format=None, extension=None):
     resp = HttpResponse(image_blob)
 
+    # Legacy betty cropper keys off of file extension, but some newer routes auto-detect format
     if extension:
         image_format = EXTENSION_MAP[extension]['format']
     resp["Content-Type"] = FORMAT_TO_MIME_TYPE_MAP[image_format]
