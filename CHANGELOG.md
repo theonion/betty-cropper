@@ -1,5 +1,10 @@
 # Betty Cropper Change Log
 
+## Version 2.6.0
+
+- Add new '/<IMAGE ID>/source' route to obtain original source asset. Image format specified in 'Content-Type' response
+  header.
+
 ## Version 2.5.5
 
 - Fix image metadata caching race conditions
