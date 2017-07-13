@@ -181,3 +181,24 @@ def test_read_from_storage_cache(image, settings):
             assert image.read_source_bytes().getvalue() == expected_bytes
             assert 2 == mock_read.call_count
             assert cache.get(cache_key) == expected_bytes
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
+@pytest.mark.parametrize(['test_name', 'test_format'],
+                         # All supported formats
+                         [('Lenna.png', 'png'),
+                          ('animated.gif', 'gif'),
+                          ('Simpsons-Week_a.jpg', 'jpeg')])
+def test_get_source_image(image, test_name, test_format):
+
+    test_path = os.path.join(TEST_DATA_PATH, test_name)
+
+    image = Image.objects.create_from_path(test_path)
+
+    image_bytes, image_format = image.get_source()
+
+    assert image_format == test_format
+
+    with open(test_path, "rb") as image:
+        assert image.read() == image_bytes

@@ -32,6 +32,8 @@ EXTENSION_MAP = {
     },
 }
 
+FORMAT_TO_MIME_TYPE_MAP = {f['format']: f['mime_type'] for f in EXTENSION_MAP.values()}
+
 
 @cache_control(max_age=settings.BETTY_CACHE_IMAGEJS_SEC)
 def image_js(request):
@@ -80,9 +82,14 @@ def redirect_crop(request, id, ratio_slug, width, extension):
                                                        extension=extension))
 
 
-def _image_response(image_blob, extension):
+def _image_response(image_blob, image_format=None, extension=None):
     resp = HttpResponse(image_blob)
-    resp["Content-Type"] = EXTENSION_MAP[extension]["mime_type"]
+
+    # Legacy betty cropper keys off of file extension, but some newer routes auto-detect format
+    if extension:
+        image_format = EXTENSION_MAP[extension]['format']
+    resp["Content-Type"] = FORMAT_TO_MIME_TYPE_MAP[image_format]
+
     resp['Last-Modified'] = http_date()
     return resp
 
@@ -138,6 +145,32 @@ def crop(request, id, ratio_slug, width, extension):
         if width not in (settings.BETTY_WIDTHS + settings.BETTY_CLIENT_ONLY_WIDTHS):
             max_age = settings.BETTY_CACHE_CROP_NON_BREAKPOINT_SEC
     patch_cache_control(resp, max_age=max_age)
+    return resp
+
+
+# Get original source asset
+def source(request, id):
+
+    image_id = int(id.replace("/", ""))
+
+    try:
+        image = Image.objects.get(id=image_id)
+    except Image.DoesNotExist:
+        raise Http404
+
+    if check_not_modified(request=request, last_modified=image.last_modified):
+        # Avoid hitting storage backend on cache update
+        resp = HttpResponseNotModified()
+    else:
+        try:
+            image_blob, image_format = image.get_source()
+        except Exception:
+            logger.exception("Source error")
+            return HttpResponseServerError("Source error")
+
+        resp = _image_response(image_blob, image_format=image_format)
+
+    patch_cache_control(resp, max_age=settings.BETTY_CACHE_CROP_SEC)
     return resp
 
 
