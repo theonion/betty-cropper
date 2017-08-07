@@ -1,5 +1,9 @@
 # Betty Cropper Change Log
 
+## Version 2.6.1
+
+- Fix: `source` endpoint now supports returning original TIFF assets
+
 ## Version 2.6.0
 
 - Add new '/<IMAGE ID>/source' route to obtain original source asset. Image format specified in 'Content-Type' response

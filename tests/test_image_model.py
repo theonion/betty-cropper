@@ -188,6 +188,7 @@ def test_read_from_storage_cache(image, settings):
 @pytest.mark.parametrize(['test_name', 'test_format'],
                          # All supported formats
                          [('Lenna.png', 'png'),
+                          ('Lenna.tiff', 'tiff'),
                           ('animated.gif', 'gif'),
                           ('Simpsons-Week_a.jpg', 'jpeg')])
 def test_get_source_image(image, test_name, test_format):
