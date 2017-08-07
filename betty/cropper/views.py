@@ -30,6 +30,10 @@ EXTENSION_MAP = {
         "format": "png",
         "mime_type": "image/png"
     },
+    "tiff": {
+        "format": "tiff",
+        "mime_type": "image/tiff"
+    },
 }
 
 FORMAT_TO_MIME_TYPE_MAP = {f['format']: f['mime_type'] for f in EXTENSION_MAP.values()}
