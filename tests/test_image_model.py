@@ -189,6 +189,7 @@ def test_read_from_storage_cache(image, settings):
                          # All supported formats
                          [('Lenna.png', 'png'),
                           ('Lenna.tiff', 'tiff'),
+                          ('Lenna.psd', 'psd'),
                           ('animated.gif', 'gif'),
                           ('Simpsons-Week_a.jpg', 'jpeg')])
 def test_get_source_image(image, test_name, test_format):
