@@ -30,6 +30,11 @@ EXTENSION_MAP = {
         "format": "png",
         "mime_type": "image/png"
     },
+    # Some Clickhole source images are actually PSD files disguised as JPG
+    "psd": {
+        "format": "psd",
+        "mime_type": "image/vnd.adobe.photoshop"
+    },
     "tiff": {
         "format": "tiff",
         "mime_type": "image/tiff"
