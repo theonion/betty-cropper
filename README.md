@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/theonion/betty-cropper.svg?branch=master)](https://travis-ci.org/theonion/betty-cropper)
 [![Coverage Status](https://coveralls.io/repos/theonion/betty-cropper/badge.svg?branch=master)](https://coveralls.io/r/theonion/betty-cropper?branch=master)
-[![Latest Version](https://pypip.in/version/betty-cropper/badge.svg)](https://pypi.python.org/pypi/betty-cropper/)
+[![Latest Version](https://img.shields.io/pypi/v/betty-cropper.svg)](https://pypi.python.org/pypi/betty-cropper/)
 
 ## Get started developing:
 
