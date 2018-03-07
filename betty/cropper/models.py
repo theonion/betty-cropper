@@ -464,6 +464,10 @@ class Image(models.Model):
                 pillow_kwargs["quality"] = settings.BETTY_DEFAULT_JPEG_QUALITY
 
         if extension == "png":
+            # Fix "cannot write mode CMYK as PNG" errors
+            # https://github.com/python-pillow/Pillow/issues/1380
+            if img.mode == 'CMYK':
+                img = img.convert('RGB')
             pillow_kwargs = {"format": "png"}
 
         if icc_profile:
