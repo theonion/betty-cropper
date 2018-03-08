@@ -274,6 +274,25 @@ def test_non_rgb(client):
     assert os.path.exists(os.path.join(image.path(), 'original/1200.jpg'))
 
 
+@pytest.mark.django_db
+@pytest.mark.usefixtures("clean_image_root")
+def test_jpg_cmyk_to_png(client):
+
+    image = Image.objects.create(
+        name="Lenna_cmyk.jpg",
+        width=512,
+        height=512
+    )
+
+    lenna = File(open(os.path.join(TEST_DATA_PATH, "Lenna_cmyk.jpg"), "rb"))
+    image.source.save("Lenna_cmyk.jpg", lenna)
+
+    res = client.get('/images/{}/original/1200.png'.format(image.id))
+    assert res.status_code == 200
+    assert res['Content-Type'] == 'image/png'
+    assert os.path.exists(os.path.join(image.path(), 'original/1200.png'))
+
+
 def test_image_js(settings, client):
     settings.BETTY_WIDTHS = [100, 200]
     settings.BETTY_CLIENT_ONLY_WIDTHS = [2, 1]
