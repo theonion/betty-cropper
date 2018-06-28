@@ -64,7 +64,7 @@
       // within 250px of being shown below scroll.
       var elementRect = el.getBoundingClientRect(),
           innerHeight = w.innerHeight || w.document.documentElement.clientHeight,
-          visible = elementRect.top <= (innerHeight + 250) && elementRect.top >= -100;
+          visible = elementRect.top <= (innerHeight + 250) && elementRect.bottom >= -100;
 
       // this is a div to picturefill, start working on it if it hasn't been rendered yet
       if (el.getAttribute("data-image-id") !== null
